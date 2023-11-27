@@ -1,0 +1,2900 @@
+
+=head1 NAME
+
+Venus::Number - Number Class
+
+=cut
+
+=head1 ABSTRACT
+
+Number Class for Perl 5
+
+=cut
+
+=head1 SYNOPSIS
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1_000);
+
+  # $number->abs;
+
+=cut
+
+=head1 DESCRIPTION
+
+This package provides methods for manipulating number data.
+
+=cut
+
+=head1 INHERITS
+
+This package inherits behaviors from:
+
+L<Venus::Kind::Value>
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 abs
+
+  abs() (Num)
+
+The abs method returns the absolute value of the number.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item abs example 1
+
+  # given: synopsis;
+
+  my $abs = $number->abs;
+
+  # 1000
+
+=back
+
+=over 4
+
+=item abs example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12);
+
+  my $abs = $number->abs;
+
+  # 12
+
+=back
+
+=over 4
+
+=item abs example 3
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(-12);
+
+  my $abs = $number->abs;
+
+  # 12
+
+=back
+
+=cut
+
+=head2 add
+
+  add(Num $value) (Num)
+
+The add method returns the result of addition performed on the argument
+provided.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item add example 1
+
+  # given: synopsis;
+
+  my $add = $number->add(1_000);
+
+  # 2000
+
+=back
+
+=cut
+
+=head2 append
+
+  append(string @parts) (string)
+
+The append method appends arugments to the number.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item append example 1
+
+  # given: synopsis;
+
+  my $append = $number->append(0);
+
+  # 10_000
+
+=back
+
+=cut
+
+=head2 append_with
+
+  append_with(string $delimiter, string @parts) (string)
+
+The append_with method appends arugments to the number using the delimiter
+provided.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item append_with example 1
+
+  # given: synopsis;
+
+  my $append = $number->append_with('.', 0);
+
+  # "1000.0"
+
+=back
+
+=cut
+
+=head2 atan2
+
+  atan2() (Num)
+
+The atan2 method returns the arctangent of Y/X in the range -PI to PI.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item atan2 example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1);
+
+  my $atan2 = $number->atan2(1);
+
+  # 0.785398163397448
+
+=back
+
+=cut
+
+=head2 cast
+
+  cast(string $kind) (object | undef)
+
+The cast method converts L<"value"|Venus::Kind::Value> objects between
+different I<"value"> object types, based on the name of the type provided. This
+method will return C<undef> if the invocant is not a L<Venus::Kind::Value>.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item cast example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new;
+
+  my $cast = $number->cast('array');
+
+  # bless({ value => [0] }, "Venus::Array")
+
+=back
+
+=over 4
+
+=item cast example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new;
+
+  my $cast = $number->cast('boolean');
+
+  # bless({ value => 0 }, "Venus::Boolean")
+
+=back
+
+=over 4
+
+=item cast example 3
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new;
+
+  my $cast = $number->cast('code');
+
+  # bless({ value => sub { ... } }, "Venus::Code")
+
+=back
+
+=over 4
+
+=item cast example 4
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new;
+
+  my $cast = $number->cast('float');
+
+  # bless({ value => "0.0" }, "Venus::Float")
+
+=back
+
+=over 4
+
+=item cast example 5
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new;
+
+  my $cast = $number->cast('hash');
+
+  # bless({ value => { "0" => 0 } }, "Venus::Hash")
+
+=back
+
+=over 4
+
+=item cast example 6
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new;
+
+  my $cast = $number->cast('number');
+
+  # bless({ value => 0 }, "Venus::Number")
+
+=back
+
+=over 4
+
+=item cast example 7
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new;
+
+  my $cast = $number->cast('regexp');
+
+  # bless({ value => qr/(?^u:0)/ }, "Venus::Regexp")
+
+=back
+
+=over 4
+
+=item cast example 8
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new;
+
+  my $cast = $number->cast('scalar');
+
+  # bless({ value => \0 }, "Venus::Scalar")
+
+=back
+
+=over 4
+
+=item cast example 9
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new;
+
+  my $cast = $number->cast('string');
+
+  # bless({ value => 0 }, "Venus::String")
+
+=back
+
+=over 4
+
+=item cast example 10
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new;
+
+  my $cast = $number->cast('undef');
+
+  # bless({ value => undef }, "Venus::Undef")
+
+=back
+
+=cut
+
+=head2 concat
+
+  concat(string @parts) (string)
+
+The concat method returns the number with the argument list appended to it.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item concat example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1_000);
+
+  my $concat = $number->concat('.', '0001');
+
+  # "1000.0001"
+
+=back
+
+=cut
+
+=head2 contains
+
+  contains(string $expr) (boolean)
+
+The contains method searches the number for a substring or expression returns
+true or false if found.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item contains example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1_0001);
+
+  my $contains = $number->contains(10);
+
+  # 1
+
+=back
+
+=over 4
+
+=item contains example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1_0001);
+
+  my $contains = $number->contains(2);
+
+  # 0
+
+=back
+
+=over 4
+
+=item contains example 3
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1_0001);
+
+  my $contains = $number->contains(qr/01$/);
+
+  # 1
+
+=back
+
+=cut
+
+=head2 cos
+
+  cos() (Num)
+
+The cos method computes the cosine of the number (expressed in radians).
+
+I<Since C<0.01>>
+
+=over 4
+
+=item cos example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12);
+
+  my $cos = $number->cos;
+
+  # 0.843853958732492
+
+=back
+
+=cut
+
+=head2 decr
+
+  decr() (Num)
+
+The decr method returns the numeric number decremented by 1.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item decr example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(123456789);
+
+  my $decr = $number->decr;
+
+  # 123456788
+
+=back
+
+=over 4
+
+=item decr example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(123456789);
+
+  my $decr = $number->decr(123456788);
+
+  # 1
+
+=back
+
+=cut
+
+=head2 default
+
+  default() (Num)
+
+The default method returns the default value, i.e. C<0>.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item default example 1
+
+  # given: synopsis;
+
+  my $default = $number->default;
+
+  # 0
+
+=back
+
+=cut
+
+=head2 div
+
+  div(Num $value) (Num)
+
+The div method returns the result of division performed on the argument
+provided.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item div example 1
+
+  # given: synopsis;
+
+  my $div = $number->div(2);
+
+  # 500
+
+=back
+
+=cut
+
+=head2 eq
+
+  eq(any $arg) (boolean)
+
+The eq method performs an I<"equals"> operation using the argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item eq example 1
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 2
+
+  package main;
+
+  use Venus::Code;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 3
+
+  package main;
+
+  use Venus::Float;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item eq example 4
+
+  package main;
+
+  use Venus::Hash;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 5
+
+  package main;
+
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item eq example 6
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 7
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 8
+
+  package main;
+
+  use Venus::Number;
+  use Venus::String;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item eq example 9
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 1
+
+=back
+
+=cut
+
+=head2 exp
+
+  exp() (Num)
+
+The exp method returns e (the natural logarithm base) to the power of the
+number.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item exp example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(0);
+
+  my $exp = $number->exp;
+
+  # 1
+
+=back
+
+=over 4
+
+=item exp example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1);
+
+  my $exp = $number->exp;
+
+  # 2.71828182845905
+
+=back
+
+=over 4
+
+=item exp example 3
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1.5);
+
+  my $exp = $number->exp;
+
+  # 4.48168907033806
+
+=back
+
+=cut
+
+=head2 ge
+
+  ge(any $arg) (boolean)
+
+The ge method performs a I<"greater-than-or-equal-to"> operation using the
+argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item ge example 1
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ge example 2
+
+  package main;
+
+  use Venus::Code;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ge example 3
+
+  package main;
+
+  use Venus::Float;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ge example 4
+
+  package main;
+
+  use Venus::Hash;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ge example 5
+
+  package main;
+
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ge example 6
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ge example 7
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ge example 8
+
+  package main;
+
+  use Venus::Number;
+  use Venus::String;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ge example 9
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 1
+
+=back
+
+=cut
+
+=head2 gele
+
+  gele(any $arg1, any $arg2) (boolean)
+
+The gele method performs a I<"greater-than-or-equal-to"> operation on the 1st
+argument, and I<"lesser-than-or-equal-to"> operation on the 2nd argument.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item gele example 1
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 2
+
+  package main;
+
+  use Venus::Code;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 3
+
+  package main;
+
+  use Venus::Float;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item gele example 4
+
+  package main;
+
+  use Venus::Hash;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 5
+
+  package main;
+
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item gele example 6
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 7
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 8
+
+  package main;
+
+  use Venus::Number;
+  use Venus::String;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item gele example 9
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 1
+
+=back
+
+=cut
+
+=head2 gt
+
+  gt(any $arg) (boolean)
+
+The gt method performs a I<"greater-than"> operation using the argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item gt example 1
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 2
+
+  package main;
+
+  use Venus::Code;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 3
+
+  package main;
+
+  use Venus::Float;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 4
+
+  package main;
+
+  use Venus::Hash;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 5
+
+  package main;
+
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 6
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 7
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 8
+
+  package main;
+
+  use Venus::Number;
+  use Venus::String;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 9
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 gtlt
+
+  gtlt(any $arg1, any $arg2) (boolean)
+
+The gtlt method performs a I<"greater-than"> operation on the 1st argument, and
+I<"lesser-than"> operation on the 2nd argument.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item gtlt example 1
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 2
+
+  package main;
+
+  use Venus::Code;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 3
+
+  package main;
+
+  use Venus::Float;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 4
+
+  package main;
+
+  use Venus::Hash;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 5
+
+  package main;
+
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 6
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 7
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 8
+
+  package main;
+
+  use Venus::Number;
+  use Venus::String;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 9
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 hex
+
+  hex() (string)
+
+The hex method returns a hex string representing the value of the number.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item hex example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(175);
+
+  my $hex = $number->hex;
+
+  # "0xaf"
+
+=back
+
+=cut
+
+=head2 incr
+
+  incr() (Num)
+
+The incr method returns the numeric number incremented by 1.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item incr example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(123456789);
+
+  my $incr = $number->incr;
+
+  # 123456790
+
+=back
+
+=over 4
+
+=item incr example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(123456790);
+
+  my $incr = $number->incr(-1);
+
+  # 123456789
+
+=back
+
+=cut
+
+=head2 index
+
+  index(string $substr, number $start) (Num)
+
+The index method searches for the argument within the number and returns the
+position of the first occurrence of the argument.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item index example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1_0001);
+
+  my $index = $number->index(0);
+
+  # 1
+
+=back
+
+=over 4
+
+=item index example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1_0001);
+
+  my $index = $number->index(1, 1);
+
+  # 4
+
+=back
+
+=over 4
+
+=item index example 3
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1_0001);
+
+  my $index = $number->index(2);
+
+  # -1
+
+=back
+
+=cut
+
+=head2 int
+
+  int() (Num)
+
+The int method returns the integer portion of the number. Do not use this
+method for rounding.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item int example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12.5);
+
+  my $int = $number->int;
+
+  # 12
+
+=back
+
+=cut
+
+=head2 le
+
+  le(any $arg) (boolean)
+
+The le method performs a I<"lesser-than-or-equal-to"> operation using the
+argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item le example 1
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 2
+
+  package main;
+
+  use Venus::Code;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 3
+
+  package main;
+
+  use Venus::Float;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 4
+
+  package main;
+
+  use Venus::Hash;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 5
+
+  package main;
+
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 6
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 7
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 8
+
+  package main;
+
+  use Venus::Number;
+  use Venus::String;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 9
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=cut
+
+=head2 length
+
+  length() (Num)
+
+The length method returns the number of characters within the number.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item length example 1
+
+  # given: synopsis;
+
+  my $length = $number->length;
+
+  # 4
+
+=back
+
+=cut
+
+=head2 log
+
+  log() (Num)
+
+The log method returns the natural logarithm (base e) of the number.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item log example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12345);
+
+  my $log = $number->log;
+
+  # 9.42100640177928
+
+=back
+
+=cut
+
+=head2 lshift
+
+  lshift(Num $value) (Num)
+
+The lshift method returns the result of a left shift performed on the argument
+provided.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item lshift example 1
+
+  # given: synopsis;
+
+  my $lshift = $number->lshift(2);
+
+  # 4000
+
+=back
+
+=cut
+
+=head2 lt
+
+  lt(any $arg) (boolean)
+
+The lt method performs a I<"lesser-than"> operation using the argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item lt example 1
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item lt example 2
+
+  package main;
+
+  use Venus::Code;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item lt example 3
+
+  package main;
+
+  use Venus::Float;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item lt example 4
+
+  package main;
+
+  use Venus::Hash;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item lt example 5
+
+  package main;
+
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item lt example 6
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item lt example 7
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item lt example 8
+
+  package main;
+
+  use Venus::Number;
+  use Venus::String;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item lt example 9
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 mod
+
+  mod() (Num)
+
+The mod method returns the division remainder of the number divided by the
+argment.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item mod example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12);
+
+  my $mod = $number->mod(1);
+
+  # 0
+
+=back
+
+=over 4
+
+=item mod example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12);
+
+  my $mod = $number->mod(2);
+
+  # 0
+
+=back
+
+=over 4
+
+=item mod example 3
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12);
+
+  my $mod = $number->mod(5);
+
+  # 2
+
+=back
+
+=cut
+
+=head2 multi
+
+  multi(Num $value) (Num)
+
+The multi method returns the result multiplication performed on the argument
+provided.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item multi example 1
+
+  # given: synopsis;
+
+  my $multi = $number->multi(2);
+
+  # 2000
+
+=back
+
+=cut
+
+=head2 ne
+
+  ne(any $arg) (boolean)
+
+The ne method performs a I<"not-equal-to"> operation using the argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item ne example 1
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 2
+
+  package main;
+
+  use Venus::Code;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 3
+
+  package main;
+
+  use Venus::Float;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ne example 4
+
+  package main;
+
+  use Venus::Hash;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 5
+
+  package main;
+
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ne example 6
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 7
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 8
+
+  package main;
+
+  use Venus::Number;
+  use Venus::String;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ne example 9
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 neg
+
+  neg() (Num)
+
+The neg method returns a negative version of the number.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item neg example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12345);
+
+  my $neg = $number->neg;
+
+  # -12345
+
+=back
+
+=cut
+
+=head2 numified
+
+  numified() (Num)
+
+The numified method returns the numerical representation of the object. For
+number objects this method returns the object's underlying value.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item numified example 1
+
+  # given: synopsis;
+
+  my $numified = $number->numified;
+
+  # 1000
+
+=back
+
+=over 4
+
+=item numified example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(2_000);
+
+  my $numified = $number->numified;
+
+  # 2000
+
+=back
+
+=over 4
+
+=item numified example 3
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(10_000);
+
+  my $numified = $number->numified;
+
+  # 10000
+
+=back
+
+=cut
+
+=head2 pow
+
+  pow() (Num)
+
+The pow method returns a number, the result of a math operation, which is the
+number to the power of the argument.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item pow example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12345);
+
+  my $pow = $number->pow(3);
+
+  # 1881365963625
+
+=back
+
+=cut
+
+=head2 prepend
+
+  prepend(string @parts) (string)
+
+The prepend method prepends arugments to the number.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item prepend example 1
+
+  # given: synopsis;
+
+  my $prepend = $number->prepend(1);
+
+  # 11_000
+
+=back
+
+=cut
+
+=head2 prepend_with
+
+  prepend_with(string $delimiter, string @parts) (string)
+
+The prepend_with method prepends arugments to the number using the delimiter
+provided.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item prepend_with example 1
+
+  # given: synopsis;
+
+  my $prepend = $number->prepend_with('.', '11');
+
+  # "11.1000"
+
+=back
+
+=cut
+
+=head2 range
+
+  range() (arrayref)
+
+The range method returns an array reference containing integer increasing values
+up-to or down-to the limit specified.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item range example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(5);
+
+  my $range = $number->range(9);
+
+  # [5..9]
+
+=back
+
+=over 4
+
+=item range example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(5);
+
+  my $range = $number->range(1);
+
+  # [5, 4, 3, 2, 1]
+
+=back
+
+=cut
+
+=head2 repeat
+
+  repeat(Num $number, string $delimiter) (string)
+
+The repeat method repeats the number value N times based on the argument provided
+and returns a new concatenated number. Optionally, a delimiter can be provided
+and be place between the occurences.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item repeat example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new('999');
+
+  my $repeat = $number->repeat(2);
+
+  # 999999
+
+=back
+
+=over 4
+
+=item repeat example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new('999');
+
+  my $repeat = $number->repeat(2, '.');
+
+  # 999.999
+
+=back
+
+=cut
+
+=head2 rshift
+
+  rshift(num $value) (Num)
+
+The rshift method returns the result a right shift performed on the argument
+provided.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item rshift example 1
+
+  # given: synopsis;
+
+  my $rshift = $number->rshift(2);
+
+  # 250
+
+=back
+
+=cut
+
+=head2 sin
+
+  sin() (Num)
+
+The sin method returns the sine of the number (expressed in radians).
+
+I<Since C<0.01>>
+
+=over 4
+
+=item sin example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12345);
+
+  my $sin = $number->sin;
+
+  # -0.993771636455681
+
+=back
+
+=cut
+
+=head2 sqrt
+
+  sqrt() (Num)
+
+The sqrt method returns the positive square root of the number.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item sqrt example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(12345);
+
+  my $sqrt = $number->sqrt;
+
+  # 111.108055513541
+
+=back
+
+=cut
+
+=head2 sub
+
+  sub(Num $value) (Num)
+
+The sub method returns the result subtraction performed on the argument
+provided.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item sub example 1
+
+  # given: synopsis;
+
+  my $sub = $number->sub(500);
+
+  # 500
+
+=back
+
+=cut
+
+=head2 substr
+
+  substr(Num $offset, Num $length, string $replace) (string)
+
+The substr method calls the core L</substr> function with the object's number
+value. In list context returns the result and the subject.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item substr example 1
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1234567890);
+
+  my $substr = $number->substr(0, 5);
+
+  # 12345
+
+=back
+
+=over 4
+
+=item substr example 2
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1234567890);
+
+  my $substr = $number->substr(6, 5);
+
+  # 7890
+
+=back
+
+=over 4
+
+=item substr example 3
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1234567890);
+
+  my $substr = $number->substr(6, 5, '0000');
+
+  # "1234560000"
+
+=back
+
+=over 4
+
+=item substr example 4
+
+  package main;
+
+  use Venus::Number;
+
+  my $number = Venus::Number->new(1234567890);
+
+  my ($result, $subject) = $number->substr(6, 5, '0000');
+
+  # ("789", "1234560000")
+
+=back
+
+=cut
+
+=head2 tv
+
+  tv(any $arg) (boolean)
+
+The tv method performs a I<"type-and-value-equal-to"> operation using argument
+provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item tv example 1
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 2
+
+  package main;
+
+  use Venus::Code;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 3
+
+  package main;
+
+  use Venus::Float;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item tv example 4
+
+  package main;
+
+  use Venus::Hash;
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 5
+
+  package main;
+
+  use Venus::Number;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item tv example 6
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 7
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 8
+
+  package main;
+
+  use Venus::Number;
+  use Venus::String;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 9
+
+  package main;
+
+  use Venus::Number;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Number->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

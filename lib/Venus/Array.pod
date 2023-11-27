@@ -1,0 +1,3466 @@
+
+=head1 NAME
+
+Venus::Array - Array Class
+
+=cut
+
+=head1 ABSTRACT
+
+Array Class for Perl 5
+
+=cut
+
+=head1 SYNOPSIS
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([1..9]);
+
+  # $array->random;
+
+=cut
+
+=head1 DESCRIPTION
+
+This package provides methods for manipulating array data.
+
+=cut
+
+=head1 INHERITS
+
+This package inherits behaviors from:
+
+L<Venus::Kind::Value>
+
+=cut
+
+=head1 INTEGRATES
+
+This package integrates behaviors from:
+
+L<Venus::Role::Mappable>
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 all
+
+  all(coderef $code) (boolean)
+
+The all method returns true if the callback returns true for all of the
+elements.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item all example 1
+
+  # given: synopsis;
+
+  my $all = $array->all(sub {
+    $_ > 0;
+  });
+
+  # 1
+
+=back
+
+=over 4
+
+=item all example 2
+
+  # given: synopsis;
+
+  my $all = $array->all(sub {
+    my ($key, $value) = @_;
+
+    $value > 0;
+  });
+
+  # 1
+
+=back
+
+=cut
+
+=head2 any
+
+  any(coderef $code) (boolean)
+
+The any method returns true if the callback returns true for any of the
+elements.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item any example 1
+
+  # given: synopsis;
+
+  my $any = $array->any(sub {
+    $_ > 4;
+  });
+
+=back
+
+=over 4
+
+=item any example 2
+
+  # given: synopsis;
+
+  my $any = $array->any(sub {
+    my ($key, $value) = @_;
+
+    $value > 4;
+  });
+
+=back
+
+=cut
+
+=head2 call
+
+  call(string $iterable, string $method) (any)
+
+The call method executes the given method (named using the first argument)
+which performs an iteration (i.e. takes a callback) and calls the method (named
+using the second argument) on the object (or value) and returns the result of
+the iterable method.
+
+I<Since C<1.02>>
+
+=over 4
+
+=item call example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $call = $array->call('map', 'incr');
+
+  # [2..10]
+
+=back
+
+=over 4
+
+=item call example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $call = $array->call('grep', 'gt', 4);
+
+  # [4..9]
+
+=back
+
+=cut
+
+=head2 cast
+
+  cast(string $kind) (object | undef)
+
+The cast method converts L<"value"|Venus::Kind::Value> objects between
+different I<"value"> object types, based on the name of the type provided. This
+method will return C<undef> if the invocant is not a L<Venus::Kind::Value>.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item cast example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new;
+
+  my $cast = $array->cast('array');
+
+  # bless({ value => [] }, "Venus::Array")
+
+=back
+
+=over 4
+
+=item cast example 2
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new;
+
+  my $cast = $array->cast('boolean');
+
+  # bless({ value => 1 }, "Venus::Boolean")
+
+=back
+
+=over 4
+
+=item cast example 3
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new;
+
+  my $cast = $array->cast('code');
+
+  # bless({ value => sub { ... } }, "Venus::Code")
+
+=back
+
+=over 4
+
+=item cast example 4
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new;
+
+  my $cast = $array->cast('float');
+
+  # bless({ value => "1.0" }, "Venus::Float")
+
+=back
+
+=over 4
+
+=item cast example 5
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new;
+
+  my $cast = $array->cast('hash');
+
+  # bless({ value => {} }, "Venus::Hash")
+
+=back
+
+=over 4
+
+=item cast example 6
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new;
+
+  my $cast = $array->cast('number');
+
+  # bless({ value => 2 }, "Venus::Number")
+
+=back
+
+=over 4
+
+=item cast example 7
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new;
+
+  my $cast = $array->cast('regexp');
+
+  # bless({ value => qr/(?^u:\[\])/ }, "Venus::Regexp")
+
+=back
+
+=over 4
+
+=item cast example 8
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new;
+
+  my $cast = $array->cast('scalar');
+
+  # bless({ value => \[] }, "Venus::Scalar")
+
+=back
+
+=over 4
+
+=item cast example 9
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new;
+
+  my $cast = $array->cast('string');
+
+  # bless({ value => "[]" }, "Venus::String")
+
+=back
+
+=over 4
+
+=item cast example 10
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new;
+
+  my $cast = $array->cast('undef');
+
+  # bless({ value => undef }, "Venus::Undef")
+
+=back
+
+=cut
+
+=head2 count
+
+  count() (number)
+
+The count method returns the number of elements within the array.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item count example 1
+
+  # given: synopsis;
+
+  my $count = $array->count;
+
+  # 9
+
+=back
+
+=cut
+
+=head2 default
+
+  default() (arrayref)
+
+The default method returns the default value, i.e. C<[]>.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item default example 1
+
+  # given: synopsis;
+
+  my $default = $array->default;
+
+  # []
+
+=back
+
+=cut
+
+=head2 delete
+
+  delete(number $index) (any)
+
+The delete method returns the value of the element at the index specified after
+removing it from the array.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item delete example 1
+
+  # given: synopsis;
+
+  my $delete = $array->delete(2);
+
+  # 3
+
+=back
+
+=cut
+
+=head2 each
+
+  each(coderef $code) (arrayref)
+
+The each method executes a callback for each element in the array passing the
+index and value as arguments. This method can return a list of values in
+list-context.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item each example 1
+
+  # given: synopsis;
+
+  my $each = $array->each(sub {
+    [$_]
+  });
+
+  # [[1], [2], [3], [4], [5], [6], [7], [8], [9]]
+
+=back
+
+=over 4
+
+=item each example 2
+
+  # given: synopsis;
+
+  my $each = $array->each(sub {
+    my ($key, $value) = @_;
+
+    [$key, $value]
+  });
+
+  # [
+  #   [0, 1],
+  #   [1, 2],
+  #   [2, 3],
+  #   [3, 4],
+  #   [4, 5],
+  #   [5, 6],
+  #   [6, 7],
+  #   [7, 8],
+  #   [8, 9],
+  # ]
+
+=back
+
+=cut
+
+=head2 empty
+
+  empty() (Venus::Array)
+
+The empty method drops all elements from the array.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item empty example 1
+
+  # given: synopsis;
+
+  my $empty = $array->empty;
+
+  # bless({ value => [] }, "Venus::Array")
+
+=back
+
+=cut
+
+=head2 eq
+
+  eq(any $arg) (boolean)
+
+The eq method performs an I<"equals"> operation using the argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item eq example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item eq example 2
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Code;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 3
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Float;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 4
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Hash;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 5
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 6
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 7
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 8
+
+  package main;
+
+  use Venus::Array;
+  use Venus::String;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item eq example 9
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->eq($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 exists
+
+  exists(number $index) (boolean)
+
+The exists method returns true if the element at the index specified exists,
+otherwise it returns false.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item exists example 1
+
+  # given: synopsis;
+
+  my $exists = $array->exists(0);
+
+  # 1
+
+=back
+
+=cut
+
+=head2 find
+
+  find(string @keys) (any)
+
+The find method traverses the data structure using the keys and indices
+provided, returning the value found or undef. In list-context, this method
+returns a tuple, i.e. the value found and boolean representing whether the
+match was successful.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item find example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([{'foo' => {'bar' => 'baz'}}, 'bar', ['baz']]);
+
+  my $find = $array->find(0, 'foo');
+
+  # { bar => "baz" }
+
+=back
+
+=over 4
+
+=item find example 2
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([{'foo' => {'bar' => 'baz'}}, 'bar', ['baz']]);
+
+  my $find = $array->find(0, 'foo', 'bar');
+
+  # "baz"
+
+=back
+
+=over 4
+
+=item find example 3
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([{'foo' => {'bar' => 'baz'}}, 'bar', ['baz']]);
+
+  my $find = $array->find(2, 0);
+
+  # "baz"
+
+=back
+
+=cut
+
+=head2 first
+
+  first() (any)
+
+The first method returns the value of the first element.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item first example 1
+
+  # given: synopsis;
+
+  my $first = $array->first;
+
+  # 1
+
+=back
+
+=cut
+
+=head2 ge
+
+  ge(any $arg) (boolean)
+
+The ge method performs a I<"greater-than-or-equal-to"> operation using the
+argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item ge example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ge example 2
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Code;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ge example 3
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Float;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ge example 4
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Hash;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ge example 5
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ge example 6
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ge example 7
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ge example 8
+
+  package main;
+
+  use Venus::Array;
+  use Venus::String;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ge example 9
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->ge($rvalue);
+
+  # 1
+
+=back
+
+=cut
+
+=head2 gele
+
+  gele(any $arg1, any $arg2) (boolean)
+
+The gele method performs a I<"greater-than-or-equal-to"> operation on the 1st
+argument, and I<"lesser-than-or-equal-to"> operation on the 2nd argument.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item gele example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 2
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Code;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 3
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Float;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 4
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Hash;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 5
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 6
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 7
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 8
+
+  package main;
+
+  use Venus::Array;
+  use Venus::String;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gele example 9
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->gele($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 grep
+
+  grep(coderef $code) (arrayref)
+
+The grep method executes a callback for each element in the array passing the
+value as an argument, returning a new array reference containing the elements
+for which the returned true. This method can return a list of values in
+list-context.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item grep example 1
+
+  # given: synopsis;
+
+  my $grep = $array->grep(sub {
+    $_ > 3
+  });
+
+  # [4..9]
+
+=back
+
+=over 4
+
+=item grep example 2
+
+  # given: synopsis;
+
+  my $grep = $array->grep(sub {
+    my ($key, $value) = @_;
+
+    $value > 3
+  });
+
+  # [4..9]
+
+=back
+
+=cut
+
+=head2 gt
+
+  gt(any $arg) (boolean)
+
+The gt method performs a I<"greater-than"> operation using the argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item gt example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 2
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Code;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 3
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Float;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item gt example 4
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Hash;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 5
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item gt example 6
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 7
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gt example 8
+
+  package main;
+
+  use Venus::Array;
+  use Venus::String;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item gt example 9
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->gt($rvalue);
+
+  # 1
+
+=back
+
+=cut
+
+=head2 gtlt
+
+  gtlt(any $arg1, any $arg2) (boolean)
+
+The gtlt method performs a I<"greater-than"> operation on the 1st argument, and
+I<"lesser-than"> operation on the 2nd argument.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item gtlt example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 2
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Code;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 3
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Float;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 4
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Hash;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 5
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 6
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 7
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 8
+
+  package main;
+
+  use Venus::Array;
+  use Venus::String;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item gtlt example 9
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->gtlt($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 iterator
+
+  iterator() (coderef)
+
+The iterator method returns a code reference which can be used to iterate over
+the array. Each time the iterator is executed it will return the next element
+in the array until all elements have been seen, at which point the iterator
+will return an undefined value. This method can return a tuple with the key and
+value in list-context.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item iterator example 1
+
+  # given: synopsis;
+
+  my $iterator = $array->iterator;
+
+  # sub { ... }
+
+  # while (my $value = $iterator->()) {
+  #   say $value; # 1
+  # }
+
+=back
+
+=over 4
+
+=item iterator example 2
+
+  # given: synopsis;
+
+  my $iterator = $array->iterator;
+
+  # sub { ... }
+
+  # while (grep defined, my ($key, $value) = $iterator->()) {
+  #   say $value; # 1
+  # }
+
+=back
+
+=cut
+
+=head2 join
+
+  join(string $seperator) (string)
+
+The join method returns a string consisting of all the elements in the array
+joined by the join-string specified by the argument. Note: If the argument is
+omitted, an empty string will be used as the join-string.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item join example 1
+
+  # given: synopsis;
+
+  my $join = $array->join;
+
+  # 123456789
+
+=back
+
+=over 4
+
+=item join example 2
+
+  # given: synopsis;
+
+  my $join = $array->join(', ');
+
+  # "1, 2, 3, 4, 5, 6, 7, 8, 9"
+
+=back
+
+=cut
+
+=head2 keyed
+
+  keyed(string @keys) (hashref)
+
+The keyed method returns a hash reference where the arguments become the keys,
+and the elements of the array become the values.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item keyed example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([1..4]);
+
+  my $keyed = $array->keyed('a'..'d');
+
+  # { a => 1, b => 2, c => 3, d => 4 }
+
+=back
+
+=cut
+
+=head2 keys
+
+  keys() (arrayref)
+
+The keys method returns an array reference consisting of the indicies of the
+array.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item keys example 1
+
+  # given: synopsis;
+
+  my $keys = $array->keys;
+
+  # [0..8]
+
+=back
+
+=cut
+
+=head2 last
+
+  last() (any)
+
+The last method returns the value of the last element in the array.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item last example 1
+
+  # given: synopsis;
+
+  my $last = $array->last;
+
+  # 9
+
+=back
+
+=cut
+
+=head2 le
+
+  le(any $arg) (boolean)
+
+The le method performs a I<"lesser-than-or-equal-to"> operation using the
+argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item le example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 2
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Code;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 3
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Float;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item le example 4
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Hash;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item le example 5
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item le example 6
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item le example 7
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item le example 8
+
+  package main;
+
+  use Venus::Array;
+  use Venus::String;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item le example 9
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->le($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 length
+
+  length() (number)
+
+The length method returns the number of elements within the array, and is an
+alias for the L</count> method.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item length example 1
+
+  # given: synopsis;
+
+  my $length = $array->length;
+
+  # 9
+
+=back
+
+=cut
+
+=head2 list
+
+  list() (any)
+
+The list method returns a shallow copy of the underlying array reference as an
+array reference.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item list example 1
+
+  # given: synopsis;
+
+  my $list = $array->list;
+
+  # 9
+
+=back
+
+=over 4
+
+=item list example 2
+
+  # given: synopsis;
+
+  my @list = $array->list;
+
+  # (1..9)
+
+=back
+
+=cut
+
+=head2 lt
+
+  lt(any $arg) (boolean)
+
+The lt method performs a I<"lesser-than"> operation using the argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item lt example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item lt example 2
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Code;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item lt example 3
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Float;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item lt example 4
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Hash;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item lt example 5
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item lt example 6
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item lt example 7
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item lt example 8
+
+  package main;
+
+  use Venus::Array;
+  use Venus::String;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item lt example 9
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->lt($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 map
+
+  map(coderef $code) (arrayref)
+
+The map method iterates over each element in the array, executing the code
+reference supplied in the argument, passing the routine the value at the
+current position in the loop and returning a new array reference containing the
+elements for which the argument returns a value or non-empty list. This method
+can return a list of values in list-context.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item map example 1
+
+  # given: synopsis;
+
+  my $map = $array->map(sub {
+    $_ * 2
+  });
+
+  # [2, 4, 6, 8, 10, 12, 14, 16, 18]
+
+=back
+
+=over 4
+
+=item map example 2
+
+  # given: synopsis;
+
+  my $map = $array->map(sub {
+    my ($key, $value) = @_;
+
+    [$key, ($value * 2)]
+  });
+
+  # [
+  #   [0, 2],
+  #   [1, 4],
+  #   [2, 6],
+  #   [3, 8],
+  #   [4, 10],
+  #   [5, 12],
+  #   [6, 14],
+  #   [7, 16],
+  #   [8, 18],
+  # ]
+
+=back
+
+=cut
+
+=head2 merge
+
+  merge(arrayref @data) (arrayref)
+
+The merge method returns an array reference where the elements in the array and
+the elements in the argument(s) are merged. This operation performs a deep
+merge and clones the datasets to ensure no side-effects.
+
+I<Since C<3.30>>
+
+=over 4
+
+=item merge example 1
+
+  # given: synopsis;
+
+  my $merge = $array->merge([10..15]);
+
+  # [10..15,7,8,9]
+
+=back
+
+=over 4
+
+=item merge example 2
+
+  # given: synopsis;
+
+  my $merge = $array->merge([1,2,{1..4},4..9]);
+
+  # [1,2,{1..4},4..9]
+
+=back
+
+=cut
+
+=head2 ne
+
+  ne(any $arg) (boolean)
+
+The ne method performs a I<"not-equal-to"> operation using the argument provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item ne example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item ne example 2
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Code;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 3
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Float;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 4
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Hash;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 5
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 6
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 7
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 8
+
+  package main;
+
+  use Venus::Array;
+  use Venus::String;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item ne example 9
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->ne($rvalue);
+
+  # 1
+
+=back
+
+=cut
+
+=head2 none
+
+  none(coderef $code) (boolean)
+
+The none method returns true if none of the elements in the array meet the
+criteria set by the operand and rvalue.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item none example 1
+
+  # given: synopsis;
+
+  my $none = $array->none(sub {
+    $_ < 1
+  });
+
+  # 1
+
+=back
+
+=over 4
+
+=item none example 2
+
+  # given: synopsis;
+
+  my $none = $array->none(sub {
+    my ($key, $value) = @_;
+
+    $value < 1
+  });
+
+  # 1
+
+=back
+
+=cut
+
+=head2 one
+
+  one(coderef $code) (boolean)
+
+The one method returns true if only one of the elements in the array meet the
+criteria set by the operand and rvalue.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item one example 1
+
+  # given: synopsis;
+
+  my $one = $array->one(sub {
+    $_ == 1
+  });
+
+  # 1
+
+=back
+
+=over 4
+
+=item one example 2
+
+  # given: synopsis;
+
+  my $one = $array->one(sub {
+    my ($key, $value) = @_;
+
+    $value == 1
+  });
+
+  # 1
+
+=back
+
+=cut
+
+=head2 order
+
+  order(number @indices) (Venus::Array)
+
+The order method reorders the array items based on the indices provided and
+returns the invocant.
+
+I<Since C<2.01>>
+
+=over 4
+
+=item order example 1
+
+  # given: synopsis;
+
+  my $order = $array->order;
+
+  # bless({ value => [1..9] }, "Venus::Array")
+
+=back
+
+=over 4
+
+=item order example 2
+
+  # given: synopsis;
+
+  my $order = $array->order(8,7,6);
+
+  # bless({ value => [9,8,7,1,2,3,4,5,6] }, "Venus::Array")
+
+=back
+
+=over 4
+
+=item order example 3
+
+  # given: synopsis;
+
+  my $order = $array->order(0,2,1);
+
+  # bless({ value => [1,3,2,4,5,6,7,8,9] }, "Venus::Array")
+
+=back
+
+=cut
+
+=head2 pairs
+
+  pairs() (arrayref)
+
+The pairs method is an alias to the pairs_array method. This method can return
+a list of values in list-context.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item pairs example 1
+
+  # given: synopsis;
+
+  my $pairs = $array->pairs;
+
+  # [
+  #   [0, 1],
+  #   [1, 2],
+  #   [2, 3],
+  #   [3, 4],
+  #   [4, 5],
+  #   [5, 6],
+  #   [6, 7],
+  #   [7, 8],
+  #   [8, 9],
+  # ]
+
+=back
+
+=cut
+
+=head2 part
+
+  part(coderef $code) (tuple[arrayref, arrayref])
+
+The part method iterates over each element in the array, executing the code
+reference supplied in the argument, using the result of the code reference to
+partition to array into two distinct array references. This method can return a
+list of values in list-context.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item part example 1
+
+  # given: synopsis;
+
+  my $part = $array->part(sub {
+    $_ > 5
+  });
+
+  # [[6..9], [1..5]]
+
+=back
+
+=over 4
+
+=item part example 2
+
+  # given: synopsis;
+
+  my $part = $array->part(sub {
+    my ($key, $value) = @_;
+
+    $value < 5
+  });
+
+  # [[1..4], [5..9]]
+
+=back
+
+=cut
+
+=head2 path
+
+  path(string $expr) (any)
+
+The path method traverses the data structure using the path expr provided,
+returning the value found or undef. In list-context, this method returns a
+tuple, i.e. the value found and boolean representing whether the match was
+successful.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item path example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([{'foo' => {'bar' => 'baz'}}, 'bar', ['baz']]);
+
+  my $path = $array->path('/0/foo');
+
+  # { bar => "baz" }
+
+=back
+
+=over 4
+
+=item path example 2
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([{'foo' => {'bar' => 'baz'}}, 'bar', ['baz']]);
+
+  my $path = $array->path('/0/foo/bar');
+
+  # "baz"
+
+=back
+
+=over 4
+
+=item path example 3
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([{'foo' => {'bar' => 'baz'}}, 'bar', ['baz']]);
+
+  my $path = $array->path('/2/0');
+
+  # "baz"
+
+=back
+
+=over 4
+
+=item path example 4
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([{'foo' => {'bar' => 'baz'}}, 'bar', ['baz']]);
+
+  my @path = $array->path('/3/0');
+
+  # (undef, 0)
+
+=back
+
+=cut
+
+=head2 pop
+
+  pop() (any)
+
+The pop method returns the last element of the array shortening it by one.
+Note, this method modifies the array.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item pop example 1
+
+  # given: synopsis;
+
+  my $pop = $array->pop;
+
+  # 9
+
+=back
+
+=cut
+
+=head2 push
+
+  push(any @data) (arrayref)
+
+The push method appends the array by pushing the agruments onto it and returns
+itself.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item push example 1
+
+  # given: synopsis;
+
+  my $push = $array->push(10);
+
+  # [1..10]
+
+=back
+
+=cut
+
+=head2 puts
+
+  puts(any @args) (arrayref)
+
+The puts method select values from within the underlying data structure using
+L<Venus::Array/path>, optionally assigning the value to the preceeding scalar
+reference and returns all the values selected.
+
+I<Since C<3.20>>
+
+=over 4
+
+=item puts example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([
+    {
+      fruit => "apple",
+      size => "small",
+      color => "red",
+    },
+    {
+      fruit => "lemon",
+      size => "large",
+      color => "yellow",
+    },
+  ]);
+
+  my $puts = $array->puts(undef, '0.fruit', undef, '1.fruit');
+
+  # ["apple", "lemon"]
+
+=back
+
+=over 4
+
+=item puts example 2
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([
+    {
+      fruit => "apple",
+      size => "small",
+      color => "red",
+    },
+    {
+      fruit => "lemon",
+      size => "large",
+      color => "yellow",
+    },
+  ]);
+
+  $array->puts(\my $fruit1, '0.fruit', \my $fruit2, '1.fruit');
+
+  my $puts = [$fruit1, $fruit2];
+
+  # ["apple", "lemon"]
+
+=back
+
+=over 4
+
+=item puts example 3
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([
+    {
+      fruit => "apple",
+      size => "small",
+      color => "red",
+    },
+    {
+      fruit => "lemon",
+      size => "large",
+      color => "yellow",
+    },
+  ]);
+
+  $array->puts(
+    \my $fruit1, '0.fruit',
+    \my $fruit2, '1.fruit',
+    \my $fruit3, '2.fruit',
+  );
+
+  my $puts = [$fruit1, $fruit2, $fruit3];
+
+  # ["apple", "lemon", undef]
+
+=back
+
+=over 4
+
+=item puts example 4
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([1..20]);
+
+  $array->puts(
+    \my $a, '0',
+    \my $b, '1',
+    \my $m, ['', '2:-2'],
+    \my $x, '18',
+    \my $y, '19',
+  );
+
+  my $puts = [$a, $b, $m, $x, $y];
+
+  # [1, 2, [3..18], 19, 20]
+
+=back
+
+=cut
+
+=head2 random
+
+  random() (any)
+
+The random method returns a random element from the array.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item random example 1
+
+  # given: synopsis;
+
+  my $random = $array->random;
+
+  # 2
+
+  # my $random = $array->random;
+
+  # 1
+
+=back
+
+=cut
+
+=head2 range
+
+  range(number | string @args) (arrayref)
+
+The range method accepts a I<"range expression"> and returns the result of
+calling the L</slice> method with the computed range.
+
+I<Since C<2.55>>
+
+=over 4
+
+=item range example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range;
+
+  # []
+
+=back
+
+=over 4
+
+=item range example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range(0);
+
+  # [1]
+
+=back
+
+=over 4
+
+=item range example 3
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('0:');
+
+  # [1..9]
+
+=back
+
+=over 4
+
+=item range example 4
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range(':4');
+
+  # [1..5]
+
+=back
+
+=over 4
+
+=item range example 5
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('8:');
+
+  # [9]
+
+=back
+
+=over 4
+
+=item range example 6
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('4:');
+
+  # [5..9]
+
+=back
+
+=over 4
+
+=item range example 7
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('0:2');
+
+  # [1..3]
+
+=back
+
+=over 4
+
+=item range example 8
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('2:4');
+
+  # [3..5]
+
+=back
+
+=over 4
+
+=item range example 9
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range(0..3);
+
+  # [1..4]
+
+=back
+
+=over 4
+
+=item range example 10
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('-1:8');
+
+  # [9,1..9]
+
+=back
+
+=over 4
+
+=item range example 11
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('0:8');
+
+  # [1..9]
+
+=back
+
+=over 4
+
+=item range example 12
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('0:-2');
+
+  # [1..7]
+
+=back
+
+=over 4
+
+=item range example 13
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('-2:-2');
+
+  # [8]
+
+=back
+
+=over 4
+
+=item range example 14
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('0:-20');
+
+  # []
+
+=back
+
+=over 4
+
+=item range example 15
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('-2:-20');
+
+  # []
+
+=back
+
+=over 4
+
+=item range example 16
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('-2:-6');
+
+  # []
+
+=back
+
+=over 4
+
+=item range example 17
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('-2:-8');
+
+  # []
+
+=back
+
+=over 4
+
+=item range example 18
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('-2:-9');
+
+  # []
+
+=back
+
+=over 4
+
+=item range example 19
+
+  # given: synopsis
+
+  package main;
+
+  my $range = $array->range('-5:-1');
+
+  # [5..9]
+
+=back
+
+=cut
+
+=head2 reverse
+
+  reverse() (arrayref)
+
+The reverse method returns an array reference containing the elements in the
+array in reverse order.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item reverse example 1
+
+  # given: synopsis;
+
+  my $reverse = $array->reverse;
+
+  # [9, 8, 7, 6, 5, 4, 3, 2, 1]
+
+=back
+
+=cut
+
+=head2 rotate
+
+  rotate() (arrayref)
+
+The rotate method rotates the elements in the array such that first elements
+becomes the last element and the second element becomes the first element each
+time this method is called.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item rotate example 1
+
+  # given: synopsis;
+
+  my $rotate = $array->rotate;
+
+  # [2..9, 1]
+
+=back
+
+=cut
+
+=head2 rsort
+
+  rsort() (arrayref)
+
+The rsort method returns an array reference containing the values in the array
+sorted alphanumerically in reverse.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item rsort example 1
+
+  # given: synopsis;
+
+  my $rsort = $array->rsort;
+
+  # [9, 8, 7, 6, 5, 4, 3, 2, 1]
+
+=back
+
+=cut
+
+=head2 shift
+
+  shift() (any)
+
+The shift method returns the first element of the array shortening it by one.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item shift example 1
+
+  # given: synopsis;
+
+  my $shift = $array->shift;
+
+  # 1
+
+=back
+
+=cut
+
+=head2 shuffle
+
+  shuffle() (arrayref)
+
+The shuffle method returns an array with the items in a randomized order.
+
+I<Since C<1.40>>
+
+=over 4
+
+=item shuffle example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $shuffle = $array->shuffle;
+
+  # [4, 5, 8, 7, 2, 9, 6, 3, 1]
+
+=back
+
+=cut
+
+=head2 slice
+
+  slice(string @keys) (arrayref)
+
+The slice method returns a hash reference containing the elements in the array
+at the index(es) specified in the arguments.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item slice example 1
+
+  # given: synopsis;
+
+  my $slice = $array->slice(2, 4);
+
+  # [3, 5]
+
+=back
+
+=cut
+
+=head2 sort
+
+  sort() (arrayref)
+
+The sort method returns an array reference containing the values in the array
+sorted alphanumerically.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item sort example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new(['d','c','b','a']);
+
+  my $sort = $array->sort;
+
+  # ["a".."d"]
+
+=back
+
+=cut
+
+=head2 tv
+
+  tv(any $arg) (boolean)
+
+The tv method performs a I<"type-and-value-equal-to"> operation using argument
+provided.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item tv example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Array->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 1
+
+=back
+
+=over 4
+
+=item tv example 2
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Code;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Code->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 3
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Float;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Float->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 4
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Hash;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Hash->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 5
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Number;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Number->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 6
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Regexp;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Regexp->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 7
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Scalar;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Scalar->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 8
+
+  package main;
+
+  use Venus::Array;
+  use Venus::String;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::String->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=over 4
+
+=item tv example 9
+
+  package main;
+
+  use Venus::Array;
+  use Venus::Undef;
+
+  my $lvalue = Venus::Array->new;
+  my $rvalue = Venus::Undef->new;
+
+  my $result = $lvalue->tv($rvalue);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 unique
+
+  unique() (arrayref)
+
+The unique method returns an array reference consisting of the unique elements
+in the array.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item unique example 1
+
+  package main;
+
+  use Venus::Array;
+
+  my $array = Venus::Array->new([1,1,1,1,2,3,1]);
+
+  my $unique = $array->unique;
+
+  # [1, 2, 3]
+
+=back
+
+=cut
+
+=head2 unshift
+
+  unshift(any @data) (arrayref)
+
+The unshift method prepends the array by pushing the agruments onto it and
+returns itself.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item unshift example 1
+
+  # given: synopsis;
+
+  my $unshift = $array->unshift(-2,-1,0);
+
+  # [-2..9]
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

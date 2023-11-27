@@ -1,0 +1,143 @@
+
+=head1 NAME
+
+Venus::Role::Valuable - Valuable Role
+
+=cut
+
+=head1 ABSTRACT
+
+Valuable Role for Perl 5
+
+=cut
+
+=head1 SYNOPSIS
+
+  package Example;
+
+  use Venus::Class;
+
+  with 'Venus::Role::Valuable';
+
+  package main;
+
+  my $example = Example->new;
+
+  # $example->value;
+
+=cut
+
+=head1 DESCRIPTION
+
+This package modifies the consuming package and provides a C<value> attribute
+which defaults to what's returned by the C<default> method, as well as C<get>
+and C<set> methods for modifying the value.
+
+=cut
+
+=head1 ATTRIBUTES
+
+This package has the following attributes:
+
+=cut
+
+=head2 value
+
+  value(Any)
+
+This attribute is read-write, accepts C<(Any)> values, and is optional.
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 default
+
+  default() (any)
+
+The default method returns the default value, i.e. C<undef>.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item default example 1
+
+  package main;
+
+  my $example = Example->new;
+
+  my $default = $example->default;
+
+  # undef
+
+=back
+
+=cut
+
+=head2 get
+
+  get() (any)
+
+The get method gets and returns the value.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item get example 1
+
+  package main;
+
+  my $example = Example->new(value => 'hey, there');
+
+  my $get = $example->get;
+
+  # "hey, there"
+
+=back
+
+=cut
+
+=head2 set
+
+  set(any $value) (any)
+
+The set method set the value and returns the value set.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item set example 1
+
+  package main;
+
+  my $example = Example->new(value => 'hey, there');
+
+  my $set = $example->set('hi, there');
+
+  # "hi, there"
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

@@ -1,0 +1,87 @@
+
+=head1 NAME
+
+Venus::Role::Tryable - Tryable Role
+
+=cut
+
+=head1 ABSTRACT
+
+Tryable Role for Perl 5
+
+=cut
+
+=head1 SYNOPSIS
+
+  package Example;
+
+  use Venus::Class 'with';
+  use Venus 'raise';
+
+  with 'Venus::Role::Tryable';
+
+  sub test {
+    raise 'Example::Error';
+  }
+
+  package main;
+
+  my $example = Example->new;
+
+  # $example->try('test');
+
+=cut
+
+=head1 DESCRIPTION
+
+This package modifies the consuming package and provides a mechanism for
+handling potentially volatile routines.
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 try
+
+  try(string | coderef $method, any @args) (Venus::Try)
+
+The try method returns a L<Venus::Try> object having the invocant, callback,
+arguments pre-configured. This method supports dispatching, i.e. providing a
+method name and arguments whose return value will be acted on by this method.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item try example 1
+
+  package main;
+
+  my $example = Example->new;
+
+  my $try = $example->try('test');
+
+  # my $value = $try->result;
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

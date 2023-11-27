@@ -1,0 +1,1203 @@
+
+=head1 NAME
+
+Venus::Assert - Assert Class
+
+=cut
+
+=head1 ABSTRACT
+
+Assert Class for Perl 5
+
+=cut
+
+=head1 SYNOPSIS
+
+  package main;
+
+  use Venus::Assert;
+
+  my $assert = Venus::Assert->new('Float');
+
+  # $assert->accept('float');
+
+  # $assert->format(sub{sprintf('%.2f', $_)});
+
+  # $assert->result(123.456);
+
+  # 123.46
+
+=cut
+
+=head1 DESCRIPTION
+
+This package provides a mechanism for asserting type constraints and coercions
+on data. Type constraints are handled via L<Venus::Constraint>, and coercions
+are handled via L<Venus::Coercion>, using L<Venus::Check> to perform data type
+validations.
+
+=cut
+
+=head1 ATTRIBUTES
+
+This package has the following attributes:
+
+=cut
+
+=head2 name
+
+  name(string $data) (string)
+
+The name attribute is read-write, accepts C<(string)> values, and is
+optional.
+
+I<Since C<1.40>>
+
+=over 4
+
+=item name example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $set_name = $assert->name("Example");
+
+  # "Example"
+
+=back
+
+=over 4
+
+=item name example 2
+
+  # given: synopsis
+
+  # given: example-1 name
+
+  package main;
+
+  my $get_name = $assert->name;
+
+  # "Example"
+
+=back
+
+=cut
+
+=head1 INHERITS
+
+This package inherits behaviors from:
+
+L<Venus::Kind::Utility>
+
+=cut
+
+=head1 INTEGRATES
+
+This package integrates behaviors from:
+
+L<Venus::Role::Buildable>
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 accept
+
+  accept(string $name, any @args) (Venus::Assert)
+
+The accept method registers a condition via L</check> based on the arguments
+provided. The built-in types are defined as methods in L<Venus::Check>.
+
+I<Since C<1.40>>
+
+=over 4
+
+=item accept example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->accept('float');
+
+  # bless(..., "Venus::Assert")
+
+  # $assert->valid;
+
+  # false
+
+  # $assert->valid(1.01);
+
+  # true
+
+=back
+
+=over 4
+
+=item accept example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->accept('number');
+
+  # bless(..., "Venus::Assert")
+
+  # $assert->valid(1.01);
+
+  # false
+
+  # $assert->valid(1_01);
+
+  # true
+
+=back
+
+=over 4
+
+=item accept example 3
+
+  # given: synopsis
+
+  package Example1;
+
+  sub new {
+    bless {};
+  }
+
+  package Example2;
+
+  sub new {
+    bless {};
+  }
+
+  package main;
+
+  $assert = $assert->accept('object');
+
+  # bless(..., "Venus::Assert")
+
+  # $assert->valid;
+
+  # false
+
+  # $assert->valid(qr//);
+
+  # false
+
+  # $assert->valid(Example1->new);
+
+  # true
+
+  # $assert->valid(Example2->new);
+
+  # true
+
+=back
+
+=over 4
+
+=item accept example 4
+
+  # given: synopsis
+
+  package Example1;
+
+  sub new {
+    bless {};
+  }
+
+  package Example2;
+
+  sub new {
+    bless {};
+  }
+
+  package main;
+
+  $assert = $assert->accept('Example1');
+
+  # bless(..., "Venus::Assert")
+
+  # $assert->valid;
+
+  # false
+
+  # $assert->valid(qr//);
+
+  # false
+
+  # $assert->valid(Example1->new);
+
+  # true
+
+  # $assert->valid(Example2->new);
+
+  # false
+
+=back
+
+=cut
+
+=head2 check
+
+  check(Venus::Check $data) (Venus::Check)
+
+The check method gets or sets the L<Venus::Check> object used for performing
+runtime data type validation.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item check example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $check = $assert->check(Venus::Check->new);
+
+  # bless(..., 'Venus::Check')
+
+=back
+
+=over 4
+
+=item check example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert->check(Venus::Check->new);
+
+  my $check = $assert->check;
+
+  # bless(..., 'Venus::Check')
+
+=back
+
+=cut
+
+=head2 clear
+
+  clear() (Venus::Assert)
+
+The clear method resets the L</check>, L</constraint>, and L</coercion>
+attributes and returns the invocant.
+
+I<Since C<1.40>>
+
+=over 4
+
+=item clear example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('string');
+
+  $assert = $assert->clear;
+
+  # bless(..., "Venus::Assert")
+
+=back
+
+=cut
+
+=head2 coerce
+
+  coerce(any $data) (any)
+
+The coerce method dispatches to the L</coercion> object and returns the result
+of the L<Venus::Coercion/result> operation.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item coerce example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('float');
+
+  $assert->format(sub{sprintf('%.2f', $_)});
+
+  my $coerce = $assert->coerce(123.456);
+
+  # 123.46
+
+=back
+
+=over 4
+
+=item coerce example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('string');
+
+  $assert->format(sub{ucfirst lc $_});
+
+  my $coerce = $assert->coerce('heLLo');
+
+  # "Hello"
+
+=back
+
+=cut
+
+=head2 coercion
+
+  coercion(Venus::Coercion $data) (Venus::Coercion)
+
+The coercion method gets or sets the L<Venus::Coercion> object used for
+performing runtime data type coercions.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item coercion example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $coercion = $assert->coercion(Venus::Coercion->new);
+
+  # bless(..., 'Venus::Coercion')
+
+=back
+
+=over 4
+
+=item coercion example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert->coercion(Venus::Coercion->new);
+
+  my $coercion = $assert->coercion;
+
+  # bless(..., 'Venus::Coercion')
+
+=back
+
+=cut
+
+=head2 conditions
+
+  conditions() (Venus::Assert)
+
+The conditions method is an object construction hook that allows subclasses to
+configure the object on construction setting up constraints and coercions and
+returning the invocant.
+
+I<Since C<1.40>>
+
+=over 4
+
+=item conditions example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->conditions;
+
+  # bless(..., 'Venus::Assert')
+
+=back
+
+=over 4
+
+=item conditions example 2
+
+  package Example::Type::PositveNumber;
+
+  use base 'Venus::Assert';
+
+  sub conditions {
+    my ($self) = @_;
+
+    $self->accept('number', sub {
+      $_ >= 0
+    });
+
+    return $self;
+  }
+
+  package main;
+
+  my $assert = Example::Type::PositveNumber->new;
+
+  # $assert->valid(0);
+
+  # true
+
+  # $assert->valid(1);
+
+  # true
+
+  # $assert->valid(-1);
+
+  # false
+
+=back
+
+=cut
+
+=head2 constraint
+
+  constraint(Venus::Constraint $data) (Venus::Constraint)
+
+The constraint method gets or sets the L<Venus::Constraint> object used for
+performing runtime data type constraints.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item constraint example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $constraint = $assert->constraint(Venus::Constraint->new);
+
+  # bless(..., 'Venus::Constraint')
+
+=back
+
+=over 4
+
+=item constraint example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert->constraint(Venus::Constraint->new);
+
+  my $constraint = $assert->constraint;
+
+  # bless(..., 'Venus::Constraint')
+
+=back
+
+=cut
+
+=head2 ensure
+
+  ensure(coderef $code) (Venus::Assert)
+
+The ensure method registers a custom (not built-in) constraint condition and
+returns the invocant.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item ensure example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('number');
+
+  my $ensure = $assert->ensure(sub {
+    $_ >= 0
+  });
+
+  # bless(.., "Venus::Assert")
+
+=back
+
+=cut
+
+=head2 expression
+
+  expression(string $expr) (Venus::Assert)
+
+The expression method parses a string representation of an type assertion,
+registers the subexpressions using the L</accept> method, and returns the
+invocant.
+
+I<Since C<1.71>>
+
+=over 4
+
+=item expression example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->expression('string');
+
+  # bless(..., 'Venus::Assert')
+
+  # $assert->valid('hello');
+
+  # true
+
+  # $assert->valid(['goodbye']);
+
+  # false
+
+=back
+
+=over 4
+
+=item expression example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->expression('string | coderef');
+
+  # bless(..., 'Venus::Assert')
+
+  # $assert->valid('hello');
+
+  # true
+
+  # $assert->valid(sub{'hello'});
+
+  # true
+
+  # $assert->valid(['goodbye']);
+
+  # false
+
+=back
+
+=over 4
+
+=item expression example 3
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->expression('string | coderef | Venus::Assert');
+
+  # bless(..., 'Venus::Assert')
+
+  # $assert->valid('hello');
+
+  # true
+
+  # $assert->valid(sub{'hello'});
+
+  # true
+
+  # $assert->valid($assert);
+
+  # true
+
+  # $assert->valid(['goodbye']);
+
+  # false
+
+=back
+
+=over 4
+
+=item expression example 4
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->expression('Venus::Assert | within[arrayref, Venus::Assert]');
+
+  # bless(..., 'Venus::Assert')
+
+  # $assert->valid('hello');
+
+  # false
+
+  # $assert->valid(sub{'hello'});
+
+  # false
+
+  # $assert->valid($assert);
+
+  # true
+
+  # $assert->valid(['goodbye']);
+
+  # false
+
+  # $assert->valid([$assert]);
+
+  # true
+
+=back
+
+=over 4
+
+=item expression example 5
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->expression('
+    string
+    | within[
+        arrayref, within[
+          hashref, string
+        ]
+      ]
+  ');
+
+  # bless(..., 'Venus::Assert')
+
+  # $assert->valid('hello');
+
+  # true
+
+  # $assert->valid(sub{'hello'});
+
+  # false
+
+  # $assert->valid($assert);
+
+  # false
+
+  # $assert->valid([]);
+
+  # false
+
+  # $assert->valid([{'test' => ['okay']}]);
+
+  # false
+
+  # $assert->valid([{'test' => 'okay'}]);
+
+  # true
+
+=back
+
+=cut
+
+=head2 format
+
+  format(coderef $code) (Venus::Assert)
+
+The format method registers a custom (not built-in) coercion condition and
+returns the invocant.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item format example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('number');
+
+  my $format = $assert->format(sub {
+    sprintf '%.2f', $_
+  });
+
+  # bless(.., "Venus::Assert")
+
+=back
+
+=cut
+
+=head2 parse
+
+  parse(string $expr) (any)
+
+The parse method accepts a string representation of a type assertion and
+returns a data structure representing one or more method calls to be used for
+validating the assertion signature.
+
+I<Since C<2.01>>
+
+=over 4
+
+=item parse example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse('');
+
+  # ['']
+
+=back
+
+=over 4
+
+=item parse example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse('any');
+
+  # ['any']
+
+=back
+
+=over 4
+
+=item parse example 3
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse('string | number');
+
+  # ['either', 'string', 'number']
+
+=back
+
+=over 4
+
+=item parse example 4
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse('enum[up,down,left,right]');
+
+  # [['enum', 'up', 'down', 'left', 'right']]
+
+=back
+
+=over 4
+
+=item parse example 5
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse('number | float | boolean');
+
+  # ['either', 'number', 'float', 'boolean']
+
+=back
+
+=over 4
+
+=item parse example 6
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse('Example');
+
+  # ['Example']
+
+=back
+
+=over 4
+
+=item parse example 7
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse('coderef | Venus::Code');
+
+  # ['either', 'coderef', 'Venus::Code']
+
+=back
+
+=over 4
+
+=item parse example 8
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse('tuple[number, arrayref, coderef]');
+
+  # [['tuple', 'number', 'arrayref', 'coderef']]
+
+=back
+
+=over 4
+
+=item parse example 9
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse('tuple[number, within[arrayref, hashref], coderef]');
+
+  # [['tuple', 'number', ['within', 'arrayref', 'hashref'], 'coderef']]
+
+=back
+
+=over 4
+
+=item parse example 10
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse(
+    'tuple[number, within[arrayref, hashref] | arrayref, coderef]'
+  );
+
+  # [
+  #   ['tuple', 'number',
+  #     ['either', ['within', 'arrayref', 'hashref'], 'arrayref'], 'coderef']
+  # ]
+
+
+
+
+=back
+
+=over 4
+
+=item parse example 11
+
+  # given: synopsis
+
+  package main;
+
+  my $parsed = $assert->parse(
+    'hashkeys["id", number | float, "upvotes", within[arrayref, boolean]]'
+  );
+
+  # [[
+  #   'hashkeys',
+  #   'id',
+  #     ['either', 'number', 'float'],
+  #   'upvotes',
+  #     ['within', 'arrayref', 'boolean']
+  # ]]
+
+=back
+
+=cut
+
+=head2 render
+
+  render(string $into, string $expression) (string)
+
+The render method builds and returns a type expressions suitable for providing
+to L</expression> based on the data provided.
+
+I<Since C<2.55>>
+
+=over 4
+
+=item render example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->render;
+
+  # undef
+
+=back
+
+=over 4
+
+=item render example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->render(undef, 'string');
+
+  # "string"
+
+=back
+
+=over 4
+
+=item render example 3
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->render('routines', ['say', 'say_pretty']);
+
+  # 'routines["say", "say_pretty"]'
+
+=back
+
+=over 4
+
+=item render example 4
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->render('hashkeys', {id => 'number', name => 'string'});
+
+  # 'hashkeys["id", number, "name", string]'
+
+=back
+
+=over 4
+
+=item render example 5
+
+  # given: synopsis
+
+  package main;
+
+  $assert = $assert->render('hashkeys', {
+    id => 'number',
+    profile => {
+      level => 'string',
+    },
+  });
+
+  # 'hashkeys["id", number, "profile", hashkeys["level", string]]'
+
+=back
+
+=cut
+
+=head2 result
+
+  result(any $data) (any)
+
+The result method validates the value provided against the registered
+constraints and if valid returns the result of the value having any registered
+coercions applied. If the value is invalid an exception from L<Venus::Check>
+will be thrown.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item result example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('number')->format(sub{sprintf '%.2f', $_});
+
+  my $result = $assert->result(1);
+
+  # "1.00"
+
+=back
+
+=over 4
+
+=item result example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('number')->format(sub{sprintf '%.2f', $_});
+
+  my $result = $assert->result('hello');
+
+  # Exception! (isa Venus::Check::Error) (see error_on_coded)
+
+=back
+
+=cut
+
+=head2 valid
+
+  valid(any $data) (any)
+
+The valid method dispatches to the L</constraint> object and returns the result
+of the L<Venus::Constraint/result> operation.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item valid example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('float');
+
+  $assert->ensure(sub{$_ >= 1});
+
+  my $valid = $assert->valid('1.00');
+
+  # true
+
+=back
+
+=over 4
+
+=item valid example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('float');
+
+  $assert->ensure(sub{$_ >= 1});
+
+  my $valid = $assert->valid('0.99');
+
+  # false
+
+=back
+
+=cut
+
+=head2 validate
+
+  validate(any $data) (any)
+
+The validate method validates the value provided against the registered
+constraints and if valid returns the value. If the value is invalid an
+exception from L<Venus::Check> will be thrown.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item validate example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('number');
+
+  my $validate = $assert->validate(1);
+
+  # 1
+
+=back
+
+=over 4
+
+=item validate example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('number');
+
+  my $validate = $assert->validate('hello');
+
+  # Exception! (isa Venus::Check::Error) (see error_on_coded)
+
+=back
+
+=cut
+
+=head2 validator
+
+  validator(any @args) (coderef)
+
+The validator method returns a coderef which calls the L</validate> method with
+the invocant when called.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item validator example 1
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('string');
+
+  my $validator = $assert->validator;
+
+  # sub{...}
+
+  # my $result = $validator->();
+
+  # Exception! (isa Venus::Check::Error) (see error_on_coded)
+
+=back
+
+=over 4
+
+=item validator example 2
+
+  # given: synopsis
+
+  package main;
+
+  $assert->accept('string');
+
+  my $validator = $assert->validator;
+
+  # sub{...}
+
+  # my $result = $validator->('hello');
+
+  # "hello"
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

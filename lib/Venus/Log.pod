@@ -1,0 +1,548 @@
+
+=head1 NAME
+
+Venus::Log - Log Class
+
+=cut
+
+=head1 ABSTRACT
+
+Log Class for Perl 5
+
+=cut
+
+=head1 SYNOPSIS
+
+  package main;
+
+  use Venus::Log;
+
+  my $log = Venus::Log->new;
+
+  # $log->trace(time, 'Something failed!');
+
+  # "0000000000 Something failed!"
+
+  # $log->error(time, 'Something failed!');
+
+  # "0000000000 Something failed!"
+
+=cut
+
+=head1 DESCRIPTION
+
+This package provides methods for logging information using various log levels.
+The default log level is L<trace>. Acceptable log levels are C<trace>,
+C<debug>, C<info>, C<warn>, C<error>, and C<fatal>, and the set log level will
+handle events for its level and any preceding levels in the order specified.
+
+=cut
+
+=head1 ATTRIBUTES
+
+This package has the following attributes:
+
+=cut
+
+=head2 handler
+
+  handler(coderef $code) (coderef)
+
+The handler attribute holds the callback that handles logging. The handler is
+passed the log level and the log messages.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item handler example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $handler = $log->handler;
+
+  my $events = [];
+
+  $handler = $log->handler(sub{shift; push @$events, [@_]});
+
+=back
+
+=cut
+
+=head2 level
+
+  level(string $name) (string)
+
+The level attribute holds the current log level. Valid log levels are C<trace>,
+C<debug>, C<info>, C<warn>, C<error> and C<fatal>, and will emit log messages
+in that order. Invalid log levels effectively disable logging.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item level example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $level = $log->level;
+
+  # "trace"
+
+  $level = $log->level('fatal');
+
+  # "fatal"
+
+=back
+
+=cut
+
+=head2 separator
+
+  separator(any $data) (any)
+
+The separator attribute holds the value used to join multiple log message arguments.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item separator example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $separator = $log->separator;
+
+  # ""
+
+  $separator = $log->separator("\n");
+
+  # "\n"
+
+=back
+
+=cut
+
+=head1 INHERITS
+
+This package inherits behaviors from:
+
+L<Venus::Kind::Utility>
+
+=cut
+
+=head1 INTEGRATES
+
+This package integrates behaviors from:
+
+L<Venus::Role::Buildable>
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 debug
+
+  debug(string @data) (Venus::Log)
+
+The debug method logs C<debug> information and returns the invocant.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item debug example 1
+
+  # given: synopsis
+
+  package main;
+
+  # $log = $log->debug(time, 'Something failed!');
+
+  # "0000000000 Something failed!"
+
+=back
+
+=over 4
+
+=item debug example 2
+
+  # given: synopsis
+
+  package main;
+
+  # $log->level('info');
+
+  # $log = $log->debug(time, 'Something failed!');
+
+  # noop
+
+=back
+
+=cut
+
+=head2 error
+
+  error(string @data) (Venus::Log)
+
+The error method logs C<error> information and returns the invocant.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item error example 1
+
+  # given: synopsis
+
+  package main;
+
+  # $log = $log->error(time, 'Something failed!');
+
+  # "0000000000 Something failed!"
+
+=back
+
+=over 4
+
+=item error example 2
+
+  # given: synopsis
+
+  package main;
+
+  # $log->level('fatal');
+
+  # $log = $log->error(time, 'Something failed!');
+
+  # noop
+
+=back
+
+=cut
+
+=head2 fatal
+
+  fatal(string @data) (Venus::Log)
+
+The fatal method logs C<fatal> information and returns the invocant.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item fatal example 1
+
+  # given: synopsis
+
+  package main;
+
+  # $log = $log->fatal(time, 'Something failed!');
+
+  # "0000000000 Something failed!"
+
+=back
+
+=over 4
+
+=item fatal example 2
+
+  # given: synopsis
+
+  package main;
+
+  # $log->level('unknown');
+
+  # $log = $log->fatal(time, 'Something failed!');
+
+  # noop
+
+=back
+
+=cut
+
+=head2 info
+
+  info(string @data) (Venus::Log)
+
+The info method logs C<info> information and returns the invocant.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item info example 1
+
+  # given: synopsis
+
+  package main;
+
+  # $log = $log->info(time, 'Something failed!');
+
+  # "0000000000 Something failed!"
+
+=back
+
+=over 4
+
+=item info example 2
+
+  # given: synopsis
+
+  package main;
+
+  # $log->level('warn');
+
+  # $log = $log->info(time, 'Something failed!');
+
+  # noop
+
+=back
+
+=cut
+
+=head2 input
+
+  input(string @data) (string)
+
+The input method returns the arguments provided to the log level methods, to
+the L</output>, and can be overridden by subclasses.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item input example 1
+
+  # given: synopsis
+
+  package main;
+
+  my @input = $log->input(1, 'Something failed!');
+
+  # (1, 'Something failed!')
+
+=back
+
+=cut
+
+=head2 output
+
+  output(string @data) (string)
+
+The output method returns the arguments returned by the L</input> method, to
+the log handler, and can be overridden by subclasses.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item output example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $output = $log->output(time, 'Something failed!');
+
+  # "0000000000 Something failed!"
+
+=back
+
+=cut
+
+=head2 string
+
+  string(any $data) (string)
+
+The string method returns a stringified representation of any argument provided
+and is used by the L</output> method.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item string example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $string = $log->string;
+
+  # ""
+
+=back
+
+=over 4
+
+=item string example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $string = $log->string('Something failed!');
+
+  # "Something failed!"
+
+=back
+
+=over 4
+
+=item string example 3
+
+  # given: synopsis
+
+  package main;
+
+  my $string = $log->string([1,2,3]);
+
+  # [1,2,3]
+
+=back
+
+=over 4
+
+=item string example 4
+
+  # given: synopsis
+
+  package main;
+
+  my $string = $log->string(bless({}));
+
+  # "bless({}, 'main')"
+
+=back
+
+=cut
+
+=head2 trace
+
+  trace(string @data) (Venus::Log)
+
+The trace method logs C<trace> information and returns the invocant.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item trace example 1
+
+  # given: synopsis
+
+  package main;
+
+  # $log = $log->trace(time, 'Something failed!');
+
+  # "0000000000 Something failed!"
+
+=back
+
+=over 4
+
+=item trace example 2
+
+  # given: synopsis
+
+  package main;
+
+  # $log->level('debug');
+
+  # $log = $log->trace(time, 'Something failed!');
+
+  # noop
+
+=back
+
+=cut
+
+=head2 warn
+
+  warn(string @data) (Venus::Log)
+
+The warn method logs C<warn> information and returns the invocant.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item warn example 1
+
+  # given: synopsis
+
+  package main;
+
+  # $log = $log->warn(time, 'Something failed!');
+
+  # "0000000000 Something failed!"
+
+=back
+
+=over 4
+
+=item warn example 2
+
+  # given: synopsis
+
+  package main;
+
+  # $log->level('error');
+
+  # $log = $log->warn(time, 'Something failed!');
+
+  # noop
+
+=back
+
+=cut
+
+=head2 write
+
+  write(string $level, any @data) (Venus::Log)
+
+The write method invokes the log handler, i.e. L</handler>, and returns the invocant.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item write example 1
+
+  # given: synopsis
+
+  package main;
+
+  # $log = $log->write('info', time, 'Something failed!');
+
+  # bless(..., "Venus::Log")
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

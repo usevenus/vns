@@ -1,0 +1,171 @@
+
+=head1 NAME
+
+Venus::Role::Testable - Testable Role
+
+=cut
+
+=head1 ABSTRACT
+
+Testable Role for Perl 5
+
+=cut
+
+=head1 SYNOPSIS
+
+  package Example;
+
+  use Venus::Class;
+
+  with 'Venus::Role::Testable';
+
+  attr 'value';
+
+  sub execute {
+    return pop;
+  }
+
+  package main;
+
+  my $example = Example->new;
+
+  # $example->is_true(sub{0});
+
+=cut
+
+=head1 DESCRIPTION
+
+This package modifies the consuming package and provides methods for
+dispatching method calls and returning truthy returns as true and falsy returns
+as false boolean values.
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 is_false
+
+  is_false(string | coderef $method, any @args) (boolean)
+
+The is_false method dispatches the method call or executes the callback and
+returns truthy returns as C<false> and falsy returns as C<true>
+L<"boolean"|Venus::Boolean> values.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item is_false example 1
+
+  package main;
+
+  my $example = Example->new;
+
+  my $true = $example->is_false(execute => 0);
+
+  # 1
+
+=back
+
+=over 4
+
+=item is_false example 2
+
+  package main;
+
+  my $example = Example->new;
+
+  my $true = $example->is_false(sub{0});
+
+  # 1
+
+=back
+
+=over 4
+
+=item is_false example 3
+
+  package main;
+
+  my $example = Example->new;
+
+  my $false = $example->is_false(execute => 1);
+
+  # 0
+
+=back
+
+=cut
+
+=head2 is_true
+
+  is_true(string | coderef $method, any @args) (boolean)
+
+The is_true method dispatches the method call or executes the callback and
+returns truthy returns as C<true> and falsy returns as C<false>
+L<"boolean"|Venus::Boolean> values.
+
+I<Since C<0.08>>
+
+=over 4
+
+=item is_true example 1
+
+  package main;
+
+  my $example = Example->new;
+
+  my $true = $example->is_true(execute => 1);
+
+  # 1
+
+=back
+
+=over 4
+
+=item is_true example 2
+
+  package main;
+
+  my $example = Example->new;
+
+  my $true = $example->is_true(sub{1});
+
+  # 1
+
+=back
+
+=over 4
+
+=item is_true example 3
+
+  package main;
+
+  my $example = Example->new;
+
+  my $false = $example->is_true(execute => 0);
+
+  # 0
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

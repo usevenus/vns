@@ -1,0 +1,502 @@
+
+=head1 NAME
+
+Venus::Name - Name Class
+
+=cut
+
+=head1 ABSTRACT
+
+Name Class for Perl 5
+
+=cut
+
+=head1 SYNOPSIS
+
+  package main;
+
+  use Venus::Name;
+
+  my $name = Venus::Name->new('Foo/Bar');
+
+  # $name->package;
+
+=cut
+
+=head1 DESCRIPTION
+
+This package provides methods for parsing and formatting package namespace
+strings.
+
+=cut
+
+=head1 INHERITS
+
+This package inherits behaviors from:
+
+L<Venus::Kind::Utility>
+
+=cut
+
+=head1 INTEGRATES
+
+This package integrates behaviors from:
+
+L<Venus::Role::Accessible>
+
+L<Venus::Role::Buildable>
+
+L<Venus::Role::Explainable>
+
+L<Venus::Role::Valuable>
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 default
+
+  default() (string)
+
+The default method returns the default value, i.e. C<'Venus'>.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item default example 1
+
+  # given: synopsis;
+
+  my $default = $name->default;
+
+  # "Venus"
+
+=back
+
+=cut
+
+=head2 dist
+
+  dist() (string)
+
+The dist method returns a package distribution representation of the name.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item dist example 1
+
+  # given: synopsis;
+
+  my $dist = $name->dist;
+
+  # "Foo-Bar"
+
+=back
+
+=cut
+
+=head2 explain
+
+  explain() (string)
+
+The explain method returns the package name and is used in stringification
+operations.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item explain example 1
+
+  # given: synopsis;
+
+  my $explain = $name->explain;
+
+  # "Foo/Bar"
+
+=back
+
+=cut
+
+=head2 file
+
+  file() (string)
+
+The file method returns a file representation of the name.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item file example 1
+
+  # given: synopsis;
+
+  my $file = $name->file;
+
+  # "foo__bar"
+
+=back
+
+=cut
+
+=head2 format
+
+  format(string $method, string $format) (string)
+
+The format method calls the specified method passing the result to the core
+L</sprintf> function with itself as an argument. This method supports
+dispatching, i.e. providing a method name and arguments whose return value will
+be acted on by this method.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item format example 1
+
+  # given: synopsis;
+
+  my $format = $name->format('file', '%s.t');
+
+  # "foo__bar.t"
+
+=back
+
+=cut
+
+=head2 label
+
+  label() (string)
+
+The label method returns a label (or constant) representation of the name.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item label example 1
+
+  # given: synopsis;
+
+  my $label = $name->label;
+
+  # "Foo_Bar"
+
+=back
+
+=cut
+
+=head2 lookslike_a_file
+
+  lookslike_a_file() (string)
+
+The lookslike_a_file method returns truthy if its state resembles a filename.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item lookslike_a_file example 1
+
+  # given: synopsis;
+
+  my $lookslike_a_file = $name->lookslike_a_file;
+
+  # ""
+
+=back
+
+=cut
+
+=head2 lookslike_a_label
+
+  lookslike_a_label() (string)
+
+The lookslike_a_label method returns truthy if its state resembles a label (or
+constant).
+
+I<Since C<0.01>>
+
+=over 4
+
+=item lookslike_a_label example 1
+
+  # given: synopsis;
+
+  my $lookslike_a_label = $name->lookslike_a_label;
+
+  # ""
+
+=back
+
+=cut
+
+=head2 lookslike_a_package
+
+  lookslike_a_package() (string)
+
+The lookslike_a_package method returns truthy if its state resembles a package
+name.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item lookslike_a_package example 1
+
+  # given: synopsis;
+
+  my $lookslike_a_package = $name->lookslike_a_package;
+
+  # ""
+
+=back
+
+=cut
+
+=head2 lookslike_a_path
+
+  lookslike_a_path() (string)
+
+The lookslike_a_path method returns truthy if its state resembles a file path.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item lookslike_a_path example 1
+
+  # given: synopsis;
+
+  my $lookslike_a_path = $name->lookslike_a_path;
+
+  # 1
+
+=back
+
+=cut
+
+=head2 lookslike_a_pragma
+
+  lookslike_a_pragma() (string)
+
+The lookslike_a_pragma method returns truthy if its state resembles a pragma.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item lookslike_a_pragma example 1
+
+  # given: synopsis;
+
+  my $lookslike_a_pragma = $name->lookslike_a_pragma;
+
+  # ""
+
+=back
+
+=cut
+
+=head2 package
+
+  package() (string)
+
+The package method returns a package name representation of the name given.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item package example 1
+
+  # given: synopsis;
+
+  my $package = $name->package;
+
+  # "Foo::Bar"
+
+=back
+
+=cut
+
+=head2 path
+
+  path() (string)
+
+The path method returns a path representation of the name.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item path example 1
+
+  # given: synopsis;
+
+  my $path = $name->path;
+
+  # "Foo/Bar"
+
+=back
+
+=cut
+
+=head1 OPERATORS
+
+This package overloads the following operators:
+
+=cut
+
+=over 4
+
+=item operation: C<("")>
+
+This package overloads the C<""> operator.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $result = "$name";
+
+  # "Foo/Bar"
+
+B<example 2>
+
+  # given: synopsis;
+
+  my $result = "$name, $name";
+
+  # "Foo/Bar, Foo/Bar"
+
+=back
+
+=over 4
+
+=item operation: C<(.)>
+
+This package overloads the C<.> operator.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $package = $name . 'Baz';
+
+  # "Foo::BarBaz"
+
+=back
+
+=over 4
+
+=item operation: C<(eq)>
+
+This package overloads the C<eq> operator.
+
+B<example 1>
+
+  # given: synopsis;
+
+  $name eq 'Foo/Bar';
+
+  # 1
+
+B<example 2>
+
+  package main;
+
+  use Venus::Name;
+
+  my $name1 = Venus::Name->new('Foo\Bar');
+  my $name2 = Venus::Name->new('Foo\Bar');
+
+  $name1 eq $name2;
+
+  # 1
+
+=back
+
+=over 4
+
+=item operation: C<(ne)>
+
+This package overloads the C<ne> operator.
+
+B<example 1>
+
+  # given: synopsis;
+
+  $name ne 'Foo\Bar';
+
+  # 1
+
+B<example 2>
+
+  package main;
+
+  use Venus::Name;
+
+  my $name1 = Venus::Name->new('FooBar');
+  my $name2 = Venus::Name->new('Foo_Bar');
+
+  $name1 ne $name2;
+
+  # 1
+
+=back
+
+=over 4
+
+=item operation: C<(qr)>
+
+This package overloads the C<qr> operator.
+
+B<example 1>
+
+  # given: synopsis;
+
+  "Foo/Bar" =~ qr/$name/;
+
+  # 1
+
+=back
+
+=over 4
+
+=item operation: C<(~~)>
+
+This package overloads the C<~~> operator.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $result = $name ~~ 'Foo/Bar';
+
+  # 1
+
+=back
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

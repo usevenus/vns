@@ -1,0 +1,468 @@
+4.15 2023-11-27
+
+- [feature] Implement built-in vns "func" and "with" commands
+- [feature] Implement Venus::Set
+- [update] Emit errors during Venus::Run execution
+
+4.11 2023-09-13
+
+- [feature] Implement Venus::Assert#includes
+- [feature] Implement Venus::Future
+- [feature] Refactor Venus::Assert, Implement Venus::{Coercion,Constraint}
+- [feature] Implement Venus::Space#{patch,patched,unpatch}
+- [feature] Implement Venus::Sealed
+- [feature] Implement Venus::Atom
+- [feature] Implement Venus::Enum
+- [feature] Implement Venus::Role::Superable
+- [feature] Implement Venus::Role::Patchable
+- [feature] Implement Venus#clone
+- [feature] Implement Venus::Process#future
+- [feature] Implement Venus::Future#wait
+- [update] Refactor Venus::Test
+- [update] Add test and documentation for Venus::Process#is_dyadic
+- [update] Update Venus::Process#await, auto-reap processes
+- [update] Research CPANTS issue with Venus::Process
+- [update] Update Venus::Process, prevent PPID in dyads
+- [update] Use Venus::Check types in all signatures
+- [update] Update Venus#async to return Venus::Future
+
+3.55 2023-08-06
+
+- [feature] Allow auto-raise via Venus::Role::Throwable
+- [feature] Implement Venus::Process#limit
+- [feature] Implement Venus::Process#serve
+- [feature] Implement Venus#{async,await} with Venus::Process
+- [update] Update all errors to use stash variables in messages
+- [update] Update Venus::Path#extension (replace vs append)
+- [update] Update Venus::Core tests/docs missing "mixin"
+- [update] Standardize and document environment variables
+- [update] Suppress "diag" output from tests w/o $ENV{DEBUG}
+- [update] Update Venus::Role::Deferrable default return "$self"
+- [update] Update Venus#log to honor levels
+
+3.40 2023-07-22
+
+- [feature] Implement Venus#resolve
+- [feature] Implement automatic Venus::Error message formatting
+- [feature] Implement Venus::String#format
+- [feature] Implement Venus#{docs,text}
+- [feature] Implement Venus::{Array,Hash}#merge via Venus#merge
+- [update] Fix Venus::Run variable interpolation issue
+- [update] Resolve Venus::Run "which" issues caused by var-path-lib-var
+- [update] Resolve CPANTS issues from 3.30
+- [update] Update Venus::{Array,Hash}#{get,set} for k/v and whole-values
+
+3.30 2023-07-17
+
+- [feature] Implement Venus::Container
+- [feature] Implement Venus#puts for destructuring
+- [feature] Implement "help" ability in Venus::Run
+- [feature] Implement "when" ability in Venus::Run
+- [update] Implement {Venus,Venus::Array}#range
+- [update] Slim down the default Venus::Run config
+
+3.20 2023-07-15
+
+- [feature] Implement Venus#is_bool
+- [update] Update Venus::Run quoting and variable expansion
+- [update] Update Venus::Run default config and variable expansion issue
+
+3.18 2023-07-14
+
+- [feature] Implement Venus#{arrayref,hashref}
+- [feature] Implement Venus#clargs
+- [feature] Implement Venus::{Cli,Task}#pass
+- [feature] Implement Venus::Config#edit_file
+- [update] Address issue validating CLI args and opts
+- [update] Update Venus::Run "Error running command" if "ECHO" is off
+- [update] Update Venus::Run "flow" feature to exit on first error
+- [update] Update default "vns" config
+- [update] Update Venus synopsis
+
+3.10 2023-07-10
+
+- [feature] Implement Venus#render, Venus::String#template
+- [feature] Implement Venus::Run "from" ability
+- [feature] Implement Venus::Run "asks" ability
+- [feature] Implement Venus::Run "flow" ability
+- [feature] Implement Venus::Run "with" ability
+- [feature] Implement Venus#{list,pairs}
+- [feature] Support environment variable based paths in "vns" config
+- [feature] Implement Venus::Run "func" ability
+- [feature] Implement Venus#syscall
+- [feature] Implement Venus#{is_true,is_false}
+- [update] Enhance "vns" and Venus::Run documentation
+- [update] Update documentation in Venus
+
+3.04 2023-06-28
+
+- [feature] Implement Venus::Task
+- [feature] Implement Venus::Core#UNIMPORT
+- [feature] Implement Venus::Path#rename
+- [feature] Implement Venus::Core#USE and "import"
+- [feature] Implement Venus::Meta#emit
+- [feature] Implement Venus::Core::{GET,SET}
+- [feature] Implement Venus::Process#ppid
+- [feature] Implement Venus::Process#{send,recv}
+- [feature] Implement Venus::Run, and the "vns" CLI
+- [feature] Implement Venus::Process#{recall,recallall}
+- [feature] Implement Venus::Process#data
+- [feature] Implement Venus::Process#sync
+- [feature] Implement Venus::Role::Printable#{print,say}_{json,yaml}
+- [feature] Implement Venus::Os#quote
+- [update] Update Venus::Core#DESTROY to include mixins
+- [update] Fix "$!" issue in exceptions
+- [update] Refactor Venus::Config, implement write_* methods
+- [update] Refactor Venus::{Log,Task}, pass level to handler
+- [update] Update documentation
+- [update] Fix repeated CPANTS failures in releases 3.00..03
+
+2.91 2023-05-30
+
+- [feature] Implement Venus::Os
+- [feature] Implement Venus::Path#{mktemp_dir,mktemp_file}
+- [feature] Implement Venus::Path#{copy,move}
+- [feature] Implement throw-via-dispatch errors
+- [feature] Better document all Venus errors
+- [feature] Implement POD for errors in Venus::Test
+
+2.80 2023-05-10
+
+- [feature] Implement Venus#array
+- [feature] Implement Venus#boolean
+- [feature] Implement Venus#code
+- [feature] Implement Venus#config
+- [feature] Implement Venus#data
+- [feature] Implement Venus#float
+- [feature] Implement Venus#hash
+- [feature] Implement Venus#name
+- [feature] Implement Venus#number
+- [feature] Implement Venus#path
+- [feature] Implement Venus#proto
+- [feature] Implement Venus#string
+- [feature] Implement Venus#template
+- [feature] Implement Venus#vars
+- [feature] Implement Venus::Assert#render
+- [feature] Implement Venus::Array#range
+- [feature] Enhance Venus::Throw
+- [feature] Implement Venus#meta
+- [feature] Implement Venus#opts
+- [feature] Implement Venus#process
+- [feature] Implement Venus#random
+- [feature] Implement Venus#regexp
+- [feature] Implement Venus#replace
+- [feature] Implement Venus#search
+- [feature] Implement Venus#test
+- [feature] Implement Venus#throw
+- [feature] Implement Venus#try
+- [feature] Implement Venus#type
+- [feature] Implement Venus::Schema
+- [feature] Implement Venus::Path#extension
+- [update] Resolve CPANTS issues
+- [update] Add missing signature for Venus::Template#render
+- [update] Implement Venus::Throw#{frame,capture}
+- [update] Update Venus#date syntax
+- [update] Fix Venus::Assert parser issue
+- [update] Refactor Venus::Cli
+- [update] Update Venus::Cli "opt" type logic and documentation
+
+2.55 2023-04-27
+
+- [feature] Implement Venus#date
+- [feature] Implement Venus#match
+- [feature] Implement Venus#gather
+- [update] Make Venus::Unpack#{checks,validate} list context aware
+- [update] Resolve Venus#unpack signature/caller issue
+- [update] Update arguments passing in Venus#{json,perl,yaml}
+- [update] Update {json,perl,yaml} behaviors and error conditions
+
+2.50 2023-04-25
+
+- [feature] Implement Venus#work
+- [feature] Implement Venus#{check,assert}
+- [feature] Implement Venus#unpack
+- [feature] Implement Venus#venus
+- [feature] Implement Venus::Process#alarm
+- [feature] Export {json,yaml,perl} utility functions
+- [feature] Implement "watching" in Venus::Process
+- [update] Fix Venus::Random#range documentation
+- [update] Support multiline type expressions
+- [update] Fix Venus::Test subtest descriptions
+
+2.40 2023-04-08
+
+- [feature] Implement Venus::Role::Mockable
+- [feature] Implement Venus::Assert#validator
+- [feature] Implement Venus::Assert#checker
+- [feature] Implement Venus::Path#{root,seek}
+- [feature] Implement exportable utility functions in Venus
+- [feature] Implement Venus#chain
+- [update] Refactor Venus::Test
+- [update] Update Venus::Unpack#signature naming
+- [update] Update Venus::Unpack with {build_arg,build_args}
+- [update] Update Venus::Try exception trapping
+- [update] Update README.md, include testing
+
+2.32 2023-03-13
+
+- [update] Update attribute assert failure message in Venus::Role::Optional
+- [update] Ignore attribute assertion in Venus::Role::Optional if not required
+
+2.30 2023-03-13
+
+- [feature] Implement Venus::Assert#attributes
+- [feature] Implement Venus::Role::Unpackable
+- [feature] Implement Venus::Unpack
+- [feature] Implement Venus::Array#order
+- [feature] Implement Venus::Unpack#signature
+- [feature] Implement Venus::Assert#either
+- [feature] Implement Venus::Process#ping
+- [feature] Implement Venus::Assert#hashkeys
+- [feature] Implement Venus::Assert#parse, update Venus::Assert#expression
+- [feature] Implement Venus::Assert#{inherits,integrates}
+- [feature] Implement Venus::Assert#yesno
+- [update] Update Venus::Template
+- [update] Strengthen Venus::Assert#enum
+- [update] Enhance Venus::Assert#{tuple,within}
+- [update] Update Venus::Assert type expression parser
+
+2.01 2023-02-28
+
+- [feature] Implement Venus::Test "partials" feature
+- [feature] Implement Venus::Config
+- [feature] Implement Venus#caught
+- [feature] Support documentation of messages and exceptions
+- [feature] Implement Venus::Space#swap
+- [feature] Support documentation and testing of magic "attest" comment
+- [update] Address CPAN report 9dabc3cc-a53c-11ed-8404-33246e8775ea
+- [update] Fix "initial" in Venus::Role::Optional
+
+1.90 2023-01-28
+
+- [feature] Allow option_build to set value on read/write
+- [feature] Allow option_build on object construction
+- [feature] Test permutations of option_build, option_default, and option_coerce
+- [feature] Implement lazy_build hook in Venus::Role::Optional
+- [feature] Implement self_coerce hook in Venus::Role::Optional
+- [feature] Implement self_assert hook in Venus::Role::Optional
+- [feature] Use Venus::Assert#expression when asserting with option_assert
+
+1.85 2022-12-31
+
+- [feature] Implement Venus::Fault
+- [feature] Implement Venus::Role::Comparable#{is,st}
+- [feature] Implement Venus::Role::Deferrable
+- [update] Update value class assertions to use "expression" syntax
+
+1.80 2022-12-24
+
+- [feature] Implement Venus::Role::Serializable
+- [feature] Implement Venus::Role::Subscribable
+
+1.75 2022-12-22
+
+- [update] Replace Venus::Cli#{program,podfile} with "path" attribute
+- [update] Convert Venus::Cli#init method to attribute
+- [update] Implement Venus::Assert#expression, and add ref aliases
+- [update] Update Venus::Assert to raise exceptions with expectation(s)
+
+1.71 2022-12-20
+
+- [feature] Implement Venus::Log
+- [feature] Implement Venus::Cli
+
+1.68 2022-12-16
+
+- [feature] Implement Venus::Data#string
+
+1.67 2022-12-15
+
+- [feature] Allow envvars to control tracing in Venus::Error
+- [feature] Add unused arguments to Venus::Opt
+
+1.66 2022-12-14
+
+- [feature] Cache Venus::Meta for better performance
+- [update] Update Venus::Role::Optional
+
+1.65 2022-12-09
+
+- [feature] Implement Venus::Gather
+- [feature] Implement Venus::Role::Optional
+- [update] Deprecate Venus::Role::Coercible#coerce
+
+1.55 2022-11-21
+
+- [feature] Implement Venus::Prototype
+- [feature] Support Venus::Role::Pluggable#construct
+
+1.50 2022-09-17
+
+- [feature] Implement Venus::Assert#accept
+- [feature] Implement exportable "cast" function
+- [feature] Implement Venus::Assert#format
+- [feature] Support Venus::Assert#conditions
+- [feature] Implement Venus::Assert $type methods
+- [feature] Implement Venus::Assert#validator
+- [feature] Implement Venus::Match#where
+- [feature] Allow Venus::Match#result to accept/set a value
+- [feature] Implement Venus::Assert#{clear,within}
+- [feature] Implement Venus::Array#shuffle
+
+1.40 2022-09-10
+
+- [change] Update callback naming in Venus::Role::Coercible
+- [feature] Implement Venus::Space#integrates
+- [feature] Implement Venus::Role::Rejectable
+- [feature] Implement Venus::Role::Unacceptable
+- [feature] Implement Venus::Role::Defaultable
+- [feature] Implement Venus::Role::Makeable
+- [feature] Implement Venus::Space#{lfile,pfile,tfile}
+- [update] Include examples in the distribution
+- [update] Update Venus::Meta methods to return with wantarray
+- [update] Update Venus::Test to support rendering the encoding tag
+
+1.30 2022-08-31
+
+- [change] Remove Venus::Role::Testable#{istrue,isfalse}
+- [feature] Implement Venus::Path#lines
+- [feature] Implement Venus::Role::Assertable
+- [feature] Implement Venus::Assert, Venus::Type#coded
+- [feature] Implement math methods for Venus::Number
+- [feature] Port applicable methods in Venus::String to Venus::Number
+- [feature] Implement Venus::Type#identify
+- [feature] Implement Venus::Array#{head,tail}
+- [feature] Implement Venus::Kind#{renew,self}
+- [feature] Move {class,meta,space,type} into Venus::Role::Reflectable
+- [feature] Implement Venus::Role::Valuable#mutate
+- [feature] Implement Venus::Role::Assertable#{check,assert,coerce}
+- [feature] Implement Venus::Role::Coercible#coerce_attr
+- [feature] Support dispatching from Venus::Box#unbox
+- [feature] Implement Venus::Role::Reflectable#reify
+- [update] Fix overloaded interpolation issue
+- [update] Update Venus::Role::{Accessible,Valuable}
+- [update] Rename Venus::Error#origin to frame
+- [update] Prevent bad symbols on imports
+- [update] Support overloaded "empty" invocants in Venus::Try
+- [update] Ensure true/false is returned over 1/0
+- [update] Reset srand on fork in Venus::Process
+- [update] Skip t/Venus_Random.t if rand is undeterministic
+- [update] Implement Venus::Role::Accessible#assign
+
+1.23 2022-08-18
+
+- [change] Replace Venus::Role::Testable#{istrue,isfalse} with {is_true,is_false}
+- [change] Resolve cross-platform float precision test failures
+- [feature] Allow Venus::Class to IMPORT and EXPORT using FROM
+- [feature] Add caller info to Venus::Error stacktrace
+- [feature] Allow Venus::Error#{is,as} to fallback to name
+- [feature] Implement Venus:Random
+- [feature] Implement Venus::Error#of
+- [update] Set "srand" on fork in Venus::Process
+- [update] Include names (for Venus::Error#{as,is}) in all exceptions
+- [update] Update Venus::Box#unbox as alias to __handle__unbox
+- [update] Make all Venus imports strict
+
+1.10 2022-08-07
+
+- [change] Rename truncate_to_x methods to restart_x
+- [feature] Cascade DESTROY from Core
+- [feature] Implement Venus::Mixin to mix-in routines
+- [feature] Venus::{Json,Yaml} engine override via ENV VAR
+- [feature] Allow Venus::Meta to return configurations
+- [feature] Allow attr override (prevent accessor install)
+- [feature] Implement Venus::Error#{is,as} for better classification
+- [feature] Implement Venus::Match#test
+- [feature] Implement Venus::{Array,Hash}#call
+- [update] Allow Meta to return local-only attrs, bases, roles, and subs
+- [update] Improve Venus::Space algorithms, add additional methods
+- [update] Add missing documentation in Venus::Date, Venus::String
+- [update] Update Venus::Core to better handle non-hashref based objects
+- [update] Update criteria on require of classes and roles
+
+1.01 2022-07-23
+
+- [feature] Test, validate, and generate attributes the same as methods
+- [feature] Export (on-demand) catch, error, and raise from Venus::{Class,Role}
+- [update] Unravel and flattern roles
+- [update] Expose errors on require of classes and roles
+
+1.00 2022-07-22
+
+- [change] Replace Moo with Mars architecture
+- [feature] Auto-generate VERSION from the main module
+- [update] Fix Venus::Date#rfc822 test example 1 on Windows
+- [update] Fix Venus::String#camelcase, add pascalcase
+
+0.09 2022-06-28
+
+- [feature] Include Venus::Test in the library
+- [feature] Add splice to Venus::Space
+- [feature] Add kebabcase to Venus::String
+- [feature] Add truncate_to_x methods to Venus::Date
+- [feature] Add print_string and say_string to Venus::Role::Printable
+- [update] Cleanup documentation
+- [update] Generate CHANGELOG from .changelog
+- [update] Add "Ethic" to READMEs
+- [update] Marker =cut being rendered twice
+
+0.08 2022-03-08
+
+- [defect] Fix inability to deduce floats
+- [feature] Implement value casting
+- [feature] Implement Venus::Kind#{safe,trap}
+- [feature] Implement Venus::Role::Comparable
+- [feature] Implement Venus::Role::Testable
+- [update] Address test failures reported via CPAN testers issues
+- [update] Document all exceptions and methods that throw them
+- [update] Document Venus::{Class,Role} configurations
+- [update] Fix operator overload documentation rendering
+- [update] Refactor Venus::Role::Comparable
+- [update] Reimplement Venus::Box#unbox as a virtual method
+
+0.07 2022-02-13
+
+- [defect] Fix Venus::Class attribute declaration issue
+- [feature] Extend Venus::Role::Coercion with new abilities
+- [feature] Implement Venus::Match#data
+- [feature] Implement Venus::Match#expr
+- [update] Update documentation
+
+0.06 2022-02-12
+
+- [defect] Fix Venus::Path#mkdirs empty rootdir issue
+- [feature] Implement Venus::Process
+
+0.04 2022-02-04
+
+- [feature] Implement Venus::Role::Matchable
+- [update] Address CPAN Testers reports
+
+0.03 2022-02-01
+
+- [feature] Implement Venus::Match
+- [update] Address CPAN Testers reports
+
+0.02 2022-01-30
+
+- [defect] Fix Dumpable method calls in list context
+- [feature] Implement String#append_with,prepend_with
+- [feature] Implement String#prepend
+- [feature] Implement String#repeat
+- [feature] Implement String#substr
+- [feature] Implement Venus::Role::Coercible
+- [feature] Implement Venus::Role::Digestable
+- [feature] Implement Venus::Template
+- [feature] Support any JSON library via encode/decode callbacks
+- [feature] Support any YAML library, deduce booleans
+- [update] Document all proxyable methods
+- [update] Document overrides, i.e. overloaded operators
+- [update] Document overrides in Venus::Boolean
+- [update] JSON::PP support requires 4.00
+- [update] Minor refactors to source, documentation, and automation
+- [update] Require Perl version 5.18+
+- [update] Update CONTRIBUTING.md
+- [update] Update String#render token syntax
+- [update] Update Venus::Json to use encoder/decoder callbacks
+
+

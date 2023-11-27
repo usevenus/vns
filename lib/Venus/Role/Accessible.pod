@@ -1,0 +1,201 @@
+
+=head1 NAME
+
+Venus::Role::Accessible - Accessible Role
+
+=cut
+
+=head1 ABSTRACT
+
+Accessible Role for Perl 5
+
+=cut
+
+=head1 SYNOPSIS
+
+  package Example;
+
+  use Venus::Class;
+
+  with 'Venus::Role::Accessible';
+
+  attr 'value';
+
+  sub downcase {
+    lc $_[0]->value
+  }
+
+  sub upcase {
+    uc $_[0]->value
+  }
+
+  package main;
+
+  my $example = Example->new(value => 'hello, there');
+
+  # $example->value;
+
+=cut
+
+=head1 DESCRIPTION
+
+This package modifies the consuming package and provides the C<access> method
+for getting and setting attributes.
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 access
+
+  access(string $name, any $value) (any)
+
+The access method gets or sets the class attribute specified.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item access example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $access = $example->access;
+
+  # undef
+
+=back
+
+=over 4
+
+=item access example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $access = $example->access('value');
+
+  # "hello, there"
+
+=back
+
+=over 4
+
+=item access example 3
+
+  # given: synopsis
+
+  package main;
+
+  my $access = $example->access('value', 'something');
+
+  # "something"
+
+=back
+
+=over 4
+
+=item access example 4
+
+  # given: synopsis
+
+  package main;
+
+  my $instance = $example;
+
+  # bless({}, "Example")
+
+  $example->access('value', 'something');
+
+  # "something"
+
+  $instance = $example;
+
+  # bless({value => "something"}, "Example")
+
+=back
+
+=cut
+
+=head2 assign
+
+  assign(string $name, string | coderef $code, any @args) (any)
+
+The assign method dispatches the method call or executes the callback, sets the
+class attribute specified to the result, and returns the result.
+
+I<Since C<1.23>>
+
+=over 4
+
+=item assign example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $assign = $example->assign('value', 'downcase');
+
+  # "hello, there"
+
+=back
+
+=over 4
+
+=item assign example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $assign = $example->assign('value', 'upcase');
+
+  # "HELLO, THERE"
+
+=back
+
+=over 4
+
+=item assign example 3
+
+  # given: synopsis
+
+  package main;
+
+  my $instance = $example;
+
+  # bless({value => "hello, there"}, "Example")
+
+  my $assign = $example->assign('value', 'downcase');
+
+  # "hello, there"
+
+  $instance = $example;
+
+  # bless({value => "hello, there"}, "Example")
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut
