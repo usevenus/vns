@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base', 'with';
 
+# INHERITS
+
 base 'Venus::Kind::Value';
+
+# INTEGRATES
 
 with 'Venus::Role::Mappable';
 
@@ -71,16 +77,16 @@ sub any {
 sub call {
   my ($self, $mapper, $method, @args) = @_;
 
-  require Venus::Type;
+  require Venus::What;
 
   return $self->$mapper(sub{
     my ($key, $val) = @_;
 
-    my $type = Venus::Type->new($val)->deduce;
+    my $what = Venus::What->new($val)->deduce;
 
-    local $_ = $type;
+    local $_ = $what;
 
-    $key, $type->$method(@args)
+    $key, $what->$method(@args)
   });
 }
 
@@ -180,6 +186,14 @@ sub get {
   return $self->value->{$index};
 }
 
+sub gets {
+  my ($self, @args) = @_;
+
+  my $result = $self->puts(map +(undef, $_), @args);
+
+  return wantarray ? (@{$result}) : $result;
+}
+
 sub grep {
   my ($self, $code) = @_;
 
@@ -260,7 +274,7 @@ sub merge {
 
   my $lvalue = {%{$self->get}};
 
-  return Venus::merge($lvalue, @rvalues);
+  return Venus::merge_swap($lvalue, @rvalues);
 }
 
 sub none {
@@ -333,7 +347,7 @@ sub puts {
   for (my $i = 0; $i < @args; $i += 2) {
     my ($into, $path) = @args[$i, $i+1];
 
-    next if !defined $path;
+    next if !defined $path || $path eq '';
 
     my $value;
     my @range;
@@ -341,7 +355,10 @@ sub puts {
     ($path, @range) = @{$path} if ref $path eq 'ARRAY';
 
     $value = $self->path($path);
-    $value = Venus::Array->new($value)->range(@range) if ref $value eq 'ARRAY';
+
+    if (ref $value eq 'ARRAY' && @range) {
+      $value = Venus::Array->new($value)->range(@range);
+    }
 
     if (ref $into eq 'SCALAR') {
       $$into = $value;
@@ -386,6 +403,14 @@ sub reverse {
   return {CORE::reverse(%$result)};
 }
 
+sub rsort {
+  my ($self) = @_;
+
+  my $pairs = $self->pairs;
+
+  return [CORE::sort { $b cmp $a } CORE::map $$_[1], @{$pairs}];
+}
+
 sub set {
   my ($self, @args) = @_;
 
@@ -400,12 +425,75 @@ sub set {
   return $self->value->{$index} = $value;
 }
 
+sub sets {
+  my ($self, @args) = @_;
+
+  my $result = [];
+
+  for (my $i = 0; $i < @args; $i += 2) {
+    my ($path, $data) = @args[$i, $i+1];
+
+    CORE::push @{$result}, $data;
+
+    next if !defined $path || $path eq "";
+
+    if (my ($first, $last) = $path =~ /^(.*)\.(\w+)$/) {
+      my $value = $self->path($first) or next;
+
+      if (ref $value eq 'ARRAY') {
+        $value->[$last] = $data;
+      }
+      elsif (ref $value eq 'HASH') {
+        $value->{$last} = $data;
+      }
+    }
+    else {
+      $self->set($path, $data);
+    }
+  }
+
+  return wantarray ? (@{$result}) : $result;
+}
+
+sub shuffle {
+  my ($self) = @_;
+
+  my $pairs = $self->pairs;
+
+  my $result = [CORE::map $$_[1], @{$pairs}];
+
+  for my $index (0..$#$result) {
+    my $other = int(rand(@$result));
+    my $stash = $result->[$index];
+    $result->[$index] = $result->[$other];
+    $result->[$other] = $stash;
+  }
+
+  return $result;
+}
+
 sub slice {
   my ($self, @args) = @_;
 
   my $data = $self->get;
 
   return [@{$data}{@args}];
+}
+
+sub sort {
+  my ($self) = @_;
+
+  my $pairs = $self->pairs;
+
+  return [CORE::sort { $a cmp $b } CORE::map $$_[1], @{$pairs}];
+}
+
+sub values {
+  my ($self) = @_;
+
+  my $data = $self->get;
+
+  return [CORE::values(%$data)];
 }
 
 1;

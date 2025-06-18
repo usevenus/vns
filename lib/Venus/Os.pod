@@ -1,3 +1,7 @@
+﻿
+=encoding UTF8
+
+=cut
 
 =head1 NAME
 
@@ -747,6 +751,30 @@ I<Since C<2.80>>
 
 =cut
 
+=head2 new
+
+  new(any @args) (Venus::Os)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Os;
+
+  my $new = Venus::Os->new;
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=cut
+
 =head2 paths
 
   paths() (arrayref)
@@ -848,6 +876,246 @@ I<Since C<2.91>>
   my $quote = $os->quote('hello "world"');
 
   # '"hello \"world\""'
+
+=back
+
+=cut
+
+=head2 read
+
+  read(any $from) (string)
+
+The read method reads from a file, filehandle, or STDIN, and returns the data.
+To read from STDIN provide the string C<"STDIN">. The method defaults to reading from STDIN.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item read example 1
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read;
+
+  # from STDIN
+
+  # "..."
+
+=back
+
+=over 4
+
+=item read example 2
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('STDIN');
+
+  # from STDIN
+
+  # "..."
+
+=back
+
+=over 4
+
+=item read example 3
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/iso-8859-1.txt');
+
+  # from file
+
+  # "Hello, world! This is ISO-8859-1."
+
+=back
+
+=over 4
+
+=item read example 4
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  open my $fh, '<', 't/data/texts/iso-8859-1.txt';
+
+  my $read = $os->read($fh);
+
+  # from filehandle
+
+  # "Hello, world! This is ISO-8859-1."
+
+=back
+
+=over 4
+
+=item read example 5
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  use IO::File;
+
+  my $fh = IO::File->new('t/data/texts/iso-8859-1.txt', 'r');
+
+  my $read = $os->read($fh);
+
+  # from filehandle
+
+  # "Hello, world! This is ISO-8859-1."
+
+=back
+
+=over 4
+
+=item read example 6
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-16be.txt');
+
+  # from UTF-16BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=back
+
+=over 4
+
+=item read example 7
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-16le.txt');
+
+  # from UTF-16LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=back
+
+=over 4
+
+=item read example 8
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-32be.txt');
+
+  # from UTF-32BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=back
+
+=over 4
+
+=item read example 9
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-32le.txt');
+
+  # from UTF-32LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=back
+
+=over 4
+
+=item read example 10
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-8.txt');
+
+  # from UTF-8 encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=back
+
+=cut
+
+=head2 syscall
+
+  syscall(any @data) (Venus::Os)
+
+The syscall method executes the command and arguments provided, via
+L<perlfunc/system>, and returns the invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item syscall example 1
+
+  package main;
+
+  use Venus::Os;
+
+  my $os = Venus::Os->new;
+
+  $os->syscall($^X, '--help');
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item syscall example 2
+
+  package main;
+
+  use Venus::Os;
+
+  my $os = Venus::Os->new;
+
+  $os->syscall('.help');
+
+  # Exception! (isa Venus::Os::Error) (see error_on_system_call)
 
 =back
 
@@ -1205,6 +1473,574 @@ I<Since C<2.80>>
 =back
 
 =cut
+
+=head2 write
+
+  write(any $into, string $data, string $encoding) (Venus::Os)
+
+The write method writes to a file, filehandle, STDOUT, or STDERR, and returns
+the invocant. To write to STDOUT provide the string C<"STDOUT">. To write to
+STDERR provide the string C<"STDERR">. The method defaults to writing to
+STDOUT.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item write example 1
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write;
+
+  # to STDOUT
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 2
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write(undef, '');
+
+  # to STDOUT
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 3
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDOUT');
+
+  # to STDOUT
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 4
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDOUT', '...');
+
+  # to STDOUT
+
+  # '...'
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 5
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDERR');
+
+  # to STDERR
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 6
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDERR', '...');
+
+  # to STDERR
+
+  # '...'
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 7
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/iso-8859-1.txt';
+
+  my $write = $os->write($file, 'Hello, world! This is ISO-8859-1.');
+
+  # to file
+
+  # "Hello, world! This is ISO-8859-1."
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 8
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  open my $fh, '<', 't/data/texts/iso-8859-1.txt';
+
+  my $write = $os->write($fh, 'Hello, world! This is ISO-8859-1.');
+
+  # to file
+
+  # "Hello, world! This is ISO-8859-1."
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 9
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  use IO::File;
+
+  my $fh = IO::File->new('t/data/texts/iso-8859-1.txt', 'w');
+
+  my $write = $os->write($fh, 'Hello, world! This is ISO-8859-1.');
+
+  # to ISO-8859-1 encoded file
+
+  # "Hello, world! This is ISO-8859-1."
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 10
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-16be.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-16BE');
+
+  # to UTF-16BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 11
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-16le.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-16LE');
+
+  # to UTF-16LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 12
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-32be.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-32BE');
+
+  # to UTF-32BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 13
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-32le.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-32LE');
+
+  # to UTF-32LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 14
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-8.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-8');
+
+  # to UTF-8 encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=cut
+
+=head1 ERRORS
+
+This package may raise the following errors:
+
+=cut
+
+=over 4
+
+=item error: C<error_on_read_binmode>
+
+This package may raise an C<on.read.binmode> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_read_binmode> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $os->error_on_read_binmode({
+    binmode => ':raw',
+    error => 'No such file',
+    from => '/path/to/nowhere',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.read.binmode"
+
+  # my $render = $error->render;
+
+  # "Can't binmode on read: No such file"
+
+=back
+
+=over 4
+
+=item error: C<error_on_read_open_file>
+
+This package may raise an C<on.read.open.file> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_read_open_file> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $os->error_on_read_open_file({
+    error => 'No such file',
+    file => '/path/to/nowhere',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.read.open.file"
+
+  # my $render = $error->render;
+
+  # "Can't open "/path/to/nowhere" for reading: No such file"
+
+=back
+
+=over 4
+
+=item error: C<error_on_read_open_stdin>
+
+This package may raise an C<on.read.open.stdin> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_read_open_stdin> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $os->error_on_read_open_stdin({
+    error => 'Unknown',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.read.open.stdin"
+
+  # my $render = $error->render;
+
+  # "Can't open STDIN for reading: Unknown"
+
+=back
+
+=over 4
+
+=item error: C<error_on_read_seek>
+
+This package may raise an C<on.read.seek> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_read_seek> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $os->error_on_read_seek({
+    error => 'Unknown',
+    filehandle => \*FH,
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.read.seek"
+
+  # my $render = $error->render;
+
+  # "Can't seek in filehandle: Unknown"
+
+=back
+
+=over 4
+
+=item error: C<error_on_read_seek_reset>
+
+This package may raise an C<on.read.seek.reset> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_read_seek_reset> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $os->error_on_read_seek_reset({
+    error => 'Unknown',
+    filehandle => \*FH,
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.read.seek.reset"
+
+  # my $render = $error->render;
+
+  # "Can't reset seek in filehandle: Unknown"
+
+=back
+
+=over 4
+
+=item error: C<error_on_write_binmode>
+
+This package may raise an C<on.write.binmode> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_write_binmode> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $os->error_on_write_binmode({
+    binmode => ':raw',
+    error => 'No such file',
+    from => '/path/to/nowhere',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.write.binmode"
+
+  # my $render = $error->render;
+
+  # "Can't binmode on write: No such file"
+
+=back
+
+=over 4
+
+=item error: C<error_on_write_open_file>
+
+This package may raise an C<on.write.open.file> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_write_open_file> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $os->error_on_write_open_file({
+    error => 'No such file',
+    file => '/path/to/nowhere',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.write.open.file"
+
+  # my $render = $error->render;
+
+  # "Can't open "/path/to/nowhere" for writing: No such file"
+
+=back
+
+=over 4
+
+=item error: C<error_on_write_open_stderr>
+
+This package may raise an C<on.write.open.stderr> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_write_open_stderr> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $os->error_on_write_open_stderr({
+    error => 'Unknown',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.write.open.stderr"
+
+  # my $render = $error->render;
+
+  # "Can't open STDERR for writing: Unknown"
+
+=back
+
+=over 4
+
+=item error: C<error_on_write_open_stdout>
+
+This package may raise an C<on.write.open.stdout> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_write_open_stdout> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $os->error_on_write_open_stdout({
+    error => 'Unknown',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.write.open.stdout"
+
+  # my $render = $error->render;
+
+  # "Can't open STDOUT for writing: Unknown"
+
+=back
 
 =head1 AUTHORS
 

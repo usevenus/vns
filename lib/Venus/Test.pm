@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
 
+# INHERITS
+
 base 'Venus::Kind';
+
+# INTEGRATES
 
 with 'Venus::Role::Buildable';
 
@@ -37,10 +43,8 @@ sub build_self {
   return $self if !$self->file;
 
   for my $name (qw(name abstract tagline synopsis description)) {
-    $self->error({throw => "error_on_$name"}) if !$self->data->count({
-      name => $name,
-      list => undef,
-    });
+    my $error = "error_on_$name";
+    $self->$error({file => $self->file})->throw if !$self->data->count({name => $name, list => undef});
   }
 
   return $self;
@@ -1917,96 +1921,81 @@ sub skip {
 sub error_on_abstract {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = 'Test file "{{file}}" missing abstract section';
 
-  my $stash = {
-    file => $self->file,
-  };
+  $error->name('on.abstract');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.abstract',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 sub error_on_description {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = 'Test file "{{file}}" missing description section';
 
-  my $stash = {
-    file => $self->file,
-  };
+  $error->name('on.description');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.description',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 sub error_on_name {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = 'Test file "{{file}}" missing name section';
 
-  my $stash = {
-    file => $self->file,
-  };
+  $error->name('on.name');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.name',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 sub error_on_synopsis {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = 'Test file "{{file}}" missing synopsis section';
 
-  my $stash = {
-    file => $self->file,
-  };
+  $error->name('on.synopsis');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.synopsis',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 sub error_on_tagline {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = 'Test file "{{file}}" missing tagline section';
 
-  my $stash = {
-    file => $self->file,
-  };
+  $error->name('on.tagline');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.tagline',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 1;

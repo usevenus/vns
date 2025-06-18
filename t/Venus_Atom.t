@@ -7,6 +7,7 @@ use warnings;
 
 use Test::More;
 use Venus::Test;
+use Venus;
 
 my $test = test(__FILE__);
 
@@ -38,6 +39,7 @@ $test->for('abstract');
 
 method: get
 method: set
+method: new
 
 =cut
 
@@ -200,14 +202,94 @@ $test->for('example', 2, 'set', sub {
   my $result = $tryable->error->result;
   ok defined $result;
   isa_ok $result, "Venus::Atom::Error";
-  is $result->name, "on_set";
+  is $result->name, "on.set";
+
+  $result
+});
+
+=method new
+
+The new method constructs an instance of the package.
+
+=signature new
+
+  new(any @args) (Venus::Atom)
+
+=metadata new
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 new
+
+  package main;
+
+  use Venus::Atom;
+
+  my $new = Venus::Atom->new;
+
+  # bless(..., "Venus::Atom")
+
+=cut
+
+$test->for('example', 1, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Atom');
+  ok $result->{scope};
+
+  !$result
+});
+
+=example-2 new
+
+  package main;
+
+  use Venus::Atom;
+
+  my $new = Venus::Atom->new('Important');
+
+  # bless(..., "Venus::Atom")
+
+=cut
+
+$test->for('example', 2, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Atom');
+  ok $result->{scope};
+
+  $result
+});
+
+=example-3 new
+
+  package main;
+
+  use Venus::Atom;
+
+  my $new = Venus::Atom->new(value => 'Important');
+
+  # bless(..., "Venus::Atom")
+
+=cut
+
+$test->for('example', 3, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Atom');
+  ok $result->{scope};
 
   $result
 });
 
 =error error_on_set
 
-This package may raise an error_on_set exception.
+This package may raise an C<on.set> error, as an instance of
+C<Venus::Atom::Error>, via the C<error_on_set> method.
 
 =cut
 
@@ -217,24 +299,17 @@ $test->for('error', 'error_on_set');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_set',
-    value => 'test',
-  };
+  my $error = $atom->error_on_set;
 
-  my $error = $atom->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_set"
+  # "on.set"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
-  # "Can't re-set atom value to \"test\""
-
-  # my $value = $error->stash('value');
-
-  # "test"
+  # "Can't re-set atom value"
 
 =cut
 
@@ -243,11 +318,9 @@ $test->for('example', 1, 'error_on_set', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_set";
-  my $message = $result->render;
-  is $message, "Can't re-set atom value to \"test\"";
-  my $value = $result->stash('value');
-  is $value, "test";
+  is $name, "on.set";
+  my $render = $result->render;
+  is $render, "Can't re-set atom value";
 
   $result
 });

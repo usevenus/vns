@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Fault - Fault Class
@@ -82,6 +82,44 @@ I<Since C<1.80>>
   #     ...
   #   ],
   # ]
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Fault)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Fault;
+
+  my $new = Venus::Fault->new;
+
+  # bless(..., "Venus::Fault")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Fault;
+
+  my $new = Venus::Fault->new('Oops!');
+
+  # bless(..., "Venus::Fault")
 
 =back
 

@@ -5,14 +5,13 @@ use 5.018;
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More import => ['!is'];
 use Venus::Test;
+use Venus;
 
 use Config;
 use Venus::Process;
 use Venus::Path;
-
-use_ok "Venus";
 
 my $test = test(__FILE__);
 my $fsds = qr/[:\\\/\.]+/;
@@ -192,7 +191,6 @@ $Venus::Process::PID = $TEST_VENUS_PROCESS_PID;
   };
 }
 
-
 =name
 
 Venus
@@ -219,6 +217,8 @@ $test->for('abstract');
 
 =includes
 
+function: all
+function: any
 function: args
 function: array
 function: arrayref
@@ -238,31 +238,68 @@ function: clargs
 function: cli
 function: clone
 function: code
+function: concat
 function: config
-function: container
 function: cop
 function: data
 function: date
 function: docs
 function: enum
 function: error
+function: factory
 function: false
 function: fault
+function: flat
 function: float
 function: future
 function: gather
+function: gets
 function: hash
 function: hashref
-function: is_bool
+function: in
+function: is
+function: is_arrayref
+function: is_blessed
+function: is_boolean
+function: is_coderef
+function: is_dirhandle
+function: is_enum
+function: is_error
 function: is_false
+function: is_fault
+function: is_filehandle
+function: is_float
+function: is_glob
+function: is_hashref
+function: is_number
+function: is_object
+function: is_package
+function: is_reference
+function: is_regexp
+function: is_scalarref
+function: is_string
 function: is_true
+function: is_undef
+function: is_value
+function: is_yesno
 function: json
 function: list
 function: load
 function: log
 function: make
+function: map
 function: match
 function: merge
+function: merge_flat
+function: merge_flat_mutate
+function: merge_join
+function: merge_join_mutate
+function: merge_keep
+function: merge_keep_mutate
+function: merge_swap
+function: merge_swap_mutate
+function: merge_take
+function: merge_take_mutate
 function: meta
 function: name
 function: number
@@ -276,15 +313,24 @@ function: puts
 function: raise
 function: random
 function: range
+function: read_env
+function: read_env_file
+function: read_json
+function: read_json_file
+function: read_perl
+function: read_perl_file
+function: read_yaml
+function: read_yaml_file
 function: regexp
 function: render
 function: replace
-function: resolve
 function: roll
+function: schema
 function: search
 function: set
+function: sets
 function: space
-function: schema
+function: sorts
 function: string
 function: syscall
 function: template
@@ -294,12 +340,22 @@ function: then
 function: throw
 function: true
 function: try
+function: tv
 function: type
 function: unpack
 function: vars
-function: venus
+function: vns
+function: what
 function: work
 function: wrap
+function: write_env
+function: write_env_file
+function: write_json
+function: write_json_file
+function: write_perl
+function: write_perl_file
+function: write_yaml
+function: write_yaml_file
 function: yaml
 
 =cut
@@ -328,7 +384,7 @@ $test->for('includes');
   }
 
   # boolean keywords, and more!
-  true ne false;
+  my $bool = true ne false;
 
 =cut
 
@@ -434,6 +490,354 @@ Complete Test Coverage
 =cut
 
 $test->for('description');
+
+=function all
+
+The all function accepts an arrayref, hashref, or
+L<"mappable"|Venus::Role::Mappable> and returns true if the rvalue is a
+callback and returns true for all items in the collection. If the rvalue
+provided is not a coderef that value's type and value will be used as the
+criteria.
+
+=signature all
+
+  all(arrayref | hashref | consumes[Venus::Role::Mappable] $lvalue, any $rvalue) (boolean)
+
+=metadata all
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 all
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'all';
+
+  my $all = all [1, '1'], 1;
+
+  # false
+
+=cut
+
+$test->for('example', 1, 'all', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-2 all
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'all';
+
+  my $all = all [1, 1], 1;
+
+  # true
+
+=cut
+
+$test->for('example', 2, 'all', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-3 all
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'all';
+
+  my $all = all {1, 2}, 1;
+
+  # false
+
+=cut
+
+$test->for('example', 3, 'all', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-4 all
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'all';
+
+  my $all = all {1, 1}, 1;
+
+  # true
+
+=cut
+
+$test->for('example', 4, 'all', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-5 all
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'all';
+
+  my $all = all [[1], [1]], [1];
+
+  # true
+
+=cut
+
+$test->for('example', 5, 'all', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-6 all
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'all';
+
+  my $all = all [1, '1', 2..4], sub{$_ > 0};
+
+  # true
+
+=cut
+
+$test->for('example', 6, 'all', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-7 all
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'all';
+
+  my $all = all [1, '1', 2..4], sub{$_ > 1};
+
+  # false
+
+=cut
+
+$test->for('example', 7, 'all', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function any
+
+The any function accepts an arrayref, hashref, or
+L<"mappable"|Venus::Role::Mappable> and returns true if the rvalue is a
+callback and returns true for any items in the collection. If the rvalue
+provided is not a coderef that value's type and value will be used as the
+criteria.
+
+=signature any
+
+  any(arrayref | hashref | consumes[Venus::Role::Mappable] $lvalue, any $rvalue) (boolean)
+
+=metadata any
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 any
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'any';
+
+  my $any = any [1, '1'], 1;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'any', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 any
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'any';
+
+  my $any = any [1, 1], 0;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'any', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-3 any
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'any';
+
+  my $any = any {1, 2}, 1;
+
+  # false
+
+=cut
+
+$test->for('example', 3, 'any', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-4 any
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'any';
+
+  my $any = any {1, 1}, 1;
+
+  # true
+
+=cut
+
+$test->for('example', 4, 'any', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-5 any
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'any';
+
+  my $any = any [[0], [1]], [1];
+
+  # true
+
+=cut
+
+$test->for('example', 5, 'any', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-6 any
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'any';
+
+  my $any = any [1, '1', 2..4], sub{!defined};
+
+  # false
+
+=cut
+
+$test->for('example', 6, 'any', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-7 any
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'any';
+
+  my $any = any [1, '1', 2..4, undef], sub{!defined};
+
+  # true
+
+=cut
+
+$test->for('example', 7, 'any', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
 
 =function args
 
@@ -656,7 +1060,7 @@ a L<Venus::Assert/validate> operation.
 $test->for('example', 1, 'assert', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 1234567890;
+  is_deeply $result, 1234567890;
 
   $result
 });
@@ -698,7 +1102,7 @@ $test->for('example', 3, 'assert', sub {
   my ($tryable) = @_;
   my $result = $tryable->error->result;
   ok defined $result;
-  is $result, 1234567890;
+  is_deeply $result, 1234567890;
 
   $result
 });
@@ -786,7 +1190,7 @@ $test->for('example', 1, 'atom', sub {
   my $result = $tryable->result;
   ok defined $result;
   isa_ok $result, "Venus::Atom";
-  is $result->get, "super-admin";
+  is_deeply $result->get, "super-admin";
 
   $result
 });
@@ -877,7 +1281,7 @@ $test->for('example', 1, 'bool', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Boolean';
-  is $result->get, 0;
+  is_deeply $result->get, 0;
 
   !$result
 });
@@ -898,7 +1302,7 @@ $test->for('example', 2, 'bool', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Boolean';
-  is $result->get, 1;
+  is_deeply $result->get, 1;
 
   $result
 });
@@ -1119,9 +1523,9 @@ $test->for('example', 2, 'cast', sub {
   my ($tryable) = @_;
   ok my @result = $tryable->result;
   ok $result[0]->isa('Venus::Boolean');
-  is $result[0]->get, 1;
+  is_deeply $result[0]->get, 1;
   ok $result[1]->isa('Venus::Boolean');
-  is $result[1]->get, 0;
+  is_deeply $result[1]->get, 0;
 
   @result
 });
@@ -1162,7 +1566,7 @@ $test->for('example', 4, 'cast', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
   ok $result->isa('Venus::Float');
-  is $result->get, 1.23;
+  is_deeply $result->get, 1.23;
 
   $result
 });
@@ -1357,7 +1761,7 @@ $test->for('example', 4, 'caught', sub {
   ok $result->isa('Example::Error');
   ok $result->isa('Venus::Error');
   ok $result->name;
-  is $result->name, 'on_test';
+  is_deeply $result->name, 'on.test';
 
   $result
 });
@@ -1465,7 +1869,7 @@ $test->for('example', 9, 'caught', sub {
   ok my $result = $tryable->result;
   ok $result->isa('Venus::Error');
   ok $result->name;
-  is $result->name, 'on_send';
+  is_deeply $result->name, 'on.send';
 
   $result
 });
@@ -1493,7 +1897,7 @@ $test->for('example', 10, 'caught', sub {
   ok $result->isa('Venus::Error');
   ok $result->stash('caught');
   ok $result->name;
-  is $result->name, 'on_send_open';
+  is_deeply $result->name, 'on.send.open';
 
   $result
 });
@@ -1528,7 +1932,7 @@ values) and returns the result.
 $test->for('example', 1, 'chain', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
-  is $result, 1;
+  is_deeply $result, 1;
 
   $result
 });
@@ -1548,7 +1952,7 @@ $test->for('example', 1, 'chain', sub {
 $test->for('example', 2, 'chain', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
-  is $result, 1;
+  is_deeply $result, 1;
 
   $result
 });
@@ -1585,7 +1989,7 @@ a L<Venus::Assert/check> operation.
 $test->for('example', 1, 'check', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 1;
+  is_deeply $result, 1;
 
   $result
 });
@@ -1605,7 +2009,7 @@ $test->for('example', 1, 'check', sub {
 $test->for('example', 2, 'check', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 0;
+  is_deeply $result, 0;
 
   !$result
 });
@@ -1616,7 +2020,8 @@ The clargs function accepts a single arrayref of L<Getopt::Long> specs, or an
 arrayref of arguments followed by an arrayref of L<Getopt::Long> specs, and
 returns a three element list of L<Venus::Args>, L<Venus::Opts>, and
 L<Venus::Vars> objects. If only a single arrayref is provided, the arguments
-will be taken from C<@ARGV>.
+will be taken from C<@ARGV>. If this function is called in scalar context only
+the L<Venus::Opts> object will be returned.
 
 =signature clargs
 
@@ -1708,13 +2113,65 @@ $test->for('example', 3, 'clargs', sub {
   my ($tryable) = @_;
   my @result = $tryable->result;
   isa_ok $result[0], 'Venus::Args';
-  is_deeply $result[0]->value, ['--resource', 'help'];
+  is_deeply $result[0]->value, [];
   isa_ok $result[1], 'Venus::Opts';
   is_deeply $result[1]->value, ['--resource', 'help'];
   is_deeply $result[1]->specs, ['resource|r=s', 'help|h'];
   isa_ok $result[2], 'Venus::Vars';
 
   @result
+});
+
+=example-4 clargs
+
+  package main;
+
+  use Venus 'clargs';
+
+  my ($args, $opts, $vars) = clargs ['--help', 'how-to'],
+    ['resource|r=s', 'help|h'];
+
+  # (
+  #   bless(..., 'Venus::Args'),
+  #   bless(..., 'Venus::Opts'),
+  #   bless(..., 'Venus::Vars')
+  # )
+
+=cut
+
+$test->for('example', 4, 'clargs', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  isa_ok $result[0], 'Venus::Args';
+  is_deeply $result[0]->value, ['how-to'];
+  isa_ok $result[1], 'Venus::Opts';
+  is_deeply $result[1]->value, ['--help', 'how-to'];
+  is_deeply $result[1]->specs, ['resource|r=s', 'help|h'];
+  isa_ok $result[2], 'Venus::Vars';
+
+  @result
+});
+
+=example-5 clargs
+
+  package main;
+
+  use Venus 'clargs';
+
+  my $opts = clargs ['--help', 'how-to'], ['resource|r=s', 'help|h'];
+
+  # bless(..., 'Venus::Opts'),
+
+=cut
+
+$test->for('example', 5, 'clargs', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Opts';
+  is_deeply $result->value, ['--help', 'how-to'];
+  is_deeply $result->specs, ['resource|r=s', 'help|h'];
+
+  $result
 });
 
 =function cli
@@ -1759,11 +2216,15 @@ $test->for('example', 1, 'cli', sub {
 
   use Venus 'cli';
 
-  my $cli = cli ['--help'];
+  my $cli = cli 'mycli';
 
   # bless({...}, 'Venus::Cli')
 
-  # $cli->set('opt', 'help', {})->opt('help');
+  # $cli->boolean('option', 'help');
+
+  # $cli->parse('--help');
+
+  # $cli->option_value('help');
 
   # 1
 
@@ -1773,7 +2234,10 @@ $test->for('example', 2, 'cli', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Cli';
-  is_deeply $result->data, ['--help'];
+  $result->boolean('option', 'help');
+  $result->parse('--help');
+  my $help = $result->option_value('help');
+  ok $help == 1;
 
   $result
 });
@@ -1910,6 +2374,133 @@ $test->for('example', 2, 'code', sub {
   $result
 });
 
+=function concat
+
+The concat function stringifies and L<"joins"|perlfunc/join> multiple values delimited
+by a single space and returns the resulting string.
+
+=signature concat
+
+  concat(any @args) (string)
+
+=metadata concat
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 concat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'concat';
+
+  my $concat = concat;
+
+  # ""
+
+=cut
+
+$test->for('example', 1, 'concat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, "";
+
+  !$result
+});
+
+=example-2 concat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'concat';
+
+  my $concat = concat 'hello';
+
+  # "hello"
+
+=cut
+
+$test->for('example', 2, 'concat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, "hello";
+
+  $result
+});
+
+=example-3 concat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'concat';
+
+  my $concat = concat 'hello', 'world';
+
+  # "hello world"
+
+=cut
+
+$test->for('example', 3, 'concat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, "hello world";
+
+  $result
+});
+
+=example-4 concat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'concat';
+
+  my $concat = concat 'value is', [1,2];
+
+  # "value is [1,2]"
+
+=cut
+
+$test->for('example', 4, 'concat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, "value is [1,2]";
+
+  $result
+});
+
+=example-5 concat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'concat';
+
+  my $concat = concat 'value is', [1,2], 'and', [3,4];
+
+  # "value is [1,2] and [3,4]"
+
+=cut
+
+$test->for('example', 5, 'concat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, "value is [1,2] and [3,4]";
+
+  $result
+});
+
 =function config
 
 The config function builds and returns a L<Venus::Config> object, or dispatches
@@ -1969,79 +2560,6 @@ $test->for('example', 2, 'config', sub {
   $result
 });
 
-=function container
-
-The container function builds and returns a L<Venus::Container> object, or
-dispatches to the coderef or method provided.
-
-=signature container
-
-  container(hashref $value, string | coderef $code, any @args) (any)
-
-=metadata container
-
-{
-  since => '3.20',
-}
-
-=cut
-
-=example-1 container
-
-  package main;
-
-  use Venus 'container';
-
-  my $container = container {};
-
-  # bless({...}, 'Venus::Config')
-
-=cut
-
-$test->for('example', 1, 'container', sub {
-  my ($tryable) = @_;
-  my $result = $tryable->result;
-  isa_ok $result, 'Venus::Container';
-  is_deeply $result->get, {};
-
-  $result
-});
-
-=example-2 container
-
-  package main;
-
-  use Venus 'container';
-
-  my $data = {
-    '$metadata' => {
-      tmplog => "/tmp/log"
-    },
-    '$services' => {
-      log => {
-        package => "Venus/Path",
-        argument => {
-          '$metadata' => "tmplog"
-        }
-      }
-    }
-  };
-
-  my $log = container $data, 'resolve', 'log';
-
-  # bless({value => '/tmp/log'}, 'Venus::Path')
-
-=cut
-
-$test->for('example', 2, 'container', sub {
-  my ($tryable) = @_;
-  ok my $result = $tryable->result;
-  ok $result->isa('Venus::Path');
-  ok $result->value eq '/tmp/log';
-
-  $result
-});
-
 =function cop
 
 The cop function attempts to curry the given subroutine on the object or class
@@ -2072,7 +2590,7 @@ and if successful returns a closure.
 $test->for('example', 1, 'cop', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
-  is ref($result), 'CODE';
+  is_deeply ref($result), 'CODE';
 
   $result
 });
@@ -2094,7 +2612,7 @@ $test->for('example', 1, 'cop', sub {
 $test->for('example', 2, 'cop', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
-  is ref($result), 'CODE';
+  is_deeply ref($result), 'CODE';
 
   $result
 });
@@ -2132,7 +2650,7 @@ $test->for('example', 1, 'data', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Data';
-  is $result->get, 't/data/sections';
+  is_deeply $result->get, 't/data/sections';
 
   $result
 });
@@ -2152,7 +2670,7 @@ $test->for('example', 1, 'data', sub {
 $test->for('example', 2, 'data', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, "Example #1\nExample #2";
+  is_deeply $result, "Example #1\nExample #2";
 
   $result
 });
@@ -2213,7 +2731,7 @@ $test->for('example', 1, 'date', sub {
 $test->for('example', 2, 'date', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result->string, '1988-02-01T00:00:00Z';
+  is_deeply $result->string, '1988-02-01T00:00:00Z';
 
   $result
 });
@@ -2278,7 +2796,7 @@ $test->for('example', 1, 'docs', sub {
   my ($tryable) = @_;
   local $0 = 't/data/sections';
   my $result = $tryable->result;
-  is $result, "Example Abstract";
+  is_deeply $result, "Example Abstract";
 
   $result
 });
@@ -2311,7 +2829,7 @@ $test->for('example', 2, 'docs', sub {
   my ($tryable) = @_;
   local $0 = 't/data/sections';
   my $result = $tryable->result;
-  is $result, "Example #1\nExample #2";
+  is_deeply $result, "Example #1\nExample #2";
 
   $result
 });
@@ -2359,7 +2877,7 @@ $test->for('example', 1, 'enum', sub {
   isa_ok $result, "Venus::Enum";
   my $returned = $result->get('dark');
   isa_ok $returned, "Venus::Enum";
-  is "$returned", "dark";
+  is_deeply "$returned", "dark";
 
   !$result
 });
@@ -2394,7 +2912,7 @@ $test->for('example', 2, 'enum', sub {
   isa_ok $result, "Venus::Enum";
   my $returned = $result->get('dark');
   isa_ok $returned, "Venus::Enum";
-  is "$returned", "dark_theme";
+  is_deeply "$returned", "dark_theme";
 
   !$result
 });
@@ -2456,6 +2974,71 @@ $test->for('example', 2, 'error', sub {
   ok $error;
   ok $error->isa('Venus::Error');
   ok $error->message eq 'Something failed!';
+
+  $result
+});
+
+=function factory
+
+The factory function builds and returns a L<Venus::Factory> object, or
+dispatches to the coderef or method provided.
+
+=signature factory
+
+  factory(hashref $value, string | coderef $code, any @args) (any)
+
+=metadata factory
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 factory
+
+  package main;
+
+  use Venus 'factory';
+
+  my $factory = factory {};
+
+  # bless(..., 'Venus::Factory')
+
+=cut
+
+$test->for('example', 1, 'factory', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Factory');
+  is_deeply $result, {};
+
+  $result
+});
+
+=example-2 factory
+
+  package main;
+
+  use Venus 'factory';
+
+  my $path = factory {name => 'path', value => ['/tmp/log']}, 'class', 'Venus::Path';
+
+  # bless(..., 'Venus::Factory')
+
+  # $path->build;
+
+  # bless({value => '/tmp/log'}, 'Venus::Path')
+
+=cut
+
+$test->for('example', 2, 'factory', sub {
+  my ($tryable) = @_;
+  ok my $result = $tryable->result;
+  ok $result->isa('Venus::Factory');
+  my $returns = $result->build;
+  ok $returns->isa('Venus::Path');
+  is_deeply $returns->value, '/tmp/log';
 
   $result
 });
@@ -2573,6 +3156,85 @@ $test->for('example', 2, 'fault', sub {
   $result
 });
 
+=function flat
+
+The flat function take a list of arguments and flattens them where possible and
+returns the list of flattened values. When a hashref is encountered, it will be
+flattened into key/value pairs. When an arrayref is encountered, it will be
+flattened into a list of items.
+
+=signature flat
+
+  flat(any @args) (any)
+
+=metadata flat
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 flat
+
+  package main;
+
+  use Venus 'flat';
+
+  my @flat = flat 1, 2, 3;
+
+  # (1, 2, 3)
+
+=cut
+
+$test->for('example', 1, 'flat', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  is_deeply \@result, [1, 2, 3];
+
+  @result
+});
+
+=example-2 flat
+
+  package main;
+
+  use Venus 'flat';
+
+  my @flat = flat 1, 2, 3, [1, 2, 3];
+
+  # (1, 2, 3, 1, 2, 3)
+
+=cut
+
+$test->for('example', 2, 'flat', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  is_deeply \@result, [1, 2, 3, 1, 2, 3];
+
+  @result
+});
+
+=example-3 flat
+
+  package main;
+
+  use Venus 'flat';
+
+  my @flat = flat 1, 2, 3, [1, 2, 3], {1, 2};
+
+  # (1, 2, 3, 1, 2, 3, 1, 2)
+
+=cut
+
+$test->for('example', 3, 'flat', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  is_deeply \@result, [1, 2, 3, 1, 2, 3, 1, 2];
+
+  @result
+});
+
 =function float
 
 The float function builds and returns a L<Venus::Float> object, or dispatches
@@ -2606,7 +3268,7 @@ $test->for('example', 1, 'float', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Float';
-  is $result->get, 1.23;
+  is_deeply $result->get, 1.23;
 
   $result
 });
@@ -2626,7 +3288,7 @@ $test->for('example', 1, 'float', sub {
 $test->for('example', 2, 'float', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 1;
+  is_deeply $result, 1;
 
   $result
 });
@@ -2816,6 +3478,112 @@ $test->for('example', 5, 'gather', sub {
   $result
 });
 
+=function gets
+
+The gets function select values from within the underlying data structure using
+L<Venus::Array/path> or L<Venus::Hash/path>, where each argument is a selector,
+returns all the values selected. Returns a list in list context.
+
+=signature gets
+
+  gets(string @args) (arrayref)
+
+=metadata gets
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 gets
+
+  package main;
+
+  use Venus 'gets';
+
+  my $data = {'foo' => {'bar' => 'baz'}, 'bar' => ['baz']};
+
+  my $gets = gets $data, 'bar', 'foo.bar';
+
+  # [['baz'], 'baz']
+
+=cut
+
+$test->for('example', 1, 'gets', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [['baz'], 'baz'];
+
+  $result
+});
+
+=example-2 gets
+
+  package main;
+
+  use Venus 'gets';
+
+  my $data = {'foo' => {'bar' => 'baz'}, 'bar' => ['baz']};
+
+  my ($bar, $foo_bar) = gets $data, 'bar', 'foo.bar';
+
+  # (['baz'], 'baz')
+
+=cut
+
+$test->for('example', 2, 'gets', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  is_deeply \@result, [['baz'], 'baz'];
+
+  @result
+});
+
+=example-3 gets
+
+  package main;
+
+  use Venus 'gets';
+
+  my $data = ['foo', {'bar' => 'baz'}, 'bar', ['baz']];
+
+  my $gets = gets $data, '3', '1.bar';
+
+  # [['baz'], 'baz']
+
+=cut
+
+$test->for('example', 3, 'gets', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [['baz'], 'baz'];
+
+  $result
+});
+
+=example-4 gets
+
+  package main;
+
+  use Venus 'gets';
+
+  my $data = ['foo', {'bar' => 'baz'}, 'bar', ['baz']];
+
+  my ($baz, $one_bar) = gets $data, '3', '1.bar';
+
+  # (['baz'], 'baz')
+
+=cut
+
+$test->for('example', 4, 'gets', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  is_deeply \@result, [['baz'], 'baz'];
+
+  @result
+});
+
 =function hash
 
 The hash function builds and returns a L<Venus::Hash> object, or dispatches
@@ -2968,103 +3736,704 @@ $test->for('example', 4, 'hashref', sub {
   $result
 });
 
-=function is_bool
+=function in
 
-The is_bool function returns L</true> if the value provided is a boolean value,
-not merely truthy, and L</false> otherwise.
+The in function accepts an arrayref, hashref, or
+L<"mappable"|Venus::Role::Mappable> and returns true if the type and value of
+the rvalue is the same for any items in the collection.
 
-=signature is_bool
+=signature in
 
-  is_bool(any $arg) (boolean)
+  in(arrayref | hashref | consumes[Venus::Role::Mappable] $lvalue, any $rvalue) (boolean)
 
-=metadata is_bool
+=metadata in
 
 {
-  since => '3.18',
+  since => '4.15',
 }
 
 =cut
 
-=example-1 is_bool
+=example-1 in
+
+  # given: synopsis
 
   package main;
 
-  use Venus 'is_bool';
+  use Venus 'in';
 
-  my $is_bool = is_bool true;
+  my $in = in [1, '1'], 1;
 
   # true
 
 =cut
 
-$test->for('example', 1, 'is_bool', sub {
+$test->for('example', 1, 'in', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  ok defined $result;
-  is $result, 1;
+  is_deeply $result, true;
 
   $result
 });
 
-=example-2 is_bool
+=example-2 in
+
+  # given: synopsis
 
   package main;
 
-  use Venus 'is_bool';
+  use Venus 'in';
 
-  my $is_bool = is_bool false;
-
-  # true
-
-=cut
-
-$test->for('example', 2, 'is_bool', sub {
-  my ($tryable) = @_;
-  my $result = $tryable->result;
-  ok defined $result;
-  is $result, 1;
-
-  $result
-});
-
-=example-3 is_bool
-
-  package main;
-
-  use Venus 'is_bool';
-
-  my $is_bool = is_bool 1;
+  my $in = in [1, 1], 0;
 
   # false
 
 =cut
 
-$test->for('example', 3, 'is_bool', sub {
+$test->for('example', 2, 'in', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  ok defined $result;
-  is $result, 0;
+  is_deeply $result, false;
 
   !$result
 });
 
-=example-4 is_bool
+=example-3 in
+
+  # given: synopsis
 
   package main;
 
-  use Venus 'is_bool';
+  use Venus 'in';
 
-  my $is_bool = is_bool 0;
+  my $in = in {1, 2}, 1;
 
   # false
 
 =cut
 
-$test->for('example', 4, 'is_bool', sub {
+$test->for('example', 3, 'in', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-4 in
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'in';
+
+  my $in = in {1, 1}, 1;
+
+  # true
+
+=cut
+
+$test->for('example', 4, 'in', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-5 in
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'in';
+
+  my $in = in [[0], [1]], [1];
+
+  # true
+
+=cut
+
+$test->for('example', 5, 'in', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=function is
+
+The is function returns true if the lvalue and rvalue are identical, i.e.
+refers to the same memory address, otherwise returns false.
+
+=signature is
+
+  is(any $lvalue, any $rvalue) (boolean)
+
+=metadata is
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is';
+
+  my $is = is 1, 1;
+
+  # false
+
+=cut
+
+$test->for('example', 1, 'is', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-2 is
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is', 'number';
+
+  my $a = number 1;
+
+  my $is = is $a, 1;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-3 is
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is', 'number';
+
+  my $a = number 1;
+
+  my $is = is $a, $a;
+
+  # true
+
+=cut
+
+$test->for('example', 3, 'is', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-4 is
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is', 'number';
+
+  my $a = number 1;
+  my $b = number 1;
+
+  my $is = is $a, $b;
+
+  # false
+
+=cut
+
+$test->for('example', 4, 'is', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_blessed
+
+The is_blessed function uses L</check> to validate that the data provided is an
+object returns true, otherwise returns false.
+
+=signature is_blessed
+
+  is_blessed(any $data) (boolean)
+
+=metadata is_blessed
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_blessed
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_blessed';
+
+  my $is_blessed = is_blessed bless {};
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_blessed', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_blessed
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_blessed';
+
+  my $is_blessed = is_blessed {};
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_blessed', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_boolean
+
+The is_boolean function uses L</check> to validate that the data provided is a
+boolean returns true, otherwise returns false.
+
+=signature is_boolean
+
+  is_boolean(any $data) (boolean)
+
+=metadata is_boolean
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_boolean
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_boolean';
+
+  my $is_boolean = is_boolean true;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_boolean', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_boolean
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_boolean';
+
+  my $is_boolean = is_boolean 1;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_boolean', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_coderef
+
+The is_coderef function uses L</check> to validate that the data provided is a
+coderef returns true, otherwise returns false.
+
+=signature is_coderef
+
+  is_coderef(any $data) (boolean)
+
+=metadata is_coderef
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_coderef
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_coderef';
+
+  my $is_coderef = is_coderef sub{};
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_coderef', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_coderef
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_coderef';
+
+  my $is_coderef = is_coderef {};
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_coderef', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_dirhandle
+
+The is_dirhandle function uses L</check> to validate that the data provided is
+a dirhandle returns true, otherwise returns false.
+
+=signature is_dirhandle
+
+  is_dirhandle(any $data) (boolean)
+
+=metadata is_dirhandle
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_dirhandle
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_dirhandle';
+
+  opendir my $dh, 't';
+
+  my $is_dirhandle = is_dirhandle $dh;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_dirhandle', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_dirhandle
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_dirhandle';
+
+  open my $fh, '<', 't/data/moon';
+
+  my $is_dirhandle = is_dirhandle $fh;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_dirhandle', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_enum
+
+The is_enum function uses L</check> to validate that the data provided is an
+enum returns true, otherwise returns false.
+
+=signature is_enum
+
+  is_enum(any $data, value @args) (boolean)
+
+=metadata is_enum
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_enum
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_enum';
+
+  my $is_enum = is_enum 'yes', 'yes', 'no'
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_enum', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_enum
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_enum';
+
+  my $is_enum = is_enum 'yes', 'Yes', 'No';
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_enum', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_error
+
+The is_error function accepts a scalar value and returns true if the value is
+(or is derived from) L<Venus::Error>. This function can dispatch method calls
+and execute callbacks, and returns true of the return value from the callback
+is truthy, and false otherwise.
+
+=signature is_error
+
+  is_error(any $data, string | coderef $code, any @args) (boolean)
+
+=metadata is_error
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_error
+
+  package main;
+
+  use Venus 'is_error';
+
+  my $is_error = is_error 0;
+
+  # false
+
+=cut
+
+$test->for('example', 1, 'is_error', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   ok defined $result;
-  is $result, 0;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=example-2 is_error
+
+  package main;
+
+  use Venus 'is_error';
+
+  my $is_error = is_error 1;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_error', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=example-3 is_error
+
+  package main;
+
+  use Venus 'catch', 'fault', 'is_error';
+
+  my $fault = catch {fault};
+
+  my $is_error = is_error $fault;
+
+  # false
+
+=cut
+
+$test->for('example', 3, 'is_error', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=example-4 is_error
+
+  package main;
+
+  use Venus 'catch', 'error', 'is_error';
+
+  my $error = catch {error};
+
+  my $is_error = is_error $error;
+
+  # true
+
+=cut
+
+$test->for('example', 4, 'is_error', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-5 is_error
+
+  package main;
+
+  use Venus 'catch', 'error', 'is_error';
+
+  my $error = catch {error {verbose => true}};
+
+  my $is_error = is_error $error, 'verbose';
+
+  # true
+
+=cut
+
+$test->for('example', 5, 'is_error', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-6 is_error
+
+  package main;
+
+  use Venus 'catch', 'error', 'is_error';
+
+  my $error = catch {error {verbose => false}};
+
+  my $is_error = is_error $error, 'verbose';
+
+  # false
+
+=cut
+
+$test->for('example', 6, 'is_error', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 0;
 
   !$result
 });
@@ -3072,11 +4441,11 @@ $test->for('example', 4, 'is_bool', sub {
 =function is_false
 
 The is_false function accepts a scalar value and returns true if the value is
-falsy.
+falsy. This function can dispatch method calls and execute callbacks.
 
 =signature is_false
 
-  is_false(any $data) (boolean)
+  is_false(any $data, string | coderef $code, any @args) (boolean)
 
 =metadata is_false
 
@@ -3102,7 +4471,7 @@ $test->for('example', 1, 'is_false', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   ok defined $result;
-  is $result, 1;
+  is_deeply $result, 1;
 
   $result
 });
@@ -3123,7 +4492,879 @@ $test->for('example', 2, 'is_false', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   ok defined $result;
-  is $result, 0;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=example-3 is_false
+
+  package main;
+
+  use Venus 'array', 'is_false';
+
+  my $array = array [];
+
+  my $is_false = is_false $array;
+
+  # false
+
+=cut
+
+$test->for('example', 3, 'is_false', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=example-4 is_false
+
+  package main;
+
+  use Venus 'array', 'is_false';
+
+  my $array = array [];
+
+  my $is_false = is_false $array, 'count';
+
+  # true
+
+=cut
+
+$test->for('example', 4, 'is_false', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-5 is_false
+
+  package main;
+
+  use Venus 'array', 'is_false';
+
+  my $array = array [1];
+
+  my $is_false = is_false $array, 'count';
+
+  # false
+
+=cut
+
+$test->for('example', 5, 'is_false', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=example-6 is_false
+
+  package main;
+
+  use Venus 'is_false';
+
+  my $array = undef;
+
+  my $is_false = is_false $array, 'count';
+
+  # true
+
+=cut
+
+$test->for('example', 6, 'is_false', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=function is_fault
+
+The is_fault function accepts a scalar value and returns true if the value is
+(or is derived from) L<Venus::Fault>.
+
+=signature is_fault
+
+  is_fault(any $data) (boolean)
+
+=metadata is_fault
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_fault
+
+  package main;
+
+  use Venus 'is_fault';
+
+  my $is_fault = is_fault 0;
+
+  # false
+
+=cut
+
+$test->for('example', 1, 'is_fault', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=example-2 is_fault
+
+  package main;
+
+  use Venus 'is_fault';
+
+  my $is_fault = is_fault 1;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_fault', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=example-3 is_fault
+
+  package main;
+
+  use Venus 'catch', 'fault', 'is_fault';
+
+  my $fault = catch {fault};
+
+  my $is_fault = is_fault $fault;
+
+  # true
+
+=cut
+
+$test->for('example', 3, 'is_fault', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-4 is_fault
+
+  package main;
+
+  use Venus 'catch', 'error', 'is_fault';
+
+  my $error = catch {error};
+
+  my $is_fault = is_fault $error;
+
+  # false
+
+=cut
+
+$test->for('example', 4, 'is_fault', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=function is_filehandle
+
+The is_filehandle function uses L</check> to validate that the data provided is
+a filehandle returns true, otherwise returns false.
+
+=signature is_filehandle
+
+  is_filehandle(any $data) (boolean)
+
+=metadata is_filehandle
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_filehandle
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_filehandle';
+
+  open my $fh, '<', 't/data/moon';
+
+  my $is_filehandle = is_filehandle $fh;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_filehandle', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_filehandle
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_filehandle';
+
+  opendir my $dh, 't';
+
+  my $is_filehandle = is_filehandle $dh;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_filehandle', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_float
+
+The is_float function uses L</check> to validate that the data provided is a
+float returns true, otherwise returns false.
+
+=signature is_float
+
+  is_float(any $data) (boolean)
+
+=metadata is_float
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_float
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_float';
+
+  my $is_float = is_float .123;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_float', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_float
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_float';
+
+  my $is_float = is_float 123;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_float', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_glob
+
+The is_glob function uses L</check> to validate that the data provided is a
+glob returns true, otherwise returns false.
+
+=signature is_glob
+
+  is_glob(any $data) (boolean)
+
+=metadata is_glob
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_glob
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_glob';
+
+  my $is_glob = is_glob \*main;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_glob', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_glob
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_glob';
+
+  my $is_glob = is_glob *::main;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_glob', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_hashref
+
+The is_hashref function uses L</check> to validate that the data provided is a
+hashref returns true, otherwise returns false.
+
+=signature is_hashref
+
+  is_hashref(any $data) (boolean)
+
+=metadata is_hashref
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_hashref
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_hashref';
+
+  my $is_hashref = is_hashref {};
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_hashref', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_hashref
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_hashref';
+
+  my $is_hashref = is_hashref [];
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_hashref', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_number
+
+The is_number function uses L</check> to validate that the data provided is a
+number returns true, otherwise returns false.
+
+=signature is_number
+
+  is_number(any $data) (boolean)
+
+=metadata is_number
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_number
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_number';
+
+  my $is_number = is_number 0;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_number', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_number
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_number';
+
+  my $is_number = is_number '0';
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_number', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_object
+
+The is_object function uses L</check> to validate that the data provided is an
+object returns true, otherwise returns false.
+
+=signature is_object
+
+  is_object(any $data) (boolean)
+
+=metadata is_object
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_object
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_object';
+
+  my $is_object = is_object bless {};
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_object', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_object
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_object';
+
+  my $is_object = is_object {};
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_object', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_package
+
+The is_package function uses L</check> to validate that the data provided is a
+package returns true, otherwise returns false.
+
+=signature is_package
+
+  is_package(any $data) (boolean)
+
+=metadata is_package
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_package
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_package';
+
+  my $is_package = is_package 'Venus';
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_package', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_package
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_package';
+
+  my $is_package = is_package 'Example';
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_package', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_reference
+
+The is_reference function uses L</check> to validate that the data provided is
+a reference returns true, otherwise returns false.
+
+=signature is_reference
+
+  is_reference(any $data) (boolean)
+
+=metadata is_reference
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_reference
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_reference';
+
+  my $is_reference = is_reference \0;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_reference', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_reference
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_reference';
+
+  my $is_reference = is_reference 0;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_reference', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_regexp
+
+The is_regexp function uses L</check> to validate that the data provided is a
+regexp returns true, otherwise returns false.
+
+=signature is_regexp
+
+  is_regexp(any $data) (boolean)
+
+=metadata is_regexp
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_regexp
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_regexp';
+
+  my $is_regexp = is_regexp qr/hello/;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_regexp', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_regexp
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_regexp';
+
+  my $is_regexp = is_regexp 'hello';
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_regexp', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_scalarref
+
+The is_scalarref function uses L</check> to validate that the data provided is
+a scalarref returns true, otherwise returns false.
+
+=signature is_scalarref
+
+  is_scalarref(any $data) (boolean)
+
+=metadata is_scalarref
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_scalarref
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_scalarref';
+
+  my $is_scalarref = is_scalarref \1;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_scalarref', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_scalarref
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_scalarref';
+
+  my $is_scalarref = is_scalarref 1;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_scalarref', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_string
+
+The is_string function uses L</check> to validate that the data provided is a
+string returns true, otherwise returns false.
+
+=signature is_string
+
+  is_string(any $data) (boolean)
+
+=metadata is_string
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_string
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_string';
+
+  my $is_string = is_string '0';
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_string', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_string
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_string';
+
+  my $is_string = is_string 0;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_string', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
 
   !$result
 });
@@ -3131,11 +5372,11 @@ $test->for('example', 2, 'is_false', sub {
 =function is_true
 
 The is_true function accepts a scalar value and returns true if the value is
-truthy.
+truthy. This function can dispatch method calls and execute callbacks.
 
 =signature is_true
 
-  is_true(any $data) (boolean)
+  is_true(any $data, string | coderef $code, any @args) (boolean)
 
 =metadata is_true
 
@@ -3161,7 +5402,7 @@ $test->for('example', 1, 'is_true', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   ok defined $result;
-  is $result, 1;
+  is_deeply $result, 1;
 
   $result
 });
@@ -3182,7 +5423,282 @@ $test->for('example', 2, 'is_true', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   ok defined $result;
-  is $result, 0;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=example-3 is_true
+
+  package main;
+
+  use Venus 'array', 'is_true';
+
+  my $array = array [];
+
+  my $is_true = is_true $array;
+
+  # true
+
+=cut
+
+$test->for('example', 3, 'is_true', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-4 is_true
+
+  package main;
+
+  use Venus 'array', 'is_true';
+
+  my $array = array [];
+
+  my $is_true = is_true $array, 'count';
+
+  # false
+
+=cut
+
+$test->for('example', 4, 'is_true', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=example-5 is_true
+
+  package main;
+
+  use Venus 'array', 'is_true';
+
+  my $array = array [1];
+
+  my $is_true = is_true $array, 'count';
+
+  # true
+
+=cut
+
+$test->for('example', 5, 'is_true', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-6 is_true
+
+  package main;
+
+  use Venus 'is_true';
+
+  my $array = undef;
+
+  my $is_true = is_true $array, 'count';
+
+  # false
+
+=cut
+
+$test->for('example', 6, 'is_true', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok defined $result;
+  is_deeply $result, 0;
+
+  !$result
+});
+
+=function is_undef
+
+The is_undef function uses L</check> to validate that the data provided is an
+undef returns true, otherwise returns false.
+
+=signature is_undef
+
+  is_undef(any $data) (boolean)
+
+=metadata is_undef
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_undef
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_undef';
+
+  my $is_undef = is_undef undef;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_undef', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_undef
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_undef';
+
+  my $is_undef = is_undef '';
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_undef', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_value
+
+The is_value function uses L</check> to validate that the data provided is an
+value returns true, otherwise returns false.
+
+=signature is_value
+
+  is_value(any $data) (boolean)
+
+=metadata is_value
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_value
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_value';
+
+  my $is_value = is_value 0;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_value', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_value
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_value';
+
+  my $is_value = is_value sub{};
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_value', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=function is_yesno
+
+The is_yesno function uses L</check> to validate that the data provided is a
+yesno returns true, otherwise returns false.
+
+=signature is_yesno
+
+  is_yesno(any $data) (boolean)
+
+=metadata is_yesno
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 is_yesno
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_yesno';
+
+  my $is_yesno = is_yesno 0;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'is_yesno', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 is_yesno
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'is_yesno';
+
+  my $is_yesno = is_yesno undef;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'is_yesno', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
 
   !$result
 });
@@ -3220,6 +5736,7 @@ and returns the result.
 $test->for('example', 1, 'json', sub {
   if (require Venus::Json && not Venus::Json->package) {
     plan skip_all => 'No suitable JSON library found';
+    return 1;
   }
   my ($tryable) = @_;
   my $result = $tryable->result;
@@ -3243,11 +5760,12 @@ $test->for('example', 1, 'json', sub {
 $test->for('example', 2, 'json', sub {
   if (require Venus::Json && not Venus::Json->package) {
     plan skip_all => 'No suitable JSON library found';
+    return 1;
   }
   my ($tryable) = @_;
   my $result = $tryable->result;
   $result =~ s/[\s\n]+//g;
-  is $result, '{"codename":["Ready","Robot"],"stable":true}';
+  is_deeply $result, '{"codename":["Ready","Robot"],"stable":true}';
 
   $result
 });
@@ -3267,6 +5785,7 @@ $test->for('example', 2, 'json', sub {
 $test->for('example', 3, 'json', sub {
   if (require Venus::Json && not Venus::Json->package) {
     plan skip_all => 'No suitable JSON library found';
+    return 1;
   }
   my ($tryable) = @_;
   my $result = $tryable->result;
@@ -3290,6 +5809,7 @@ $test->for('example', 3, 'json', sub {
 $test->for('example', 4, 'json', sub {
   if (require Venus::Json && not Venus::Json->package) {
     plan skip_all => 'No suitable JSON library found';
+    return 1;
   }
   my ($tryable) = @_;
   my $result = $tryable->catch('Venus::Fault')->result;
@@ -3406,7 +5926,7 @@ $test->for('example', 1, 'load', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
   ok $result->isa('Venus::Space');
-  is $result->value, 'Venus::Scalar';
+  is_deeply $result->value, 'Venus::Scalar';
 
   $result
 });
@@ -3510,6 +6030,61 @@ $test->for('example', 2, 'make', sub {
   $result
 });
 
+=function map
+
+The map function returns a L<Venus::Map> object for the hashref provided.
+
+=signature map
+
+  map(hashref $value) (Venus::Map)
+
+=metadata map
+
+{
+  since => '4.15',
+}
+
+=example-1 map
+
+  package main;
+
+  use Venus;
+
+  my $map = Venus::map {1..4};
+
+  # bless(..., 'Venus::Map')
+
+=cut
+
+$test->for('example', 1, 'map', sub {
+  my ($tryable) = @_;
+  ok my $result = $tryable->result;
+  ok $result->isa('Venus::Map');
+  is_deeply $result->get, {1..4};
+
+  $result
+});
+
+=example-2 map
+
+  package main;
+
+  use Venus;
+
+  my $map = Venus::map {1..4}, 'count';
+
+  # 2
+
+=cut
+
+$test->for('example', 2, 'map', sub {
+  my ($tryable) = @_;
+  ok my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result
+});
+
 =function match
 
 The match function builds a L<Venus::Match> object, passing it and the value
@@ -3571,7 +6146,7 @@ $test->for('example', 1, 'match', sub {
 $test->for('example', 2, 'match', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 'five';
+  is_deeply $result, 'five';
 
   $result
 });
@@ -3645,7 +6220,7 @@ $test->for('example', 4, 'match', sub {
 $test->for('example', 5, 'match', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, '6 > 5';
+  is_deeply $result, '6 > 5';
 
   $result
 });
@@ -3669,7 +6244,7 @@ $test->for('example', 5, 'match', sub {
 $test->for('example', 6, 'match', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, '4 < 5';
+  is_deeply $result, '4 < 5';
 
   $result
 });
@@ -3677,7 +6252,8 @@ $test->for('example', 6, 'match', sub {
 =function merge
 
 The merge function returns a value which is a merger of all of the arguments
-provided.
+provided. This function is an alias for L</merge_join> given the principle of
+least surprise.
 
 =signature merge
 
@@ -3729,6 +6305,2637 @@ $test->for('example', 2, 'merge', sub {
   $result
 });
 
+=function merge_flat
+
+The merge_flat function merges two (or more) values and returns a new values
+based on the types of the inputs:
+
+B<Note:> This function appends hashref values to an arrayref when encountered.
+
++=over 4
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "scalar" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "arrayref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "hashref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "scalar" we
+append the C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "arrayref"
+we append the items in C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "hashref" we
+append the values in C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "scalar" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "arrayref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "hashref" we
+append the keys and values in C<rvalue> to the C<lvalue>, overwriting existing
+keys where there's overlap.
+
++=back
+
+=signature merge_flat
+
+  merge_flat(any @args) (any)
+
+=metadata merge_flat
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 merge_flat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat';
+
+  my $merge_flat = merge_flat;
+
+  # undef
+
+=cut
+
+$test->for('example', 1, 'merge_flat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, undef;
+
+  !$result
+});
+
+=example-2 merge_flat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat';
+
+  my $merge_flat = merge_flat 1;
+
+  # 1
+
+=cut
+
+$test->for('example', 2, 'merge_flat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-3 merge_flat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat';
+
+  my $merge_flat = merge_flat 1, 2;
+
+  # 2
+
+=cut
+
+$test->for('example', 3, 'merge_flat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result
+});
+
+=example-4 merge_flat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat';
+
+  my $merge_flat = merge_flat 1, [2, 3];
+
+  # [2, 3]
+
+=cut
+
+$test->for('example', 4, 'merge_flat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [2, 3];
+
+  $result
+});
+
+=example-5 merge_flat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat';
+
+  my $merge_flat = merge_flat 1, {a => 1};
+
+  # {a => 1}
+
+=cut
+
+$test->for('example', 5, 'merge_flat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {a => 1};
+
+  $result
+});
+
+=example-6 merge_flat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat';
+
+  my $merge_flat = merge_flat [1, 2], 3;
+
+  # [1, 2, 3]
+
+=cut
+
+$test->for('example', 6, 'merge_flat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3];
+
+  $result
+});
+
+=example-7 merge_flat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat';
+
+  my $merge_flat = merge_flat [1, 2], {a => 3, b => 4};
+
+  # [1, 2, 3, 4]
+
+=cut
+
+$test->for('example', 7, 'merge_flat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply [sort @$result], [1, 2, 3, 4];
+
+  $result
+});
+
+=example-8 merge_flat
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat';
+
+  my $merge_flat = merge_flat(
+    {
+      a => 1,
+      b => {x => 10},
+      d => 0,
+      g => [4],
+    },
+    {
+      b => {y => 20},
+      c => 3,
+      e => [5],
+      f => [6]
+    },
+    {
+      b => {z => 456},
+      c => {z => 123},
+      d => 2,
+      e => [6, 7],
+      f => {7, 8},
+      g => 5,
+    },
+  );
+
+  # {
+  #   a => 1,
+  #   b => {
+  #     x => 10,
+  #     y => 20,
+  #     z => 456
+  #   },
+  #   c => {z => 123},
+  #   d => 2,
+  #   e => [5, 6, 7],
+  #   f => [6, 8],
+  #   g => [4, 5],
+  # }
+
+=cut
+
+$test->for('example', 8, 'merge_flat', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {
+    a => 1,
+    b => {
+      x => 10,
+      y => 20,
+      z => 456
+    },
+    c => {z => 123},
+    d => 2,
+    e => [5, 6, 7],
+    f => [6, 8],
+    g => [4, 5],
+  };
+
+  is_deeply(merge_flat(10, 20), 20);
+  is_deeply(merge_flat(10, [1, 2]), [1, 2]);
+  is_deeply(merge_flat(10, {a => 1}), {a => 1});
+  is_deeply(merge_flat([1, 2], 3), [1, 2, 3]);
+  is_deeply(merge_flat([1, 2], [3, 4]), [1, 2, 3, 4]);
+  is_deeply([sort(@{merge_flat([1, 2], {a => 3, b => 4})})], [1, 2, 3, 4]);
+  is_deeply(merge_flat({a => 1, b => 2}, 10), 10);
+  is_deeply(merge_flat({a => 1, b => 2}, [3, 4]), [3, 4]);
+  is_deeply(merge_flat({a => 1, b => 2}, {b => 3, c => 4}), {a => 1, b => 3, c => 4});
+
+  $result
+});
+
+=function merge_flat_mutate
+
+The merge_flat_mutate performs a merge operaiton in accordance with
+L</merge_flat> except that it mutates the values being merged and returns the
+mutated value.
+
+=signature merge_flat_mutate
+
+  merge_flat_mutate(any @args) (any)
+
+=metadata merge_flat_mutate
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 merge_flat_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat_mutate';
+
+  my $merge_flat_mutate = merge_flat_mutate;
+
+  # undef
+
+=cut
+
+$test->for('example', 1, 'merge_flat_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, undef;
+
+  !$result
+});
+
+=example-2 merge_flat_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat_mutate';
+
+  my $merge_flat_mutate = merge_flat_mutate 1;
+
+  # 1
+
+=cut
+
+$test->for('example', 2, 'merge_flat_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-3 merge_flat_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat_mutate';
+
+  $result = 1;
+
+  my $merge_flat_mutate = merge_flat_mutate $result, 2;
+
+  # 2
+
+  $result;
+
+  # 2
+
+=cut
+
+$test->for('example', 3, 'merge_flat_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result
+});
+
+=example-4 merge_flat_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat_mutate';
+
+  $result = 1;
+
+  my $merge_flat_mutate = merge_flat_mutate $result, [2, 3];
+
+  # [2, 3]
+
+  $result;
+
+  # [2, 3]
+
+=cut
+
+$test->for('example', 4, 'merge_flat_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [2, 3];
+
+  $result
+});
+
+=example-5 merge_flat_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat_mutate';
+
+  $result = 1;
+
+  my $merge_flat_mutate = merge_flat_mutate $result, {a => 1};
+
+  # {a => 1}
+
+  $result;
+
+  # {a => 1}
+
+=cut
+
+$test->for('example', 5, 'merge_flat_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {a => 1};
+
+  $result
+});
+
+=example-6 merge_flat_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat_mutate';
+
+  $result = [1, 2];
+
+  my $merge_flat_mutate = merge_flat_mutate $result, 3;
+
+  # [1, 2, 3]
+
+  $result;
+
+  # [1, 2, 3]
+
+=cut
+
+$test->for('example', 6, 'merge_flat_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3];
+
+  $result
+});
+
+=example-7 merge_flat_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_flat_mutate';
+
+  $result = [1, 2];
+
+  my $merge_flat_mutate = merge_flat_mutate $result, {a => 3, b => 4};
+
+  # [1, 2, 3, 4]
+
+  $result;
+
+  # [1, 2, 3, 4]
+
+=cut
+
+$test->for('example', 7, 'merge_flat_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply [sort @$result], [1, 2, 3, 4];
+
+  $result = 10;
+  merge_flat_mutate($result, 20);
+  is_deeply($result, 20);
+
+  $result = 10;
+  merge_flat_mutate($result, [1, 2]);
+  is_deeply($result, [1, 2]);
+
+  $result = 10;
+  merge_flat_mutate($result, {a => 1});
+  is_deeply($result, {a => 1});
+
+  $result = [1, 2];
+  merge_flat_mutate($result, 3);
+  is_deeply($result, [1, 2, 3]);
+
+  $result = [1, 2];
+  merge_flat_mutate($result, [3, 4]);
+  is_deeply($result, [1, 2, 3, 4]);
+
+  $result = [1, 2];
+  merge_flat_mutate($result, {a => 3, b => 4});
+  is_deeply([sort(@{$result})], [1, 2, 3, 4]);
+
+  $result = {a => 1, b => 2};
+  merge_flat_mutate($result, 10);
+  is_deeply($result, 10);
+
+  $result = {a => 1, b => 2};
+  merge_flat_mutate($result, [3, 4]);
+  is_deeply($result, [3, 4]);
+
+  $result = {a => 1, b => 2};
+  merge_flat_mutate($result, {b => 3, c => 4});
+  is_deeply($result, {a => 1, b => 3, c => 4});
+
+  $result
+});
+
+=function merge_join
+
+The merge_join merges two (or more) values and returns a new values based on
+the types of the inputs:
+
+B<Note:> This function merges hashrefs with hashrefs, and appends arrayrefs
+with arrayrefs.
+
++=over 4
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "scalar" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "arrayref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "hashref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "scalar" we
+append the C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "arrayref"
+we append the items in C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "hashref" we
+append the C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "scalar" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "arrayref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "hashref" we
+append the keys and values in C<rvalue> to the C<lvalue>, overwriting existing
+keys where there's overlap.
+
++=back
+
+=signature merge_join
+
+  merge_join(any @args) (any)
+
+=metadata merge_join
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 merge_join
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join';
+
+  my $merge_join = merge_join;
+
+  # undef
+
+=cut
+
+$test->for('example', 1, 'merge_join', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, undef;
+
+  !$result
+});
+
+=example-2 merge_join
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join';
+
+  my $merge_join = merge_join 1;
+
+  # 1
+
+=cut
+
+$test->for('example', 2, 'merge_join', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-3 merge_join
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join';
+
+  my $merge_join = merge_join 1, 2;
+
+  # 2
+
+=cut
+
+$test->for('example', 3, 'merge_join', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result
+});
+
+=example-4 merge_join
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join';
+
+  my $merge_join = merge_join 1, [2, 3];
+
+  # [2, 3]
+
+=cut
+
+$test->for('example', 4, 'merge_join', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [2, 3];
+
+  $result
+});
+
+=example-5 merge_join
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join';
+
+  my $merge_join = merge_join [1, 2], 3;
+
+  # [1, 2, 3]
+
+=cut
+
+$test->for('example', 5, 'merge_join', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3];
+
+  $result
+});
+
+=example-6 merge_join
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join';
+
+  my $merge_join = merge_join [1, 2], [3, 4];
+
+  # [1, 2, 3, 4]
+
+=cut
+
+$test->for('example', 6, 'merge_join', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3, 4];
+
+  $result
+});
+
+=example-7 merge_join
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join';
+
+  my $merge_join = merge_join {a => 1}, {a => 2, b => 3};
+
+  # {a => 2, b => 3}
+
+=cut
+
+$test->for('example', 7, 'merge_join', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {a => 2, b => 3};
+
+  $result
+});
+
+=example-8 merge_join
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join';
+
+  my $merge_join = merge_join(
+    {
+      a => 1,
+      b => {x => 10},
+      d => 0,
+      g => [4],
+    },
+    {
+      b => {y => 20},
+      c => 3,
+      e => [5],
+      f => [6]
+    },
+    {
+      b => {z => 456},
+      c => {z => 123},
+      d => 2,
+      e => [6, 7],
+      f => {7, 8},
+      g => 5,
+    },
+  );
+
+  # {
+  #   a => 1,
+  #   b => {
+  #     x => 10,
+  #     y => 20,
+  #     z => 456
+  #   },
+  #   c => {z => 123},
+  #   d => 2,
+  #   e => [5, 6, 7],
+  #   f => [6, {7, 8}],
+  #   g => [4, 5],
+  # }
+
+=cut
+
+$test->for('example', 8, 'merge_join', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {
+    a => 1,
+    b => {
+      x => 10,
+      y => 20,
+      z => 456
+    },
+    c => {z => 123},
+    d => 2,
+    e => [5, 6, 7],
+    f => [6, {7, 8}],
+    g => [4, 5],
+  };
+
+  is_deeply(merge_join(10, 20), 20);
+  is_deeply(merge_join(10, [1, 2]), [1, 2]);
+  is_deeply(merge_join(10, {a=>1}), {a=>1});
+  is_deeply(merge_join([1, 2], 3), [1, 2, 3]);
+  is_deeply(merge_join([1, 2], [3, 4]), [1, 2, 3, 4]);
+  is_deeply(merge_join([1, 2], {a=>3, b=>4}), [1, 2, {a=>3, b=>4}]);
+  is_deeply(merge_join({a=>1, b=>2}, 10), 10);
+  is_deeply(merge_join({a=>1, b=>2}, [3, 4]), [3, 4]);
+  is_deeply(merge_join({a=>1, b=>2}, {b=>3, c=>4}), {a=>1, b=>3, c=>4});
+
+  $result
+});
+
+=function merge_join_mutate
+
+The merge_join_mutate performs a merge operaiton in accordance with
+L</merge_join> except that it mutates the values being merged and returns the
+mutated value.
+
+=signature merge_join_mutate
+
+  merge_join_mutate(any @args) (any)
+
+=metadata merge_join_mutate
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 merge_join_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join_mutate';
+
+  my $merge_join_mutate = merge_join_mutate;
+
+  # undef
+
+=cut
+
+$test->for('example', 1, 'merge_join_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, undef;
+
+  !$result
+});
+
+=example-2 merge_join_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join_mutate';
+
+  my $merge_join_mutate = merge_join_mutate 1;
+
+  # 1
+
+=cut
+
+$test->for('example', 2, 'merge_join_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-3 merge_join_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join_mutate';
+
+  $result = 1;
+
+  my $merge_join_mutate = merge_join_mutate $result, 2;
+
+  # 2
+
+  $result;
+
+  # 2
+
+=cut
+
+$test->for('example', 3, 'merge_join_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result
+});
+
+=example-4 merge_join_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join_mutate';
+
+  $result = 1;
+
+  my $merge_join_mutate = merge_join_mutate $result, [2, 3];
+
+  # [2, 3]
+
+  $result;
+
+  # [2, 3]
+
+=cut
+
+$test->for('example', 4, 'merge_join_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [2, 3];
+
+  $result
+});
+
+=example-5 merge_join_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join_mutate';
+
+  $result = [1, 2];
+
+  my $merge_join_mutate = merge_join_mutate $result, 3;
+
+  # [1, 2, 3]
+
+  $result;
+
+  # [1, 2, 3]
+
+=cut
+
+$test->for('example', 5, 'merge_join_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3];
+
+  $result
+});
+
+=example-6 merge_join_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join_mutate';
+
+  $result = [1, 2];
+
+  my $merge_join_mutate = merge_join_mutate $result, [3, 4];
+
+  # [1, 2, 3, 4]
+
+  $result;
+
+  # [1, 2, 3, 4]
+
+=cut
+
+$test->for('example', 6, 'merge_join_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3, 4];
+
+  $result
+});
+
+=example-7 merge_join_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_join_mutate';
+
+  $result = {a => 1};
+
+  my $merge_join_mutate = merge_join_mutate $result, {a => 2, b => 3};
+
+  # {a => 2, b => 3}
+
+  $result;
+
+  # {a => 2, b => 3}
+
+=cut
+
+$test->for('example', 7, 'merge_join_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {a => 2, b => 3};
+
+  $result = 10;
+  merge_join_mutate($result, 20);
+  is_deeply($result, 20);
+
+  $result = 10;
+  merge_join_mutate($result, [1, 2]);
+  is_deeply($result, [1, 2]);
+
+  $result = 10;
+  merge_join_mutate($result, {a=>1});
+  is_deeply($result, {a=>1});
+
+  $result = [1, 2];
+  merge_join_mutate($result, 3);
+  is_deeply($result, [1, 2, 3]);
+
+  $result = [1, 2];
+  merge_join_mutate($result, [3, 4]);
+  is_deeply($result, [1, 2, 3, 4]);
+
+  $result = [1, 2];
+  merge_join_mutate($result, {a=>3, b=>4});
+  is_deeply($result, [1, 2, {a=>3, b=>4}]);
+
+  $result = {a=>1, b=>2};
+  merge_join_mutate($result, 10);
+  is_deeply($result, 10);
+
+  $result = {a=>1, b=>2};
+  merge_join_mutate($result, [3, 4]);
+  is_deeply($result, [3, 4]);
+
+  $result = {a=>1, b=>2};
+  merge_join_mutate($result, {b=>3, c=>4});
+  is_deeply($result, {a=>1, b=>3, c=>4});
+
+  $result
+});
+
+=function merge_keep
+
+The merge_keep function merges two (or more) values and returns a new values
+based on the types of the inputs:
+
+B<Note:> This function retains the existing data, appends arrayrefs with
+arrayrefs, and only merges new keys and values when merging hashrefs with
+hashrefs.
+
++=over 4
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "scalar" we
+keep the C<lvalue>.
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "arrayref" we
+keep the C<lvalue>.
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "hashref" we
+keep the C<lvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "scalar" we
+append the C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "arrayref"
+we append the items in C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "hashref" we
+append the C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "scalar" we
+keep the C<lvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "arrayref" we
+keep the C<lvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "hashref" we
+append the keys and values in C<rvalue> to the C<lvalue>, but without
+overwriting existing keys if there's overlap.
+
++=back
+
+=signature merge_keep
+
+  merge_keep(any @args) (any)
+
+=metadata merge_keep
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 merge_keep
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep';
+
+  my $merge_keep = merge_keep;
+
+  # undef
+
+=cut
+
+$test->for('example', 1, 'merge_keep', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, undef;
+
+  !$result
+});
+
+=example-2 merge_keep
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep';
+
+  my $merge_keep = merge_keep 1;
+
+  # 1
+
+=cut
+
+$test->for('example', 2, 'merge_keep', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-3 merge_keep
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep';
+
+  my $merge_keep = merge_keep 1, 2;
+
+  # 1
+
+=cut
+
+$test->for('example', 3, 'merge_keep', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-4 merge_keep
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep';
+
+  my $merge_keep = merge_keep 1, [2, 3];
+
+  # 1
+
+=cut
+
+$test->for('example', 4, 'merge_keep', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-5 merge_keep
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep';
+
+  my $merge_keep = merge_keep [1, 2], 3;
+
+  # [1, 2, 3]
+
+=cut
+
+$test->for('example', 5, 'merge_keep', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3];
+
+  $result
+});
+
+=example-6 merge_keep
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep';
+
+  my $merge_keep = merge_keep [1, 2], [3, 4];
+
+  # [1, 2, 3, 4]
+
+=cut
+
+$test->for('example', 6, 'merge_keep', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3, 4];
+
+  $result
+});
+
+=example-7 merge_keep
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep';
+
+  my $merge_keep = merge_keep {a => 1}, {a => 2, b => 3};
+
+  # {a => 1, b => 3}
+
+=cut
+
+$test->for('example', 7, 'merge_keep', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {a => 1, b => 3};
+
+  $result
+});
+
+=example-8 merge_keep
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep';
+
+  my $merge_keep = merge_keep(
+    {
+      a => 1,
+      b => {x => 10},
+      d => 0,
+      g => [4],
+    },
+    {
+      b => {y => 20},
+      c => 3,
+      e => [5],
+      f => [6]
+    },
+    {
+      b => {y => 30, z => 456},
+      c => {z => 123},
+      d => 2,
+      e => [6, 7],
+      f => {7, 8},
+      g => 5,
+    },
+  );
+
+  # {
+  #   a => 1,
+  #   b => {
+  #     x => 10,
+  #     y => 20,
+  #     z => 456
+  #   },
+  #   c => 3,
+  #   d => 0,
+  #   e => [5, 6, 7],
+  #   f => [6, {7, 8}],
+  #   g => [4, 5],
+  # }
+
+=cut
+
+$test->for('example', 8, 'merge_keep', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {
+    a => 1,
+    b => {
+      x => 10,
+      y => 20,
+      z => 456
+    },
+    c => 3,
+    d => 0,
+    e => [5, 6, 7],
+    f => [6, {7, 8}],
+    g => [4, 5],
+  };
+
+  is_deeply(merge_keep(10, 20), 10);
+  is_deeply(merge_keep(10, [1, 2]), 10);
+  is_deeply(merge_keep(10, {a=>1}), 10);
+  is_deeply(merge_keep([1, 2], 3), [1, 2, 3]);
+  is_deeply(merge_keep([1, 2], [3, 4]), [1, 2, 3, 4]);
+  is_deeply(merge_keep([1, 2], {a=>3, b=>4}), [1, 2, {a=>3, b=>4}]);
+  is_deeply(merge_keep({a=>1, b=>2}, 10), {a=>1, b=>2});
+  is_deeply(merge_keep({a=>1, b=>2}, [3, 4]), {a=>1, b=>2});
+  is_deeply(merge_keep({a=>1, b=>2}, {b=>3, c=>4}), {a=>1, b=>2, c=>4});
+
+  $result
+});
+
+=function merge_keep_mutate
+
+The merge_keep_mutate performs a merge operaiton in accordance with
+L</merge_keep> except that it mutates the values being merged and returns the
+mutated value.
+
+=signature merge_keep_mutate
+
+  merge_keep_mutate(any @args) (any)
+
+=metadata merge_keep_mutate
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 merge_keep_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep_mutate';
+
+  my $merge_keep_mutate = merge_keep_mutate;
+
+  # undef
+
+=cut
+
+$test->for('example', 1, 'merge_keep_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, undef;
+
+  !$result
+});
+
+=example-2 merge_keep_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep_mutate';
+
+  my $merge_keep_mutate = merge_keep_mutate 1;
+
+  # 1
+
+=cut
+
+$test->for('example', 2, 'merge_keep_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-3 merge_keep_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep_mutate';
+
+  $result = 1;
+
+  my $merge_keep_mutate = merge_keep_mutate $result, 2;
+
+  # 1
+
+  $result;
+
+  # 1
+
+=cut
+
+$test->for('example', 3, 'merge_keep_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-4 merge_keep_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep_mutate';
+
+  $result = 1;
+
+  my $merge_keep_mutate = merge_keep_mutate $result, [2, 3];
+
+  # 1
+
+  $result;
+
+  # 1
+
+=cut
+
+$test->for('example', 4, 'merge_keep_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-5 merge_keep_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep_mutate';
+
+  $result = [1, 2];
+
+  my $merge_keep_mutate = merge_keep_mutate $result, 3;
+
+  # [1, 2, 3]
+
+  $result;
+
+  # [1, 2, 3]
+
+=cut
+
+$test->for('example', 5, 'merge_keep_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3];
+
+  $result
+});
+
+=example-6 merge_keep_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep_mutate';
+
+  $result = [1, 2];
+
+  my $merge_keep_mutate = merge_keep_mutate $result, [3, 4];
+
+  # [1, 2, 3, 4]
+
+  $result;
+
+  # [1, 2, 3, 4]
+
+=cut
+
+$test->for('example', 6, 'merge_keep_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3, 4];
+
+  $result
+});
+
+=example-7 merge_keep_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_keep_mutate';
+
+  $result = {a => 1};
+
+  my $merge_keep_mutate = merge_keep_mutate $result, {a => 2, b => 3};
+
+  # {a => 1, b => 3}
+
+  $result;
+
+  # {a => 1, b => 3}
+
+=cut
+
+$test->for('example', 7, 'merge_keep_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {a => 1, b => 3};
+
+  $result = 10;
+  merge_keep_mutate($result, 20);
+  is_deeply($result, 10);
+
+  $result = 10;
+  merge_keep_mutate($result, [1, 2]);
+  is_deeply($result, 10);
+
+  $result = 10;
+  merge_keep_mutate($result, {a=>1});
+  is_deeply($result, 10);
+
+  $result = [1, 2];
+  merge_keep_mutate($result, 3);
+  is_deeply($result, [1, 2, 3]);
+
+  $result = [1, 2];
+  merge_keep_mutate($result, [3, 4]);
+  is_deeply($result, [1, 2, 3, 4]);
+
+  $result = [1, 2];
+  merge_keep_mutate($result, {a=>3, b=>4});
+  is_deeply($result, [1, 2, {a=>3, b=>4}]);
+
+  $result = {a=>1, b=>2};
+  merge_keep_mutate($result, 10);
+  is_deeply($result, {a=>1, b=>2});
+
+  $result = {a=>1, b=>2};
+  merge_keep_mutate($result, [3, 4]);
+  is_deeply($result, {a=>1, b=>2});
+
+  $result = {a=>1, b=>2};
+  merge_keep_mutate($result, {b=>3, c=>4});
+  is_deeply($result, {a=>1, b=>2, c=>4});
+
+  $result
+});
+
+=function merge_swap
+
+The merge_swap function merges two (or more) values and returns a new values
+based on the types of the inputs:
+
+B<Note:> This function replaces the existing data, including when merging
+hashrefs with hashrefs, and overwrites values (instead of appending) when
+merging arrayrefs with arrayrefs.
+
++=over 4
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "scalar" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "arrayref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "hashref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "scalar" we
+append the C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "arrayref"
+we replace each items in C<lvalue> with the value at the corresponding position
+in the C<rvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "hashref" we
+append the C<rvalue> to the C<lvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "scalar" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "arrayref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "hashref" we
+append the keys and values in C<rvalue> to the C<lvalue>, overwriting existing
+keys if there's overlap.
+
++=back
+
+=signature merge_swap
+
+  merge_swap(any @args) (any)
+
+=metadata merge_swap
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 merge_swap
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap';
+
+  my $merge_swap = merge_swap;
+
+  # undef
+
+=cut
+
+$test->for('example', 1, 'merge_swap', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, undef;
+
+  !$result
+});
+
+=example-2 merge_swap
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap';
+
+  my $merge_swap = merge_swap 1;
+
+  # 1
+
+=cut
+
+$test->for('example', 2, 'merge_swap', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-3 merge_swap
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap';
+
+  my $merge_swap = merge_swap 1, 2;
+
+  # 2
+
+=cut
+
+$test->for('example', 3, 'merge_swap', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result
+});
+
+=example-4 merge_swap
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap';
+
+  my $merge_swap = merge_swap 1, [2, 3];
+
+  # [2, 3]
+
+=cut
+
+$test->for('example', 4, 'merge_swap', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [2, 3];
+
+  $result
+});
+
+=example-5 merge_swap
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap';
+
+  my $merge_swap = merge_swap [1, 2], 3;
+
+  # [1, 2, 3]
+
+=cut
+
+$test->for('example', 5, 'merge_swap', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3];
+
+  $result
+});
+
+=example-6 merge_swap
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap';
+
+  my $merge_swap = merge_swap [1, 2, 3], [4, 5];
+
+  # [4, 5, 3]
+
+=cut
+
+$test->for('example', 6, 'merge_swap', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [4, 5, 3];
+
+  $result
+});
+
+=example-7 merge_swap
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap';
+
+  my $merge_swap = merge_swap {a => 1}, {a => 2, b => 3};
+
+  # {a => 2, b => 3}
+
+=cut
+
+$test->for('example', 7, 'merge_swap', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {a => 2, b => 3};
+
+  $result
+});
+
+=example-8 merge_swap
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap';
+
+  my $merge_swap = merge_swap(
+    {
+      a => 1,
+      b => {x => 10},
+      d => 0,
+      g => [4],
+    },
+    {
+      b => {y => 20},
+      c => 3,
+      e => [5],
+      f => [6]
+    },
+    {
+      b => {y => 30, z => 456},
+      c => {z => 123},
+      d => 2,
+      e => [6, 7],
+      f => {7, 8},
+      g => 5,
+    },
+  );
+
+  # {
+  #   a => 1,
+  #   b => {
+  #     x => 10,
+  #     y => 30,
+  #     z => 456
+  #   },
+  #   c => {z => 123},
+  #   d => 2,
+  #   e => [6, 7],
+  #   f => [6, {7, 8}],
+  #   g => [4, 5],
+  # }
+
+=cut
+
+$test->for('example', 8, 'merge_swap', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {
+    a => 1,
+    b => {
+      x => 10,
+      y => 30,
+      z => 456
+    },
+    c => {z => 123},
+    d => 2,
+    e => [6, 7],
+    f => [6, {7, 8}],
+    g => [4, 5],
+  };
+
+  is_deeply(merge_swap(10, 20), 20);
+  is_deeply(merge_swap(10, [1, 2]), [1, 2]);
+  is_deeply(merge_swap(10, {a=>1}), {a=>1});
+  is_deeply(merge_swap([1, 2], 3), [1, 2, 3]);
+  is_deeply(merge_swap([1, 2], [3, 4]), [3, 4]);
+  is_deeply(merge_swap([1, 2], {a=>3, b=>4}), [1, 2, {a=>3, b=>4}]);
+  is_deeply(merge_swap({a=>1, b=>2}, 10), 10);
+  is_deeply(merge_swap({a=>1, b=>2}, [3, 4]), [3, 4]);
+  is_deeply(merge_swap({a=>1, b=>2}, {b=>3, c=>4}), {a=>1, b=>3, c=>4});
+
+  $result
+});
+
+=function merge_swap_mutate
+
+The merge_swap_mutate performs a merge operaiton in accordance with
+L</merge_swap> except that it mutates the values being merged and returns the
+mutated value.
+
+=signature merge_swap_mutate
+
+  merge_swap_mutate(any @args) (any)
+
+=metadata merge_swap_mutate
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 merge_swap_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap_mutate';
+
+  $result = undef;
+
+  my $merge_swap_mutate = merge_swap_mutate $result;
+
+  # undef
+
+  $result;
+
+  # undef
+
+=cut
+
+$test->for('example', 1, 'merge_swap_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, undef;
+
+  !$result
+});
+
+=example-2 merge_swap_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap_mutate';
+
+  $result = 1;
+
+  my $merge_swap_mutate = merge_swap_mutate $result;
+
+  # 1
+
+  $result;
+
+  # 1
+
+=cut
+
+$test->for('example', 2, 'merge_swap_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-3 merge_swap_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap_mutate';
+
+  $result = 1;
+
+  my $merge_swap_mutate = merge_swap_mutate $result, 2;
+
+  # 2
+
+  $result;
+
+  # 2
+
+=cut
+
+$test->for('example', 3, 'merge_swap_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result
+});
+
+=example-4 merge_swap_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap_mutate';
+
+  $result = 1;
+
+  my $merge_swap_mutate = merge_swap_mutate $result, [2, 3];
+
+  # [2, 3]
+
+  $result;
+
+  # [2, 3]
+
+=cut
+
+$test->for('example', 4, 'merge_swap_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [2, 3];
+
+  $result
+});
+
+=example-5 merge_swap_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap_mutate';
+
+  $result = [1, 2];
+
+  my $merge_swap_mutate = merge_swap_mutate $result, 3;
+
+  # [1, 2, 3]
+
+  $result;
+
+  # [1, 2, 3]
+
+=cut
+
+$test->for('example', 5, 'merge_swap_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [1, 2, 3];
+
+  $result
+});
+
+=example-6 merge_swap_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap_mutate';
+
+  $result = [1, 2, 3];
+
+  my $merge_swap_mutate = merge_swap_mutate $result, [4, 5];
+
+  # [4, 5, 3]
+
+  $result;
+
+  # [4, 5, 3]
+
+=cut
+
+$test->for('example', 6, 'merge_swap_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [4, 5, 3];
+
+  $result
+});
+
+=example-7 merge_swap_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_swap_mutate';
+
+  $result = {a => 1};
+
+  my $merge_swap_mutate = merge_swap_mutate $result, {a => 2, b => 3};
+
+  # {a => 2, b => 3}
+
+  $result;
+
+  # {a => 2, b => 3}
+
+=cut
+
+$test->for('example', 7, 'merge_swap_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {a => 2, b => 3};
+
+  $result = 10;
+  merge_swap_mutate($result, 20);
+  is_deeply($result, 20);
+
+  $result = 10;
+  merge_swap_mutate($result, [1, 2]);
+  is_deeply($result, [1, 2]);
+
+  $result = 10;
+  merge_swap_mutate($result, {a=>1});
+  is_deeply($result, {a=>1});
+
+  $result = [1, 2];
+  merge_swap_mutate($result, 3);
+  is_deeply($result, [1, 2, 3]);
+
+  $result = [1, 2];
+  merge_swap_mutate($result, [3, 4]);
+  is_deeply($result, [3, 4]);
+
+  $result = [1, 2];
+  merge_swap_mutate($result, {a=>3, b=>4});
+  is_deeply($result, [1, 2, {a=>3, b=>4}]);
+
+  $result = {a=>1, b=>2};
+  merge_swap_mutate($result, 10);
+  is_deeply($result, 10);
+
+  $result = {a=>1, b=>2};
+  merge_swap_mutate($result, [3, 4]);
+  is_deeply($result, [3, 4]);
+
+  $result = {a=>1, b=>2};
+  merge_swap_mutate($result, {b=>3, c=>4});
+  is_deeply($result, {a=>1, b=>3, c=>4});
+
+  $result
+});
+
+=function merge_take
+
+The merge_take function merges two (or more) values and returns a new values
+based on the types of the inputs:
+
+B<Note:> This function always "takes" the new value, does not append arrayrefs,
+and overwrites keys and values when merging hashrefs with hashrefs.
+
++=over 4
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "scalar" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "arrayref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "scalar" and the C<rvalue> is a "hashref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "scalar" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "arrayref"
+we keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "arrayref" and the C<rvalue> is a "hashref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "scalar" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "arrayref" we
+keep the C<rvalue>.
+
++=item * When the C<lvalue> is a "hashref" and the C<rvalue> is a "hashref" we
+append the keys and values in C<rvalue> to the C<lvalue>, overwriting existing
+keys if there's overlap.
+
++=back
+
+=signature merge_take
+
+  merge_take(any @args) (any)
+
+=metadata merge_take
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 merge_take
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take';
+
+  my $merge_take = merge_take;
+
+  # undef
+
+=cut
+
+$test->for('example', 1, 'merge_take', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, undef;
+
+  !$result
+});
+
+=example-2 merge_take
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take';
+
+  my $merge_take = merge_take 1;
+
+  # 1
+
+=cut
+
+$test->for('example', 2, 'merge_take', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-3 merge_take
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take';
+
+  my $merge_take = merge_take 1, 2;
+
+  # 2
+
+=cut
+
+$test->for('example', 3, 'merge_take', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result
+});
+
+=example-4 merge_take
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take';
+
+  my $merge_take = merge_take [1], [2, 3];
+
+  # [2, 3]
+
+=cut
+
+$test->for('example', 4, 'merge_take', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [2, 3];
+
+  $result
+});
+
+=example-5 merge_take
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take';
+
+  my $merge_take = merge_take {a => 1, b => {x => 10}}, {b => {y => 20}, c => 3};
+
+  # {a => 1, b => {x => 10, y => 20}, c => 3}
+
+=cut
+
+$test->for('example', 5, 'merge_take', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {a => 1, b => {x => 10, y => 20}, c => 3};
+
+  $result
+});
+
+=example-6 merge_take
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take';
+
+  my $merge_take = merge_take [1, 2], 3;
+
+  # 3
+
+=cut
+
+$test->for('example', 6, 'merge_take', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 3;
+
+  $result
+});
+
+=example-7 merge_take
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take';
+
+  my $merge_take = merge_take {a => 1}, 2;
+
+  # 2
+
+=cut
+
+$test->for('example', 7, 'merge_take', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result
+});
+
+=example-8 merge_take
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take';
+
+  my $merge_take = merge_take(
+    {
+      a => 1,
+      b => {x => 10},
+      d => 0,
+      g => [4],
+    },
+    {
+      b => {y => 20},
+      c => 3,
+      e => [5],
+      f => [6]
+    },
+    {
+      b => {y => 30, z => 456},
+      c => {z => 123},
+      d => 2,
+      e => [6, 7],
+      f => {7, 8},
+      g => 5,
+    },
+  );
+
+  # {
+  #   a => 1,
+  #   b => {
+  #     x => 10,
+  #     y => 30,
+  #     z => 456
+  #   },
+  #   c => {z => 123},
+  #   d => 2,
+  #   e => [6, 7],
+  #   f => {7, 8},
+  #   g => 5,
+  # }
+
+=cut
+
+$test->for('example', 8, 'merge_take', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {
+    a => 1,
+    b => {
+      x => 10,
+      y => 30,
+      z => 456
+    },
+    c => {z => 123},
+    d => 2,
+    e => [6, 7],
+    f => {7, 8},
+    g => 5,
+  };
+
+  is_deeply(merge_take(10, 20), 20);
+  is_deeply(merge_take(10, [1, 2]), [1, 2]);
+  is_deeply(merge_take(10, {a=>1}), {a=>1});
+  is_deeply(merge_take([1, 2], 3), 3);
+  is_deeply(merge_take([1, 2], [3, 4]), [3, 4]);
+  is_deeply(merge_take([1, 2], {a=>3, b=>4}), {a=>3, b=>4});
+  is_deeply(merge_take({a=>1, b=>2}, 10), 10);
+  is_deeply(merge_take({a=>1, b=>2}, [3, 4]), [3, 4]);
+  is_deeply(merge_take({a=>1, b=>2}, {b=>3, c=>4}), {a=>1, b=>3, c=>4});
+
+  $result
+});
+
+=function merge_take_mutate
+
+The merge_take_mutate performs a merge operaiton in accordance with
+L</merge_take> except that it mutates the values being merged and returns the
+mutated value.
+
+=signature merge_take_mutate
+
+  merge_take_mutate(any @args) (any)
+
+=metadata merge_take_mutate
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 merge_take_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take_mutate';
+
+  $result = undef;
+
+  my $merge_take_mutate = merge_take_mutate $result;
+
+  # undef
+
+  $result;
+
+  # undef
+
+=cut
+
+$test->for('example', 1, 'merge_take_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, undef;
+
+  !$result
+});
+
+=example-2 merge_take_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take_mutate';
+
+  $result = 1;
+
+  my $merge_take_mutate = merge_take_mutate $result;
+
+  # 1
+
+  $result;
+
+  # 1
+
+=cut
+
+$test->for('example', 2, 'merge_take_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 1;
+
+  $result
+});
+
+=example-3 merge_take_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take_mutate';
+
+  $result = 1;
+
+  my $merge_take_mutate = merge_take_mutate $result, 2;
+
+  # 2
+
+  $result;
+
+  # 2
+
+=cut
+
+$test->for('example', 3, 'merge_take_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result
+});
+
+=example-4 merge_take_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take_mutate';
+
+  $result = [1];
+
+  my $merge_take_mutate = merge_take_mutate $result, [2, 3];
+
+  # [2, 3]
+
+  $result;
+
+  # [2, 3]
+
+=cut
+
+$test->for('example', 4, 'merge_take_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, [2, 3];
+
+  $result
+});
+
+=example-5 merge_take_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take_mutate';
+
+  $result = {a => 1, b => {x => 10}};
+
+  my $merge_take_mutate = merge_take_mutate $result, {b => {y => 20}, c => 3};
+
+  # {a => 1, b => {x => 10, y => 20}, c => 3}
+
+  $result;
+
+  # {a => 1, b => {x => 10, y => 20}, c => 3}
+
+=cut
+
+$test->for('example', 5, 'merge_take_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, {a => 1, b => {x => 10, y => 20}, c => 3};
+
+  $result
+});
+
+=example-6 merge_take_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take_mutate';
+
+  $result = [1, 2];
+
+  my $merge_take_mutate = merge_take_mutate $result, 3;
+
+  # 3
+
+  $result;
+
+  # 3
+
+=cut
+
+$test->for('example', 6, 'merge_take_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 3;
+
+  $result
+});
+
+=example-7 merge_take_mutate
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'merge_take_mutate';
+
+  $result = {a => 1};
+
+  my $merge_take_mutate = merge_take_mutate $result, 2;
+
+  # 2
+
+  $result;
+
+  # 2
+
+=cut
+
+$test->for('example', 7, 'merge_take_mutate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, 2;
+
+  $result = 10;
+  merge_take_mutate($result, 20);
+  is_deeply($result, 20);
+
+  $result = 10;
+  merge_take_mutate($result, [1, 2]);
+  is_deeply($result, [1, 2]);
+
+  $result = 10;
+  merge_take_mutate($result, {a=>1});
+  is_deeply($result, {a=>1});
+
+  $result = [1, 2];
+  merge_take_mutate($result, 3);
+  is_deeply($result, 3);
+
+  $result = [1, 2];
+  merge_take_mutate($result, [3, 4]);
+  is_deeply($result, [3, 4]);
+
+  $result = [1, 2];
+  merge_take_mutate($result, {a=>3, b=>4});
+  is_deeply($result, {a=>3, b=>4});
+
+  $result = {a=>1, b=>2};
+  merge_take_mutate($result, 10);
+  is_deeply($result, 10);
+
+  $result = {a=>1, b=>2};
+  merge_take_mutate($result, [3, 4]);
+  is_deeply($result, [3, 4]);
+
+  $result = {a=>1, b=>2};
+  merge_take_mutate($result, {b=>3, c=>4});
+  is_deeply($result, {a=>1, b=>3, c=>4});
+
+  $result
+});
+
 =function meta
 
 The meta function builds and returns a L<Venus::Meta> object, or dispatches to
@@ -3762,7 +8969,7 @@ $test->for('example', 1, 'meta', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, "Venus::Meta";
-  is $result->{name}, 'Venus';
+  is_deeply $result->{name}, 'Venus';
 
   $result
 });
@@ -3782,7 +8989,7 @@ $test->for('example', 1, 'meta', sub {
 $test->for('example', 2, 'meta', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 1;
+  is_deeply $result, 1;
 
   $result
 });
@@ -3820,7 +9027,7 @@ $test->for('example', 1, 'name', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Name';
-  is $result->package, 'Foo::Bar';
+  is_deeply $result->package, 'Foo::Bar';
 
   $result
 });
@@ -3840,7 +9047,7 @@ $test->for('example', 1, 'name', sub {
 $test->for('example', 2, 'name', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 'Foo::Bar';
+  is_deeply $result, 'Foo::Bar';
 
   $result
 });
@@ -3878,7 +9085,7 @@ $test->for('example', 1, 'number', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Number';
-  is $result->get, 1_000;
+  is_deeply $result->get, 1_000;
 
   $result
 });
@@ -3898,7 +9105,7 @@ $test->for('example', 1, 'number', sub {
 $test->for('example', 2, 'number', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 11_000;
+  is_deeply $result, 11_000;
 
   $result
 });
@@ -3960,7 +9167,7 @@ $test->for('example', 2, 'opts', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Opts';
-  is $result->get('resource'), "users";
+  is_deeply $result->get('resource'), "users";
 
   $result
 });
@@ -4176,7 +9383,7 @@ $test->for('example', 2, 'perl', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   $result =~ s/[\s\n]+//g;
-  is $result, '{stable=>bless({},\'Venus::True\')}';
+  is_deeply $result, '{stable=>bless({},\'Venus::True\')}';
 
   $result
 });
@@ -4275,7 +9482,7 @@ $test->for('example', 2, 'process', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, "Venus::Process";
-  is $result->alarm, 10;
+  is_deeply $result->alarm, 10;
 
   $result
 });
@@ -4315,7 +9522,7 @@ $test->for('example', 1, 'proto', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Prototype';
-  is $result->counter, 0;
+  is_deeply $result->counter, 0;
 
   $result
 });
@@ -4339,9 +9546,9 @@ $test->for('example', 2, 'proto', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Prototype';
-  is $result->counter, 0;
-  is $result->increment, 1;
-  is $result->decrement, 0;
+  is_deeply $result->counter, 0;
+  is_deeply $result->increment, 1;
+  is_deeply $result->decrement, 0;
 
   $result
 });
@@ -4517,6 +9724,7 @@ to the coderef or method provided.
 $test->for('example', 1, 'random', sub {
   if (require Venus::Random && Venus::Random->new(42)->range(1, 50) != 38) {
     plan skip_all => "OS ($^O) rand function is undeterministic";
+    return 1;
   }
   my ($tryable) = @_;
   my $result = $tryable->result;
@@ -4540,6 +9748,7 @@ $test->for('example', 1, 'random', sub {
 $test->for('example', 2, 'random', sub {
   if (require Venus::Random && Venus::Random->new(42)->range(1, 50) != 38) {
     plan skip_all => "OS ($^O) rand function is undeterministic";
+    return 1;
   }
   my ($tryable) = @_;
   my $result = $tryable->result;
@@ -4604,6 +9813,375 @@ $test->for('example', 2, 'range', sub {
   $result
 });
 
+=function read_env
+
+The read_env function returns a new L<Venus::Config> object based on the string
+of key/value pairs provided.
+
+=signature read_env
+
+  read_env(string $data) (Venus::Config)
+
+=metadata read_env
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 read_env
+
+  package main;
+
+  use Venus 'read_env';
+
+  my $read_env = read_env "APPNAME=Example\nAPPVER=0.01\n# Comment\n\n\nAPPTAG=\"Godzilla\"";
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'read_env', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Config');
+  my $value = $result->value;
+  is_deeply $value, {
+    APPNAME => "Example",
+    APPTAG => "Godzilla",
+    APPVER => 0.01,
+  };
+
+  $result
+});
+
+=function read_env_file
+
+The read_env_file function uses L<Venus::Path> to return a new L<Venus::Config>
+object based on the file provided.
+
+=signature read_env_file
+
+  read_env_file(string $file) (Venus::Config)
+
+=metadata read_env_file
+
+{
+  since => '4.15',
+}
+
+=example-1 read_env_file
+
+  package main;
+
+  use Venus 'read_env_file';
+
+  my $config = read_env_file 't/conf/read.env';
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'read_env_file', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Config');
+  my $value = $result->value;
+  is_deeply $value->{APPNAME}, "Example";
+  is_deeply $value->{APPTAG}, "Godzilla";
+  is_deeply $value->{APPVER}, 0.01;
+
+  $result
+});
+
+=function read_json
+
+The read_json function returns a new L<Venus::Config> object based on the JSON
+string provided.
+
+=signature read_json
+
+  read_json(string $data) (Venus::Config)
+
+=metadata read_json
+
+{
+  since => '4.15',
+}
+
+=example-1 read_json
+
+  package main;
+
+  use Venus 'read_json';
+
+  my $config = read_json q(
+  {
+    "$metadata": {
+      "tmplog": "/tmp/log"
+    },
+    "$services": {
+      "log": { "package": "Venus/Path", "argument": { "$metadata": "tmplog" } }
+    }
+  }
+  );
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'read_json', sub {
+  my ($tryable) = @_;
+  my $result;
+  if (require Venus::Json && not Venus::Json->package) {
+    diag 'No suitable JSON library found' if $ENV{VENUS_DEBUG};
+    $result = Venus::Config->new;
+    ok 1;
+  }
+  else {
+    ok $result = $tryable->result;
+    ok $result->isa('Venus::Config');
+    my $value = $result->value;
+    ok exists $value->{'$services'};
+    ok exists $value->{'$metadata'};
+  }
+
+  $result
+});
+
+=function read_json_file
+
+The read_json_file function uses L<Venus::Path> to return a new
+L<Venus::Config> object based on the file provided.
+
+=signature read_json_file
+
+  read_json_file(string $file) (Venus::Config)
+
+=metadata read_json_file
+
+{
+  since => '4.15',
+}
+
+=example-1 read_json_file
+
+  package main;
+
+  use Venus 'read_json_file';
+
+  my $config = read_json_file 't/conf/read.json';
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'read_json_file', sub {
+  my ($tryable) = @_;
+  my $result;
+  if (require Venus::Json && not Venus::Json->package) {
+    diag 'No suitable JSON library found' if $ENV{VENUS_DEBUG};
+    $result = Venus::Config->new;
+    ok 1;
+  }
+  else {
+    ok $result = $tryable->result;
+    ok $result->isa('Venus::Config');
+    my $value = $result->value;
+    ok exists $value->{'$services'};
+    ok exists $value->{'$metadata'};
+  }
+
+  $result
+});
+
+=function read_perl
+
+The read_perl function returns a new L<Venus::Config> object based on the Perl
+string provided.
+
+=signature read_perl
+
+  read_perl(string $data) (Venus::Config)
+
+=metadata read_perl
+
+{
+  since => '4.15',
+}
+
+=example-1 read_perl
+
+  package main;
+
+  use Venus 'read_perl';
+
+  my $config = read_perl q(
+  {
+    '$metadata' => {
+      tmplog => "/tmp/log"
+    },
+    '$services' => {
+      log => { package => "Venus/Path", argument => { '$metadata' => "tmplog" } }
+    }
+  }
+  );
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'read_perl', sub {
+  my ($tryable) = @_;
+  ok my $result = $tryable->result;
+  ok $result->isa('Venus::Config');
+  my $value = $result->value;
+  ok exists $value->{'$services'};
+  ok exists $value->{'$metadata'};
+
+  $result
+});
+
+=function read_perl_file
+
+The read_perl_file function uses L<Venus::Path> to return a new
+L<Venus::Config> object based on the file provided.
+
+=signature read_perl_file
+
+  read_perl_file(string $file) (Venus::Config)
+
+=metadata read_perl_file
+
+{
+  since => '4.15',
+}
+
+=example-1 read_perl_file
+
+  package main;
+
+  use Venus 'read_perl_file';
+
+  my $config = read_perl_file 't/conf/read.perl';
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'read_perl_file', sub {
+  my ($tryable) = @_;
+  ok my $result = $tryable->result;
+  ok $result->isa('Venus::Config');
+  ok $result->isa('Venus::Config');
+  my $value = $result->value;
+  ok exists $value->{'$services'};
+  ok exists $value->{'$metadata'};
+
+  $result
+});
+
+=function read_yaml
+
+The read_yaml function returns a new L<Venus::Config> object based on the YAML
+string provided.
+
+=signature read_yaml
+
+  read_yaml(string $data) (Venus::Config)
+
+=metadata read_yaml
+
+{
+  since => '4.15',
+}
+
+=example-1 read_yaml
+
+  package main;
+
+  use Venus 'read_yaml';
+
+  my $config = read_yaml q(
+  '$metadata':
+    tmplog: /tmp/log
+  '$services':
+    log:
+      package: "Venus/Path"
+      argument:
+        '$metadata': tmplog
+  );
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'read_yaml', sub {
+  my ($tryable) = @_;
+  my $result;
+  if (require Venus::Yaml && not Venus::Yaml->package) {
+    diag 'No suitable YAML library found' if $ENV{VENUS_DEBUG};
+    $result = Venus::Config->new;
+    ok 1;
+  }
+  else {
+    ok $result = $tryable->result;
+    ok $result->isa('Venus::Config');
+    my $value = $result->value;
+    ok exists $value->{'$services'};
+    ok exists $value->{'$metadata'};
+  }
+
+  $result
+});
+
+=function read_yaml_file
+
+The read_yaml_file function uses L<Venus::Path> to return a new
+L<Venus::Config> object based on the YAML string provided.
+
+=signature read_yaml_file
+
+  read_yaml_file(string $file) (Venus::Config)
+
+=metadata read_yaml_file
+
+{
+  since => '4.15',
+}
+
+=example-1 read_yaml_file
+
+  package main;
+
+  use Venus 'read_yaml_file';
+
+  my $config = read_yaml_file 't/conf/read.yaml';
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'read_yaml_file', sub {
+  my ($tryable) = @_;
+  my $result;
+  if (require Venus::Yaml && not Venus::Yaml->package) {
+    diag 'No suitable YAML library found' if $ENV{VENUS_DEBUG};
+    $result = Venus::Config->new;
+    ok 1;
+  }
+  else {
+    ok $result = $tryable->result;
+    ok $result->isa('Venus::Config');
+    my $value = $result->value;
+    ok exists $value->{'$services'};
+    ok exists $value->{'$metadata'};
+  }
+
+  $result
+});
+
 =function regexp
 
 The regexp function builds and returns a L<Venus::Regexp> object, or dispatches
@@ -4661,7 +10239,7 @@ $test->for('example', 2, 'regexp', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, "Venus::Replace";
-  is $result->get, "ID 00000";
+  is_deeply $result->get, "ID 00000";
 
   $result
 });
@@ -4700,7 +10278,7 @@ L<Venus::Template>, and returns the result.
 $test->for('example', 1, 'render', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, "hello user";
+  is_deeply $result, "hello user";
 
   $result
 });
@@ -4738,9 +10316,9 @@ $test->for('example', 1, 'replace', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, "Venus::Replace";
-  is $result->string, 'hello world';
-  is $result->regexp, 'world';
-  is $result->substr, 'universe';
+  is_deeply $result->string, 'hello world';
+  is_deeply $result->regexp, 'world';
+  is_deeply $result->substr, 'universe';
 
   $result
 });
@@ -4760,71 +10338,7 @@ $test->for('example', 1, 'replace', sub {
 $test->for('example', 2, 'replace', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, "hello universe";
-
-  $result
-});
-
-=function resolve
-
-The resolve function builds and returns an object via L<Venus::Container/resolve>.
-
-=signature resolve
-
-  resolve(hashref $value, any @args) (any)
-
-=metadata resolve
-
-{
-  since => '3.30',
-}
-
-=cut
-
-=example-1 resolve
-
-  package main;
-
-  use Venus 'resolve';
-
-  my $resolve = resolve {};
-
-  # undef
-
-=cut
-
-$test->for('example', 1, 'resolve', sub {
-  my ($tryable) = @_;
-  my $result = $tryable->result;
-  ok !defined $result;
-
-  !$result
-});
-
-=example-2 resolve
-
-  package main;
-
-  use Venus 'resolve';
-
-  my $data = {
-    '$services' => {
-      log => {
-        package => "Venus/Path",
-      }
-    }
-  };
-
-  my $log = resolve $data, 'log';
-
-  # bless({...}, 'Venus::Path')
-
-=cut
-
-$test->for('example', 2, 'resolve', sub {
-  my ($tryable) = @_;
-  ok my $result = $tryable->result;
-  ok $result->isa('Venus::Path');
+  is_deeply $result, "hello universe";
 
   $result
 });
@@ -4882,7 +10396,7 @@ $test->for('example', 2, 'roll', sub {
   my ($tryable) = @_;
   ok my @result = $tryable->result;
   ok $result[0]->isa('Digest::SHA');
-  is $result[1], 'sha1_hex';
+  is_deeply $result[1], 'sha1_hex';
 
   @result
 });
@@ -4920,8 +10434,8 @@ $test->for('example', 1, 'search', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, "Venus::Search";
-  is $result->string, 'hello world';
-  is $result->regexp, 'world';
+  is_deeply $result->string, 'hello world';
+  is_deeply $result->regexp, 'world';
 
   $result
 });
@@ -4941,7 +10455,7 @@ $test->for('example', 1, 'search', sub {
 $test->for('example', 2, 'search', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 1;
+  is_deeply $result, 1;
 
   $result
 });
@@ -4964,9 +10478,9 @@ The set function returns a L<Venus::Set> object for the arrayref provided.
 
   package main;
 
-  use Venus 'set';
+  use Venus;
 
-  my $set = set [1..9];
+  my $set = Venus::set [1..9];
 
   # bless(..., 'Venus::Set')
 
@@ -4977,6 +10491,26 @@ $test->for('example', 1, 'set', sub {
   ok my $result = $tryable->result;
   ok $result->isa('Venus::Set');
   is_deeply $result->get, [1..9];
+
+  $result
+});
+
+=example-2 set
+
+  package main;
+
+  use Venus;
+
+  my $set = Venus::set [1..9], 'count';
+
+  # 9
+
+=cut
+
+$test->for('example', 2, 'set', sub {
+  my ($tryable) = @_;
+  ok my $result = $tryable->result;
+  is_deeply $result, 9;
 
   $result
 });
@@ -5011,7 +10545,7 @@ $test->for('example', 1, 'space', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
   ok $result->isa('Venus::Space');
-  is $result->value, 'Venus::Scalar';
+  is_deeply $result->value, 'Venus::Scalar';
 
   $result
 });
@@ -5023,12 +10557,12 @@ to the coderef or method provided.
 
 =signature schema
 
-  schema(string $value, string | coderef $code, any @args) (any)
+  schema(string | coderef $code, any @args) (Venus::Schema)
 
 =metadata schema
 
 {
-  since => '2.55',
+  since => '4.15',
 }
 
 =cut
@@ -5039,7 +10573,7 @@ to the coderef or method provided.
 
   use Venus 'schema';
 
-  my $schema = schema { name => 'string' };
+  my $schema = schema;
 
   # bless({...}, "Venus::Schema")
 
@@ -5049,7 +10583,6 @@ $test->for('example', 1, 'schema', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Schema';
-  is_deeply $result->definition, { name => 'string' };
 
   $result
 });
@@ -5060,18 +10593,260 @@ $test->for('example', 1, 'schema', sub {
 
   use Venus 'schema';
 
-  my $result = schema { name => 'string' }, 'validate', { name => 'example' };
+  my $schema = schema 'rule', {
+    selector => 'handles',
+    presence => 'required',
+    executes => [['type', 'arrayref']],
+  };
 
-  # { name => 'example' }
+  # bless({...}, "Venus::Schema")
 
 =cut
 
 $test->for('example', 2, 'schema', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is_deeply $result, { name => 'example' };
+  isa_ok $result, 'Venus::Schema';
+  is_deeply $result->ruleset, [{
+    selector => 'handles',
+    presence => 'required',
+    executes => [['type', 'arrayref']],
+  }];
 
   $result
+});
+
+=example-3 schema
+
+  package main;
+
+  use Venus 'schema';
+
+  my $schema = schema 'rules', {
+    selector => 'fname',
+    presence => 'required',
+    executes => ['string', 'trim', 'strip'],
+  },{
+    selector => 'lname',
+    presence => 'required',
+    executes => ['string', 'trim', 'strip'],
+  };
+
+  # bless({...}, "Venus::Schema")
+
+=cut
+
+$test->for('example', 3, 'schema', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Schema';
+  is_deeply $result->ruleset, [{
+    selector => 'fname',
+    presence => 'required',
+    executes => ['string', 'trim', 'strip'],
+  },{
+    selector => 'lname',
+    presence => 'required',
+    executes => ['string', 'trim', 'strip'],
+  }];
+
+  $result
+});
+
+=function sets
+
+The sets function find values from within the underlying data structure using
+L<Venus::Array/path> or L<Venus::Hash/path>, where each argument pair is a
+selector and value, and returns all the values provided. Returns a list in list
+context. Note, nested data structures can be updated but not created.
+
+=signature sets
+
+  sets(string @args) (arrayref)
+
+=metadata sets
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 sets
+
+  package main;
+
+  use Venus 'sets';
+
+  my $data = ['foo', {'bar' => 'baz'}, 'bar', ['baz']];
+
+  my $sets = sets $data, '3' => 'bar', '1.bar' => 'bar';
+
+  # ['bar', 'bar']
+
+=cut
+
+$test->for('example', 1, 'sets', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, ['bar', 'bar'];
+  my $data = ['foo', {'bar' => 'baz'}, 'bar', ['baz']];
+  Venus::sets($data, '3' => 'bar', '1.bar' => 'bar');
+  is_deeply $data, ['foo', {'bar' => 'bar'}, 'bar', 'bar'];
+
+  $result
+});
+
+=example-2 sets
+
+  package main;
+
+  use Venus 'sets';
+
+  my $data = ['foo', {'bar' => 'baz'}, 'bar', ['baz']];
+
+  my ($baz, $one_bar) = sets $data, '3' => 'bar', '1.bar' => 'bar';
+
+  # ('bar', 'bar')
+
+=cut
+
+$test->for('example', 2, 'sets', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  is_deeply \@result, ['bar', 'bar'];
+  my $data = ['foo', {'bar' => 'baz'}, 'bar', ['baz']];
+  Venus::sets($data, '3' => 'bar', '1.bar' => 'bar');
+  is_deeply $data, ['foo', {'bar' => 'bar'}, 'bar', 'bar'];
+
+  @result
+});
+
+=example-3 sets
+
+  package main;
+
+  use Venus 'sets';
+
+  my $data = {'foo' => {'bar' => 'baz'}, 'bar' => ['baz']};
+
+  my $sets = sets $data, 'bar' => 'bar', 'foo.bar' => 'bar';
+
+  # ['bar', 'bar']
+
+=cut
+
+$test->for('example', 3, 'sets', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, ['bar', 'bar'];
+  my $data = {'foo' => {'bar' => 'baz'}, 'bar' => ['baz']};
+  Venus::sets($data, 'bar' => 'bar', 'foo.bar' => 'bar');
+  is_deeply $data, {'foo' => {'bar' => 'bar'}, 'bar' => 'bar'};
+
+  $result
+});
+
+=example-4 sets
+
+  package main;
+
+  use Venus 'sets';
+
+  my $data = {'foo' => {'bar' => 'baz'}, 'bar' => ['baz']};
+
+  my ($bar, $foo_bar) = sets $data, 'bar' => 'bar', 'foo.bar' => 'bar';
+
+  # ('bar', 'bar')
+
+=cut
+
+$test->for('example', 4, 'sets', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  is_deeply \@result, ['bar', 'bar'];
+  my $data = {'foo' => {'bar' => 'baz'}, 'bar' => ['baz']};
+  Venus::sets($data, 'bar' => 'bar', 'foo.bar' => 'bar');
+  is_deeply $data, {'foo' => {'bar' => 'bar'}, 'bar' => 'bar'};
+
+  @result
+});
+
+=function sorts
+
+The sorts function accepts a list of values, flattens any arrayrefs, and sorts
+it using the default C<sort(LIST)> call style exclusively.
+
+=signature sorts
+
+  sorts(any @args) (any)
+
+=metadata sorts
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 sorts
+
+  package main;
+
+  use Venus 'sorts';
+
+  my @sorts = sorts 1..4;
+
+  # (1..4)
+
+=cut
+
+$test->for('example', 1, 'sorts', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  is_deeply [@result], [1..4];
+
+  @result
+});
+
+=example-2 sorts
+
+  package main;
+
+  use Venus 'sorts';
+
+  my @sorts = sorts 4,3,2,1;
+
+  # (1..4)
+
+=cut
+
+$test->for('example', 2, 'sorts', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  is_deeply [@result], [1..4];
+
+  @result
+});
+
+=example-3 sorts
+
+  package main;
+
+  use Venus 'sorts';
+
+  my @sorts = sorts [1..4], 5, [6..9];
+
+  # (1..9)
+
+=cut
+
+$test->for('example', 3, 'sorts', sub {
+  my ($tryable) = @_;
+  my @result = $tryable->result;
+  is_deeply [@result], [1..9];
+
+  @result
 });
 
 =function string
@@ -5107,7 +10882,7 @@ $test->for('example', 1, 'string', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::String';
-  is $result->get, 'hello world';
+  is_deeply $result->get, 'hello world';
 
   $result
 });
@@ -5127,7 +10902,7 @@ $test->for('example', 1, 'string', sub {
 $test->for('example', 2, 'string', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 'helloWorld';
+  is_deeply $result, 'helloWorld';
 
   $result
 });
@@ -5169,7 +10944,7 @@ $test->for('example', 1, 'syscall', sub {
   local $TEST_VENUS_QX_CODE = 0;
   my $result = $tryable->result;
   ok defined $result;
-  is $result, 1;
+  is_deeply $result, 1;
 
   $result
 });
@@ -5193,7 +10968,7 @@ $test->for('example', 2, 'syscall', sub {
   local $TEST_VENUS_QX_CODE = 29;
   my $result = $tryable->result;
   ok defined $result;
-  is $result, 0;
+  is_deeply $result, 0;
 
   !$result
 });
@@ -5277,7 +11052,7 @@ $test->for('example', 1, 'template', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Template';
-  is $result->get, 'Hi {{name}}';
+  is_deeply $result->get, 'Hi {{name}}';
 
   $result
 });
@@ -5299,7 +11074,7 @@ $test->for('example', 1, 'template', sub {
 $test->for('example', 2, 'template', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  is $result, 'Hi stranger';
+  is_deeply $result, 'Hi stranger';
 
   $result
 });
@@ -5337,7 +11112,7 @@ $test->for('example', 1, 'test', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, "Venus::Test";
-  is $result->file, 't/Venus.t';
+  is_deeply $result->file, 't/Venus.t';
 
   $result
 });
@@ -5358,7 +11133,7 @@ $test->for('example', 2, 'test', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, "Venus::Test";
-  is $result->file, 't/Venus.t';
+  is_deeply $result->file, 't/Venus.t';
 
   $result
 });
@@ -5415,7 +11190,7 @@ $test->for('example', 1, 'text', sub {
   my ($tryable) = @_;
   local $0 = 't/data/sections';
   my $result = $tryable->result;
-  is $result, "Example Name";
+  is_deeply $result, "Example Name";
 
   $result
 });
@@ -5454,7 +11229,7 @@ $test->for('example', 2, 'text', sub {
   my ($tryable) = @_;
   local $0 = 't/data/sections';
   my $result = $tryable->result;
-  is $result, "Example Title #1";
+  is_deeply $result, "Example Title #1";
 
   $result
 });
@@ -5493,7 +11268,7 @@ $test->for('example', 3, 'text', sub {
   my ($tryable) = @_;
   local $0 = 't/data/sections';
   my $result = $tryable->result;
-  is $result, "Example Name";
+  is_deeply $result, "Example Name";
 
   $result
 });
@@ -5566,7 +11341,7 @@ $test->for('example', 1, 'throw', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, "Venus::Throw";
-  is $result->package, 'Example::Error';
+  is_deeply $result->package, 'Example::Error';
 
   $result
 });
@@ -5577,7 +11352,7 @@ $test->for('example', 1, 'throw', sub {
 
   use Venus 'throw';
 
-  my $throw = throw 'Example::Error', 'catch', 'error';
+  my $throw = throw 'Example::Error', 'error';
 
   # bless({...}, 'Example::Error')
 
@@ -5615,7 +11390,7 @@ $test->for('example', 3, 'throw', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Throw';
   ok $result->package eq 'Example::Error';
-  is $result->name, 'on.execute';
+  is_deeply $result->name, 'on.execute';
   ok $result->stash('captured');
   ok $result->stash('time');
 
@@ -5766,6 +11541,235 @@ $test->for('example', 3, 'try', sub {
   $result
 });
 
+=function tv
+
+The tv function compares the lvalue and rvalue and returns true if they have
+the same type and value, otherwise returns false. b<Note:> Comparison of
+coderefs, filehandles, and blessed objects with private state are impossible.
+This function will only return true if these data types are L<"identical"|/is>.
+It's also impossible to know which blessed objects have private state and
+therefore could produce false-positives when comparing object in those cases.
+
+=signature tv
+
+  tv(any $lvalue, any $rvalue) (boolean)
+
+=metadata tv
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 tv
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'tv';
+
+  my $tv = tv 1, 1;
+
+  # true
+
+=cut
+
+$test->for('example', 1, 'tv', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-2 tv
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'tv';
+
+  my $tv = tv '1', 1;
+
+  # false
+
+=cut
+
+$test->for('example', 2, 'tv', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-3 tv
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'tv';
+
+  my $tv = tv ['0', 1..4], ['0', 1..4];
+
+  # true
+
+=cut
+
+$test->for('example', 3, 'tv', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-4 tv
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'tv';
+
+  my $tv = tv ['0', 1..4], [0, 1..4];
+
+  # false
+
+=cut
+
+$test->for('example', 4, 'tv', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-5 tv
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'tv';
+
+  my $tv = tv undef, undef;
+
+  # true
+
+=cut
+
+$test->for('example', 5, 'tv', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-6 tv
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'number', 'tv';
+
+  my $a = number 1;
+
+  my $tv = tv $a, undef;
+
+  # false
+
+=cut
+
+$test->for('example', 6, 'tv', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
+=example-7 tv
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'number', 'tv';
+
+  my $a = number 1;
+
+  my $tv = tv $a, $a;
+
+  # true
+
+=cut
+
+$test->for('example', 7, 'tv', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-8 tv
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'number', 'tv';
+
+  my $a = number 1;
+  my $b = number 1;
+
+  my $tv = tv $a, $b;
+
+  # true
+
+=cut
+
+$test->for('example', 8, 'tv', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, true;
+
+  $result
+});
+
+=example-9 tv
+
+  # given: synopsis
+
+  package main;
+
+  use Venus 'number', 'tv';
+
+  my $a = number 0;
+  my $b = number 1;
+
+  my $tv = tv $a, $b;
+
+  # false
+
+=cut
+
+$test->for('example', 9, 'tv', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, false;
+
+  !$result
+});
+
 =function type
 
 The type function builds and returns a L<Venus::Type> object, or dispatches to
@@ -5773,12 +11777,12 @@ the coderef or method provided.
 
 =signature type
 
-  type(any $data, string | coderef $code, any @args) (any)
+  type(string | coderef $code, any @args) (any)
 
 =metadata type
 
 {
-  since => '2.55',
+  since => '4.15',
 }
 
 =cut
@@ -5789,22 +11793,16 @@ the coderef or method provided.
 
   use Venus 'type';
 
-  my $type = type [1..4];
+  my $type = type;
 
   # bless({...}, 'Venus::Type')
-
-  # $type->deduce;
-
-  # bless({...}, 'Venus::Array')
 
 =cut
 
 $test->for('example', 1, 'type', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  isa_ok $result, "Venus::Type";
-  my $returned = $result->deduce;
-  isa_ok $returned, "Venus::Array";
+  ok $result->isa('Venus::Type');
 
   $result
 });
@@ -5815,16 +11813,36 @@ $test->for('example', 1, 'type', sub {
 
   use Venus 'type';
 
-  my $type = type [1..4], 'deduce';
+  my $expression = type 'expression', 'string | number';
 
-  # bless({...}, 'Venus::Array')
+  # ["either", "string", "number"]
 
 =cut
 
 $test->for('example', 2, 'type', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
-  isa_ok $result, "Venus::Array";
+  is_deeply $result, ["either", "string", "number"];
+
+  $result
+});
+
+=example-3 type
+
+  package main;
+
+  use Venus 'type';
+
+  my $expression = type 'expression', ["either", "string", "number"];
+
+  # "string | number"
+
+=cut
+
+$test->for('example', 3, 'type', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, "string | number";
 
   $result
 });
@@ -5964,81 +11982,145 @@ $test->for('example', 2, 'vars', sub {
   $result
 });
 
-=function venus
+=function vns
 
-The venus function build a L<Venus> package via the L</chain> function based on
-the name provided and returns an instance of that package.
+The vns function build a L<Venus> package based on the name provided, loads and
+instantiates the package, and returns an instance of that package or dispatches
+to the method provided and returns the result.
 
-=signature venus
+=signature vns
 
-  venus(string $name, any @args) (any)
+  vns(string $name, args $args, string | coderef $callback, any @args) (any)
 
-=metadata venus
+=metadata vns
 
 {
-  since => '2.40',
+  since => '4.15',
 }
 
 =cut
 
-=example-1 venus
+=example-1 vns
 
   package main;
 
-  use Venus 'venus';
+  use Venus 'vns';
 
-  my $space = venus 'space';
+  my $space = vns 'space';
 
   # bless({value => 'Venus'}, 'Venus::Space')
 
 =cut
 
-$test->for('example', 1, 'venus', sub {
+$test->for('example', 1, 'vns', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Space';
-  is $result->value, 'Venus';
+  is_deeply $result->value, 'Venus';
 
   $result
 });
 
-=example-2 venus
+=example-2 vns
 
   package main;
 
-  use Venus 'venus';
+  use Venus 'vns';
 
-  my $space = venus 'space', ['new', 'venus/string'];
+  my $space = vns 'space', 'Venus::String';
 
   # bless({value => 'Venus::String'}, 'Venus::Space')
 
 =cut
 
-$test->for('example', 2, 'venus', sub {
+$test->for('example', 2, 'vns', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Space';
-  is $result->value, 'Venus::String';
+  is_deeply $result->value, 'Venus::String';
 
   $result
 });
 
-=example-3 venus
+=example-3 vns
 
   package main;
 
-  use Venus 'venus';
+  use Venus 'vns';
 
-  my $space = venus 'code';
+  my $code = vns 'code', sub{};
 
   # bless({value => sub{...}}, 'Venus::Code')
 
 =cut
 
-$test->for('example', 3, 'venus', sub {
+$test->for('example', 3, 'vns', sub {
   my ($tryable) = @_;
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Code';
+
+  $result
+});
+
+=function what
+
+The what function builds and returns a L<Venus::What> object, or dispatches to
+the coderef or method provided.
+
+=signature what
+
+  what(any $data, string | coderef $code, any @args) (any)
+
+=metadata what
+
+{
+  since => '4.11',
+}
+
+=cut
+
+=example-1 what
+
+  package main;
+
+  use Venus 'what';
+
+  my $what = what [1..4];
+
+  # bless({...}, 'Venus::What')
+
+  # $what->deduce;
+
+  # bless({...}, 'Venus::Array')
+
+=cut
+
+$test->for('example', 1, 'what', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, "Venus::What";
+  my $returned = $result->deduce;
+  isa_ok $returned, "Venus::Array";
+
+  $result
+});
+
+=example-2 what
+
+  package main;
+
+  use Venus 'what';
+
+  my $what = what [1..4], 'deduce';
+
+  # bless({...}, 'Venus::Array')
+
+=cut
+
+$test->for('example', 2, 'what', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, "Venus::Array";
 
   $result
 });
@@ -6085,7 +12167,7 @@ $test->for('example', 1, 'work', sub {
   my ($tryable) = @_;
   local $TEST_VENUS_PROCESS_FORK = 0;
   ok my $result = $tryable->result;
-  is $result, $TEST_VENUS_PROCESS_PID;
+  is_deeply $result, $TEST_VENUS_PROCESS_PID;
 
   $result
 });
@@ -6131,8 +12213,8 @@ are stripped from the package to create the function name.
 $test->for('example', 1, 'wrap', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
-  is $result, '*main::DigestSHA';
-  is DigestSHA(), "Digest::SHA";
+  is_deeply $result, '*main::DigestSHA';
+  is_deeply DigestSHA(), "Digest::SHA";
   ok DigestSHA(1)->isa("Digest::SHA");
 
   $result
@@ -6161,9 +12243,373 @@ $test->for('example', 1, 'wrap', sub {
 $test->for('example', 2, 'wrap', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
-  is $result, '*main::SHA';
-  is SHA(), "Digest::SHA";
+  is_deeply $result, '*main::SHA';
+  is_deeply SHA(), "Digest::SHA";
   ok SHA(1)->isa("Digest::SHA");
+
+  $result
+});
+
+=function write_env
+
+The write_env function returns a string representing environment variable
+key/value pairs based on the L</value> held by the underlying L<Venus::Config>
+object.
+
+=signature write_env
+
+  write_env(hashref $data) (string)
+
+=metadata write_env
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 write_env
+
+  package main;
+
+  use Venus 'write_env';
+
+  my $write_env = write_env {
+    APPNAME => "Example",
+    APPTAG => "Godzilla",
+    APPVER => 0.01,
+  };
+
+  # "APPNAME=Example\nAPPTAG=Godzilla\nAPPVER=0.01"
+
+=cut
+
+$test->for('example', 1, 'write_env', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is_deeply $result, "APPNAME=Example\nAPPTAG=Godzilla\nAPPVER=0.01";
+
+  $result
+});
+
+=function write_env_file
+
+The write_env_file function saves a environment configuration file and returns
+a new L<Venus::Config> object.
+
+=signature write_env_file
+
+  write_env_file(string $path, hashref $data) (Venus::Config)
+
+=metadata write_env_file
+
+{
+  since => '4.15',
+}
+
+=example-1 write_env_file
+
+  package main;
+
+  use Venus 'write_env_file';
+
+  my $write_env_file = write_env_file 't/conf/write.env', {
+    APPNAME => "Example",
+    APPTAG => "Godzilla",
+    APPVER => 0.01,
+  };
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'write_env_file', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Config');
+  ok $result->value;
+  $result = $result->read_file('t/conf/write.env');
+  is_deeply $result->value->{APPNAME}, "Example";
+  is_deeply $result->value->{APPTAG}, "Godzilla";
+  is_deeply $result->value->{APPVER}, 0.01;
+
+  $result
+});
+
+=function write_json
+
+The write_json function returns a JSON encoded string based on the L</value>
+held by the underlying L<Venus::Config> object.
+
+=signature write_json
+
+  write_json(hashref $data) (string)
+
+=metadata write_json
+
+{
+  since => '4.15',
+}
+
+=example-1 write_json
+
+  package main;
+
+  use Venus 'write_json';
+
+  my $write_json = write_json {
+    '$services' => {
+      log => { package => "Venus::Path" },
+    },
+  };
+
+  # '{ "$services":{ "log":{ "package":"Venus::Path" } } }'
+
+=cut
+
+$test->for('example', 1, 'write_json', sub {
+  my ($tryable) = @_;
+  my $result;
+  if (require Venus::Json && not Venus::Json->package) {
+    diag 'No suitable JSON library found' if $ENV{VENUS_DEBUG};
+    $result = Venus::Config->new;
+    ok 1;
+  }
+  else {
+    $result = $tryable->result;
+    $result =~ s/[\n\s]//g;
+    is_deeply $result, '{"$services":{"log":{"package":"Venus::Path"}}}';
+  }
+
+  $result
+});
+
+=function write_json_file
+
+The write_json_file function saves a JSON configuration file and returns a new
+L<Venus::Config> object.
+
+=signature write_json_file
+
+  write_json_file(string $path, hashref $data) (Venus::Config)
+
+=metadata write_json_file
+
+{
+  since => '4.15',
+}
+
+=example-1 write_json_file
+
+  package main;
+
+  use Venus 'write_json_file';
+
+  my $write_json_file = write_json_file 't/conf/write.json', {
+    '$services' => {
+      log => { package => "Venus/Path", argument => { value => "." } }
+    }
+  };
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'write_json_file', sub {
+  my ($tryable) = @_;
+  my $result;
+  if (require Venus::Json && not Venus::Json->package) {
+    diag 'No suitable JSON library found' if $ENV{VENUS_DEBUG};
+    $result = Venus::Config->new;
+    ok 1;
+  }
+  else {
+    ok $result = $tryable->result;
+    ok $result->isa('Venus::Config');
+    ok $result->value;
+    $result = $result->read_file('t/conf/write.json');
+    ok exists $result->value->{'$services'};
+  }
+
+  $result
+});
+
+=function write_perl
+
+The write_perl function returns a FILE encoded string based on the L</value>
+held by the underlying L<Venus::Config> object.
+
+=signature write_perl
+
+  write_perl(hashref $data) (string)
+
+=metadata write_perl
+
+{
+  since => '4.15',
+}
+
+=example-1 write_perl
+
+  package main;
+
+  use Venus 'write_perl';
+
+  my $write_perl = write_perl {
+    '$services' => {
+      log => { package => "Venus::Path" },
+    },
+  };
+
+  # '{ "\$services" => { log => { package => "Venus::Path" } } }'
+
+=cut
+
+$test->for('example', 1, 'write_perl', sub {
+  my ($tryable) = @_;
+  ok my $result = $tryable->result;
+  $result =~ s/[\n\s]//g;
+  is_deeply $result, '{"\$services"=>{log=>{package=>"Venus::Path"}}}';
+
+  $result
+});
+
+=function write_perl_file
+
+The write_perl_file function saves a Perl configuration file and returns a new
+L<Venus::Config> object.
+
+=signature write_perl_file
+
+  write_perl_file(string $path, hashref $data) (Venus::Config)
+
+=metadata write_perl_file
+
+{
+  since => '4.15',
+}
+
+=example-1 write_perl_file
+
+  package main;
+
+  use Venus 'write_perl_file';
+
+  my $write_perl_file = write_perl_file 't/conf/write.perl', {
+    '$services' => {
+      log => { package => "Venus/Path", argument => { value => "." } }
+    }
+  };
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'write_perl_file', sub {
+  my ($tryable) = @_;
+  ok my $result = $tryable->result;
+  ok $result->isa('Venus::Config');
+  ok $result->value;
+  $result = $result->read_file('t/conf/write.perl');
+  ok exists $result->value->{'$services'};
+
+  $result
+});
+
+=function write_yaml
+
+The write_yaml function returns a FILE encoded string based on the L</value>
+held by the underlying L<Venus::Config> object.
+
+=signature write_yaml
+
+  write_yaml(hashref $data) (string)
+
+=metadata write_yaml
+
+{
+  since => '4.15',
+}
+
+=example-1 write_yaml
+
+  package main;
+
+  use Venus 'write_yaml';
+
+  my $write_yaml = write_yaml {
+    '$services' => {
+      log => { package => "Venus::Path" },
+    },
+  };
+
+  # '---\n$services:\n\s\slog:\n\s\s\s\spackage:\sVenus::Path'
+
+=cut
+
+$test->for('example', 1, 'write_yaml', sub {
+  my ($tryable) = @_;
+  my $result;
+  if (require Venus::Yaml && not Venus::Yaml->package) {
+    diag 'No suitable YAML library found' if $ENV{VENUS_DEBUG};
+    $result = Venus::Config->new;
+    ok 1;
+  }
+  else {
+    $result = $tryable->result;
+    $result =~ s/[\n\s]//g;
+    is_deeply $result, '---$services:log:package:Venus::Path';
+  }
+
+  $result
+});
+
+=function write_yaml_file
+
+The write_yaml_file function saves a YAML configuration file and returns a new
+L<Venus::Config> object.
+
+=signature write_yaml_file
+
+  write_yaml_file(string $path, hashref $data) (Venus::Config)
+
+=metadata write_yaml_file
+
+{
+  since => '4.15',
+}
+
+=example-1 write_yaml_file
+
+  package main;
+
+  use Venus 'write_yaml_file';
+
+  my $write_yaml_file = write_yaml_file 't/conf/write.yaml', {
+    '$services' => {
+      log => { package => "Venus/Path", argument => { value => "." } }
+    }
+  };
+
+  # bless(..., 'Venus::Config')
+
+=cut
+
+$test->for('example', 1, 'write_yaml_file', sub {
+  my ($tryable) = @_;
+  my $result;
+  if (require Venus::Yaml && not Venus::Yaml->package) {
+    diag 'No suitable YAML library found' if $ENV{VENUS_DEBUG};
+    $result = Venus::Config->new;
+    ok 1;
+  }
+  else {
+    $result = $tryable->result;
+    ok $result->isa('Venus::Config');
+    ok $result->value;
+    $result = $result->read_file('t/conf/write.yaml');
+    ok exists $result->value->{'$services'};
+  }
 
   $result
 });
@@ -6201,6 +12647,7 @@ and returns the result.
 $test->for('example', 1, 'yaml', sub {
   if (require Venus::Yaml && not Venus::Yaml->package) {
     plan skip_all => 'No suitable YAML library found';
+    return 1;
   }
   my ($tryable) = @_;
   my $result = $tryable->result;
@@ -6224,11 +12671,12 @@ $test->for('example', 1, 'yaml', sub {
 $test->for('example', 2, 'yaml', sub {
   if (require Venus::Yaml && not Venus::Yaml->package) {
     plan skip_all => 'No suitable YAML library found';
+    return 1;
   }
   my ($tryable) = @_;
   my $result = $tryable->result;
   $result =~ s/\n/\\n/g;
-  is $result, '---\nname:\n- Ready\n- Robot\nstable: true\n';
+  is_deeply $result, '---\nname:\n- Ready\n- Robot\nstable: true\n';
 
   $result
 });
@@ -6248,6 +12696,7 @@ $test->for('example', 2, 'yaml', sub {
 $test->for('example', 3, 'yaml', sub {
   if (require Venus::Yaml && not Venus::Yaml->package) {
     plan skip_all => 'No suitable YAML library found';
+    return 1;
   }
   my ($tryable) = @_;
   my $result = $tryable->result;
@@ -6271,6 +12720,7 @@ $test->for('example', 3, 'yaml', sub {
 $test->for('example', 4, 'yaml', sub {
   if (require Venus::Yaml && not Venus::Yaml->package) {
     plan skip_all => 'No suitable YAML library found';
+    return 1;
   }
   my ($tryable) = @_;
   my $result = $tryable->catch('Venus::Fault')->result;
@@ -6307,6 +12757,15 @@ asserting type constraints and coercion.
 
 $test->for('feature', 'venus-assert');
 
+=feature venus-atom
+
+This library contains a L<Venus::Atom> class which provides a write-once object
+representing a constant value.
+
+=cut
+
+$test->for('feature', 'venus-atom');
+
 =feature venus-boolean
 
 This library contains a L<Venus::Boolean> class which provides a representation
@@ -6324,6 +12783,14 @@ mechanism.
 =cut
 
 $test->for('feature', 'venus-box');
+
+=feature venus-check
+
+This library contains a L<Venus::Check> class which provides runtime dynamic type checking.
+
+=cut
+
+$test->for('feature', 'venus-check');
 
 =feature venus-class
 
@@ -6351,6 +12818,14 @@ manipulating subroutines.
 
 $test->for('feature', 'venus-code');
 
+=feature venus-coercion
+
+This library contains a L<Venus::Coercion> class which provides data type coercions via L<Venus::Check>.
+
+=cut
+
+$test->for('feature', 'venus-coercion');
+
 =feature venus-config
 
 This library contains a L<Venus::Config> class which provides methods for
@@ -6359,6 +12834,14 @@ loading Perl, YAML, and JSON configuration data.
 =cut
 
 $test->for('feature', 'venus-config');
+
+=feature venus-constraint
+
+This library contains a L<Venus::Constraint> class which provides data type constraints via L<Venus::Check>.
+
+=cut
+
+$test->for('feature', 'venus-constraint');
 
 =feature venus-data
 
@@ -6387,6 +12870,14 @@ and writing dumped Perl data.
 
 $test->for('feature', 'venus-dump');
 
+=feature venus-enum
+
+This library contains a L<Venus::Enum> class which provides an interface for working with enumerations.
+
+=cut
+
+$test->for('feature', 'venus-enum');
+
 =feature venus-error
 
 This library contains a L<Venus::Error> class which represents a context-aware
@@ -6395,6 +12886,14 @@ error (exception object).
 =cut
 
 $test->for('feature', 'venus-error');
+
+=feature venus-factory
+
+This library contains a L<Venus::Factory> class which provides an object-oriented factory pattern for building objects.
+
+=cut
+
+$test->for('feature', 'venus-factory');
 
 =feature venus-false
 
@@ -6422,6 +12921,15 @@ manipulating float data.
 =cut
 
 $test->for('feature', 'venus-float');
+
+=feature venus-future
+
+This library contains a L<Venus::Future> class which provides a
+framework-agnostic implementation of the Future pattern.
+
+=cut
+
+$test->for('feature', 'venus-future');
 
 =feature venus-gather
 
@@ -6459,6 +12967,15 @@ information using various log levels.
 =cut
 
 $test->for('feature', 'venus-log');
+
+=feature venus-map
+
+This library contains a L<Venus::Map> class which provides a representation of
+a collection of ordered key/value pairs.
+
+=cut
+
+$test->for('feature', 'venus-map');
 
 =feature venus-match
 
@@ -6513,6 +13030,16 @@ handling command-line arguments.
 
 $test->for('feature', 'venus-opts');
 
+=feature venus-os
+
+This library contains a L<Venus::Os> class which provides methods for
+determining the current operating system, as well as finding and executing
+files.
+
+=cut
+
+$test->for('feature', 'venus-os');
+
 =feature venus-path
 
 This library contains a L<Venus::Path> class which provides methods for working
@@ -6549,6 +13076,15 @@ object-oriented interface for Perl's pseudo-random number generator.
 
 $test->for('feature', 'venus-random');
 
+=feature venus-range
+
+This library contains a L<Venus::Range> class which provides an object-oriented
+interface for selecting elements from an arrayref using range expressions.
+
+=cut
+
+$test->for('feature', 'venus-range');
+
 =feature venus-regexp
 
 This library contains a L<Venus::Regexp> class which provides methods for
@@ -6566,6 +13102,15 @@ manipulating regexp replacement data.
 =cut
 
 $test->for('feature', 'venus-replace');
+
+=feature venus-result
+
+This library contains a L<Venus::Result> class which provides a container for
+representing success and error states.
+
+=cut
+
+$test->for('feature', 'venus-result');
 
 =feature venus-run
 
@@ -6586,6 +13131,24 @@ manipulating scalar data.
 
 $test->for('feature', 'venus-scalar');
 
+=feature venus-schema
+
+This library contains a L<Venus::Schema> class which provides a mechanism for
+validating complex data structures.
+
+=cut
+
+$test->for('feature', 'venus-schema');
+
+=feature venus-sealed
+
+This library contains a L<Venus::Sealed> class which provides a mechanism for
+restricting access to the underlying data structure.
+
+=cut
+
+$test->for('feature', 'venus-sealed');
+
 =feature venus-search
 
 This library contains a L<Venus::Search> class which provides methods for
@@ -6594,6 +13157,15 @@ manipulating regexp search data.
 =cut
 
 $test->for('feature', 'venus-search');
+
+=feature venus-set
+
+This library contains a L<Venus::Set> class which provides a representation of
+a collection of ordered key/value pairs.
+
+=cut
+
+$test->for('feature', 'venus-set');
 
 =feature venus-space
 
@@ -6669,8 +13241,8 @@ $test->for('feature', 'venus-try');
 
 =feature venus-type
 
-This library contains a L<Venus::Type> class which provides methods for casting
-native data types to objects.
+This library contains a L<Venus::Type> class which provides a mechanism for
+parsing, generating, and validating data type expressions.
 
 =cut
 
@@ -6694,6 +13266,15 @@ validating, coercing, and otherwise operating on lists of arguments.
 
 $test->for('feature', 'venus-unpack');
 
+=feature venus-validate
+
+This library contains a L<Venus::Validate> class which provides a mechanism for
+performing data validation of simple and hierarchal data.
+
+=cut
+
+$test->for('feature', 'venus-validate');
+
 =feature venus-vars
 
 This library contains a L<Venus::Vars> class which provides methods for
@@ -6702,6 +13283,15 @@ accessing C<%ENV> items.
 =cut
 
 $test->for('feature', 'venus-vars');
+
+=feature venus-what
+
+This library contains a L<Venus::What> class which provides methods for casting
+native data types to objects.
+
+=cut
+
+$test->for('feature', 'venus-what');
 
 =feature venus-yaml
 

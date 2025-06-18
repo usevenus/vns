@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Vars - Vars Class
@@ -275,6 +275,62 @@ I<Since C<0.01>>
   my $name = $vars->name('user');
 
   # "USER"
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Vars)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Vars;
+
+  my $new = Venus::Vars->new;
+
+  # bless(..., "Venus::Vars")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Vars;
+
+  my $new = Venus::Vars->new(
+    {USER => 'awncorp', HOME => '/home/awncorp'},
+  );
+
+  # bless(..., "Venus::Vars")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Vars;
+
+  my $new = Venus::Vars->new(
+    value => {USER => 'awncorp', HOME => '/home/awncorp'},
+  );
+
+  # bless(..., "Venus::Vars")
 
 =back
 

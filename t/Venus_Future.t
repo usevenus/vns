@@ -2062,14 +2062,15 @@ $test->for('example', 2, 'wait', sub {
   my $result = $tryable->error->result;
   ok defined $result;
   isa_ok $result, "Venus::Future::Error";
-  is $result->name, 'on_timeout';
+  is $result->name, 'on.timeout';
 
   $result
 });
 
 =error error_on_timeout
 
-This package may raise an error_on_timeout exception.
+This package may raise an C<on.timeout> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_timeout> method.
 
 =cut
 
@@ -2079,24 +2080,19 @@ $test->for('error', 'error_on_timeout');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_timeout',
+  my $error = $future->error_on_timeout({
     timeout => 10,
-  };
+  });
 
-  my $error = $future->try('error', $input)->error->result;
+  # ...
 
   # my $name = $error->name;
 
-  # "on_timeout"
+  # "on.timeout"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Future timed-out after 10 seconds"
-
-  # my $timeout = $error->stash('timeout');
-
-  # 10
 
 =cut
 
@@ -2105,11 +2101,9 @@ $test->for('example', 1, 'error_on_timeout', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_timeout";
-  my $message = $result->render;
-  is $message, "Future timed-out after 10 seconds";
-  my $timeout = $result->stash('timeout');
-  is $timeout, 10;
+  is $name, "on.timeout";
+  my $render = $result->render;
+  is $render, "Future timed-out after 10 seconds";
 
   $result
 });

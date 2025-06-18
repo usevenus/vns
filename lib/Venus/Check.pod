@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Check - Check Class
@@ -899,7 +899,7 @@ I<Since C<3.55>>
   coded(any $data, string $name) (Venus::Check)
 
 The coded method accepts a value and a type name returns the result of a
-L<Venus::Type/coded> operation.
+L<Venus::What/coded> operation.
 
 I<Since C<3.55>>
 
@@ -1219,6 +1219,97 @@ I<Since C<3.55>>
   # my $result = $check->result(undef);
 
   # Exception! (isa Venus::Check::Error) (see error_on_defined)
+
+=back
+
+=cut
+
+=head2 dirhandle
+
+  dirhandle(coderef @code) (Venus::Check)
+
+The dirhandle method configures the object to accept dirhandles and returns the
+invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item dirhandle example 1
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->dirhandle;
+
+  # bless(..., 'Venus::Check')
+
+  # opendir my $dh, './t';
+
+  # my $result = $check->eval($dh);
+
+  # true
+
+=back
+
+=over 4
+
+=item dirhandle example 2
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->dirhandle;
+
+  # bless(..., 'Venus::Check')
+
+  # opendir my $dh, './xyz';
+
+  # my $result = $check->eval($dh);
+
+  # false
+
+=back
+
+=over 4
+
+=item dirhandle example 3
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->dirhandle;
+
+  # bless(..., 'Venus::Check')
+
+  # opendir my $dh, './t';
+
+  # my $result = $check->result($dh);
+
+  # \*{'::$dh'}
+
+=back
+
+=over 4
+
+=item dirhandle example 4
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->dirhandle;
+
+  # bless(..., 'Venus::Check')
+
+  # opendir my $dh, './xyz';
+
+  # my $result = $check->result($dh);
+
+  # Exception! (isa Venus::Check::Error) (see error_on_dirhandle)
 
 =back
 
@@ -1619,6 +1710,97 @@ I<Since C<3.55>>
 
 =cut
 
+=head2 filehandle
+
+  filehandle(coderef @code) (Venus::Check)
+
+The filehandle method configures the object to accept filehandles and returns the
+invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item filehandle example 1
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->filehandle;
+
+  # bless(..., 'Venus::Check')
+
+  # open my $fh, './t/Venus.t';
+
+  # my $result = $check->eval($fh);
+
+  # true
+
+=back
+
+=over 4
+
+=item filehandle example 2
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->filehandle;
+
+  # bless(..., 'Venus::Check')
+
+  # open my $fh, './xyz/Venus.t';
+
+  # my $result = $check->eval($fh);
+
+  # false
+
+=back
+
+=over 4
+
+=item filehandle example 3
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->filehandle;
+
+  # bless(..., 'Venus::Check')
+
+  # open my $fh, './t/Venus.t';
+
+  # my $result = $check->result($fh);
+
+  # \*{'::$fh'}
+
+=back
+
+=over 4
+
+=item filehandle example 4
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->filehandle;
+
+  # bless(..., 'Venus::Check')
+
+  # open my $fh, './xyz/Venus.t';
+
+  # my $result = $check->result($fh);
+
+  # Exception! (isa Venus::Check::Error) (see error_on_filehandle)
+
+=back
+
+=cut
+
 =head2 float
 
   float(coderef @code) (Venus::Check)
@@ -1697,6 +1879,89 @@ I<Since C<3.55>>
   # my $result = $check->result(12345);
 
   # Exception! (isa Venus::Check::Error) (see error_on_coded)
+
+=back
+
+=cut
+
+=head2 glob
+
+  glob(coderef @code) (Venus::Check)
+
+The glob method configures the object to accept typeglobs and returns the
+invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item glob example 1
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->glob;
+
+  # bless(..., 'Venus::Check')
+
+  # my $result = $check->eval(\*main);
+
+  # true
+
+=back
+
+=over 4
+
+=item glob example 2
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->glob;
+
+  # bless(..., 'Venus::Check')
+
+  # my $result = $check->eval(*main);
+
+  # false
+
+=back
+
+=over 4
+
+=item glob example 3
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->glob;
+
+  # bless(..., 'Venus::Check')
+
+  # my $result = $check->result(\*main);
+
+  # \*::main
+
+=back
+
+=over 4
+
+=item glob example 4
+
+  # given: synopsis
+
+  package main;
+
+  $check = $check->glob;
+
+  # bless(..., 'Venus::Check')
+
+  # my $result = $check->result(*main);
+
+  # Exception! (isa Venus::Check::Error) (see error_on_typeglob)
 
 =back
 
@@ -2495,6 +2760,30 @@ I<Since C<3.55>>
   # my $result = $check->result([]);
 
   # Exception! (isa Venus::Check::Error) (see error_on_either)
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Check)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Check;
+
+  my $new = Venus::Check->new;
+
+  # bless(..., "Venus::Check")
 
 =back
 
@@ -3571,72 +3860,6 @@ I<Since C<3.55>>
 
 =cut
 
-=head2 type
-
-  type(any $data) (string)
-
-The type method returns the canonical data type name for the value provided.
-
-I<Since C<3.55>>
-
-=over 4
-
-=item type example 1
-
-  # given: synopsis
-
-  package main;
-
-  my $type = $check->type({});
-
-  # 'hashref'
-
-=back
-
-=over 4
-
-=item type example 2
-
-  # given: synopsis
-
-  package main;
-
-  my $type = $check->type([]);
-
-  # 'arrayref'
-
-=back
-
-=over 4
-
-=item type example 3
-
-  # given: synopsis
-
-  package main;
-
-  my $type = $check->type('Venus::Check');
-
-  # 'string'
-
-=back
-
-=over 4
-
-=item type example 4
-
-  # given: synopsis
-
-  package main;
-
-  my $type = $check->type(Venus::Check->new);
-
-  # 'object'
-
-=back
-
-=cut
-
 =head2 undef
 
   undef(coderef @code) (Venus::Check)
@@ -3821,15 +4044,83 @@ I<Since C<3.55>>
 
 =cut
 
+=head2 what
+
+  what(any $data) (string)
+
+The type method returns the canonical data type name for the value provided.
+
+I<Since C<3.55>>
+
+=over 4
+
+=item what example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $what = $check->what({});
+
+  # 'hashref'
+
+=back
+
+=over 4
+
+=item what example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $what = $check->what([]);
+
+  # 'arrayref'
+
+=back
+
+=over 4
+
+=item what example 3
+
+  # given: synopsis
+
+  package main;
+
+  my $what = $check->what('Venus::Check');
+
+  # 'string'
+
+=back
+
+=over 4
+
+=item what example 4
+
+  # given: synopsis
+
+  package main;
+
+  my $what = $check->what(Venus::Check->new);
+
+  # 'object'
+
+=back
+
+=cut
+
 =head2 within
 
   within(string $type, string | within[arrayref, string] @args) (Venus::Check)
 
 The within method configures the object, registering a constraint action as a
-sub-match operation, to accept array or hash based values, and returns a new
-L<Venus::Check> instance for the sub-match operation (not the invocant). This
-operation can traverse blessed array or hash based values. The value being
-evaluated must contain at-least one element to match.
+sub-match operation, to accept array references, hash references, or mappable
+values (see L<Venus::Role::Mappable>), and returns a new L<Venus::Check>
+instance for the sub-match operation (not the invocant). This operation can
+traverse blessed array or hash based values, or objects derived from classes
+which consume the "mappable" role. The value being evaluated must contain
+at-least one element to match.
 
 I<Since C<3.55>>
 
@@ -4141,6 +4432,76 @@ I<Since C<3.55>>
 
 =back
 
+=over 4
+
+=item within example 15
+
+  # given: synopsis
+
+  package main;
+
+  my $within = $check->within('Venus::Hash', 'string');
+
+  # bless(..., 'Venus::Check')
+
+  $check;
+
+  # bless(..., 'Venus::Check')
+
+  # my $result = $check->result({title => 'engineer'});
+
+  # Exception! (isa Venus::Check::Error) (see error_on_mappable_isa)
+
+=back
+
+=over 4
+
+=item within example 16
+
+  # given: synopsis
+
+  package main;
+
+  use Venus::Hash;
+
+  my $within = $check->within('Venus::Hash', 'string');
+
+  # bless(..., 'Venus::Check')
+
+  $check;
+
+  # bless(..., 'Venus::Check')
+
+  # my $result = $check->result(Venus::Hash->new);
+
+  # Exception! (isa Venus::Check::Error) (see error_on_mappable_empty)
+
+=back
+
+=over 4
+
+=item within example 17
+
+  # given: synopsis
+
+  package main;
+
+  use Venus::Hash;
+
+  my $within = $check->within('Venus::Hash', 'string');
+
+  # bless(..., 'Venus::Check')
+
+  $check;
+
+  # bless(..., 'Venus::Check')
+
+  # my $result = $check->eval(Venus::Hash->new({title => 'engineer'}));
+
+  # true
+
+=back
+
 =cut
 
 =head2 yesno
@@ -4255,35 +4616,27 @@ This package may raise the following errors:
 
 =item error: C<error_on_arrayref>
 
-This package may raise an error_on_arrayref exception.
+This package may raise an C<on.arrayref> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_arrayref> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_arrayref({
     at => '.',
     from => 'test',
-    throw => 'error_on_arrayref',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_arrayref"
+  # "on.arrayref"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, value provided is not an arrayref or arrayref derived, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 
@@ -4291,35 +4644,27 @@ B<example 1>
 
 =item error: C<error_on_arrayref_count>
 
-This package may raise an error_on_arrayref_count exception.
+This package may raise an C<on.arrayref.count> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_arrayref_count> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_arrayref_count({
     at => '.',
     from => 'test',
-    throw => 'error_on_arrayref_count',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_arrayref_count"
+  # "on.arrayref.count"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, incorrect item count in arrayref or arrayref derived object, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 
@@ -4327,45 +4672,29 @@ B<example 1>
 
 =item error: C<error_on_coded>
 
-This package may raise an error_on_coded exception.
+This package may raise an C<on.coded> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_coded> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_coded({
     at => '.',
     from => 'test',
     expected => 'string',
     received => 'number',
-    throw => 'error_on_coded',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_coded"
+  # "on.coded"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, expected string, received number, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
-
-  # my $expected = $error->stash('expected');
-
-  # "string"
-
-  # my $received = $error->stash('received');
-
-  # "number"
 
 =back
 
@@ -4373,40 +4702,28 @@ B<example 1>
 
 =item error: C<error_on_consumes>
 
-This package may raise an error_on_consumes exception.
+This package may raise an C<on.consumes> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_consumes> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_consumes({
     at => '.',
     from => 'test',
     role => 'Example::Role',
-    throw => 'error_on_consumes',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_consumes"
+  # "on.consumes"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, object does not consume the role \"Example::Role\", at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
-
-  # my $role = $error->stash('role');
-
-  # "Example::Role"
 
 =back
 
@@ -4414,35 +4731,55 @@ B<example 1>
 
 =item error: C<error_on_defined>
 
-This package may raise an error_on_defined exception.
+This package may raise an C<on.defined> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_defined> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_defined({
     at => '.',
     from => 'test',
-    throw => 'error_on_defined',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_defined"
+  # "on.defined"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, value provided is undefined, at ."
 
-  # my $from = $error->stash('from');
+=back
 
-  # "test"
+=over 4
 
-  # my $at = $error->stash('at');
+=item error: C<error_on_dirhandle>
 
-  # "."
+This package may raise an C<on.dirhandle> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_dirhandle> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $check->error_on_dirhandle({
+    at => '.',
+    from => 'test',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.dirhandle"
+
+  # my $render = $error->render;
+
+  # "Failed checking test, value provided is not a dirhandle (or is not open), at ."
 
 =back
 
@@ -4450,43 +4787,31 @@ B<example 1>
 
 =item error: C<error_on_either>
 
-This package may raise an error_on_either exception.
+This package may raise an C<on.either> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_either> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_either({
     at => '.',
     from => 'test',
     errors => [
       'Failed condition 1',
       'Failed condition 2',
     ],
-    throw => 'error_on_either',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_either"
+  # "on.either"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking either-or condition:\n\nFailed condition 1\n\nFailed condition 2"
-
-  # my $errors = $error->stash('errors');
-
-  # ['Failed condition 1', Failed condition 2']
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 
@@ -4494,45 +4819,57 @@ B<example 1>
 
 =item error: C<error_on_enum>
 
-This package may raise an error_on_enum exception.
+This package may raise an C<on.enum> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_enum> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_enum({
     at => '.',
     from => 'test',
     data => 'black',
     enum => ['this', 'that'],
-    throw => 'error_on_enum',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_enum"
+  # "on.enum"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, received black, valid options are this, that, at ."
 
-  # my $from = $error->stash('from');
+=back
 
-  # "test"
+=over 4
 
-  # my $at = $error->stash('at');
+=item error: C<error_on_filehandle>
 
-  # "."
+This package may raise an C<on.filehandle> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_filehandle> method.
 
-  # my $data = $error->stash('data');
+B<example 1>
 
-  # "black"
+  # given: synopsis;
 
-  # my $enum = $error->stash('enum');
+  my $error = $check->error_on_filehandle({
+    at => '.',
+    from => 'test',
+  });
 
-  # ['this', 'that']
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.filehandle"
+
+  # my $render = $error->render;
+
+  # "Failed checking test, value provided is not a filehandle (or is not open), at ."
 
 =back
 
@@ -4540,35 +4877,27 @@ B<example 1>
 
 =item error: C<error_on_hashref>
 
-This package may raise an error_on_hashref exception.
+This package may raise an C<on.hashref> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_hashref> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_hashref({
     at => '.',
     from => 'test',
-    throw => 'error_on_hashref',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_hashref"
+  # "on.hashref"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, value provided is not a hashref or hashref derived, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 
@@ -4576,35 +4905,27 @@ B<example 1>
 
 =item error: C<error_on_hashref_empty>
 
-This package may raise an error_on_hashref_empty exception.
+This package may raise an C<on.hashref.empty> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_hashref_empty> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_hashref_empty({
     at => '.',
     from => 'test',
-    throw => 'error_on_hashref_empty',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_hashref_empty"
+  # "on.hashref.empty"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, no items found in hashref or hashref derived object, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 
@@ -4612,40 +4933,28 @@ B<example 1>
 
 =item error: C<error_on_identity>
 
-This package may raise an error_on_identity exception.
+This package may raise an C<on.identity> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_identity> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_identity({
     at => '.',
     from => 'test',
     name => 'Example',
-    throw => 'error_on_identity',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_identity"
+  # "on.identity"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, object is not a Example or derived object, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
-
-  # my $name = $error->stash('name');
-
-  # "Example"
 
 =back
 
@@ -4653,43 +4962,31 @@ B<example 1>
 
 =item error: C<error_on_includes>
 
-This package may raise an error_on_includes exception.
+This package may raise an C<on.includes> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_includes> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_includes({
     at => '.',
     from => 'test',
     errors => [
       'Failed condition 1',
       'Failed condition 2',
     ],
-    throw => 'error_on_includes',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_includes"
+  # "on.includes"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking union-includes condition:\n\nFailed condition 1\n\nFailed condition 2"
-
-  # my $errors = $error->stash('errors');
-
-  # ['Failed condition 1', Failed condition 2']
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 
@@ -4697,40 +4994,28 @@ B<example 1>
 
 =item error: C<error_on_inherits>
 
-This package may raise an error_on_inherits exception.
+This package may raise an C<on.inherits> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_inherits> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_inherits({
     at => '.',
     from => 'test',
     name => 'Example',
-    throw => 'error_on_inherits',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_inherits"
+  # "on.inherits"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, object is not a Example derived object, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
-
-  # my $name = $error->stash('name');
-
-  # "Example"
 
 =back
 
@@ -4738,40 +5023,28 @@ B<example 1>
 
 =item error: C<error_on_missing>
 
-This package may raise an error_on_missing exception.
+This package may raise an C<on.missing> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_missing> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_missing({
     at => '.',
     from => 'test',
     name => 'execute',
-    throw => 'error_on_missing',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_missing"
+  # "on.missing"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, "execute" is missing, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
-
-  # my $name = $error->stash('name');
-
-  # "execute"
 
 =back
 
@@ -4779,40 +5052,28 @@ B<example 1>
 
 =item error: C<error_on_package>
 
-This package may raise an error_on_package exception.
+This package may raise an C<on.package> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_package> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_package({
     at => '.',
     data => 'main',
     from => 'test',
-    throw => 'error_on_package',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_package"
+  # "on.package"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, \"main\" is not a valid package name, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
-
-  # my $data = $error->stash('data');
-
-  # "main"
 
 =back
 
@@ -4820,40 +5081,28 @@ B<example 1>
 
 =item error: C<error_on_package_loaded>
 
-This package may raise an error_on_package_loaded exception.
+This package may raise an C<on.package.loaded> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_package_loaded> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_package_loaded({
     at => '.',
     data => 'main',
     from => 'test',
-    throw => 'error_on_package_loaded',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_package_loaded"
+  # "on.package.loaded"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, \"main\" is not loaded, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
-
-  # my $data = $error->stash('data');
-
-  # "main"
 
 =back
 
@@ -4861,35 +5110,27 @@ B<example 1>
 
 =item error: C<error_on_pairs>
 
-This package may raise an error_on_pairs exception.
+This package may raise an C<on.pairs> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_pairs> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_pairs({
     at => '.',
     from => 'test',
-    throw => 'error_on_pairs',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_pairs"
+  # "on.pairs"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, imblanced key/value pairs provided, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 
@@ -4897,35 +5138,55 @@ B<example 1>
 
 =item error: C<error_on_reference>
 
-This package may raise an error_on_reference exception.
+This package may raise an C<on.reference> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_reference> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_reference({
     at => '.',
     from => 'test',
-    throw => 'error_on_reference',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_reference"
+  # "on.reference"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, value provided is not a reference, at ."
 
-  # my $from = $error->stash('from');
+=back
 
-  # "test"
+=over 4
 
-  # my $at = $error->stash('at');
+=item error: C<error_on_typeglob>
 
-  # "."
+This package may raise an C<on.typeglob> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_typeglob> method.
+
+B<example 1>
+
+  # given: synopsis;
+
+  my $error = $check->error_on_typeglob({
+    at => '.',
+    from => 'test',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.typeglob"
+
+  # my $render = $error->render;
+
+  # "Failed checking test, value provided is not a typeglob, at ."
 
 =back
 
@@ -4933,33 +5194,24 @@ B<example 1>
 
 =item error: C<error_on_unknown>
 
-This package may raise an error_on_unknown exception.
+This package may raise an C<on.unknown> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_unknown> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_unknown',
-  };
+  my $error = $check->error_on_unknown;
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_unknown"
+  # "on.unknown"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed performing check for unknown reason"
-
-  # my $from = $error->stash('from');
-
-  # undef
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 
@@ -4967,35 +5219,27 @@ B<example 1>
 
 =item error: C<error_on_value>
 
-This package may raise an error_on_value exception.
+This package may raise an C<on.value> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_value> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_value({
     at => '.',
     from => 'test',
-    throw => 'error_on_value',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_value"
+  # "on.value"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, value provided is a reference, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 
@@ -5003,36 +5247,28 @@ B<example 1>
 
 =item error: C<error_on_within>
 
-This package may raise an error_on_within exception.
+This package may raise an C<on.within> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_within> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_within({
     at => '.',
     from => 'test',
     type => 'scalarref',
-    throw => 'error_on_within',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_within"
+  # "on.within"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Invalid type \"scalarref\" provided to the \"within\" method"
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 
@@ -5040,35 +5276,27 @@ B<example 1>
 
 =item error: C<error_on_yesno>
 
-This package may raise an error_on_yesno exception.
+This package may raise an C<on.yesno> error, as an instance of
+C<Venus::Check::Error>, via the C<error_on_yesno> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
+  my $error = $check->error_on_yesno({
     at => '.',
     from => 'test',
-    throw => 'error_on_yesno',
-  };
+  });
 
-  my $error = $check->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_yesno"
+  # "on.yesno"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Failed checking test, value provided is not a recognized \"yes\" or \"no\" value, at ."
-
-  # my $from = $error->stash('from');
-
-  # "test"
-
-  # my $at = $error->stash('at');
-
-  # "."
 
 =back
 

@@ -42,6 +42,8 @@ sub DESTROY {
     $self->$action(@data);
   }
 
+  $self->SUPER::DESTROY;
+
   return $self;
 }
 

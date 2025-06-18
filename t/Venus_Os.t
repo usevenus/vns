@@ -2,11 +2,13 @@ package main;
 
 use 5.018;
 
+use utf8;
 use strict;
 use warnings;
 
 use Test::More;
 use Venus::Test;
+use Venus;
 use Venus::Os;
 use Venus::Path;
 
@@ -16,6 +18,12 @@ my $fsds = qr/[:\\\/\.]+/;
 no warnings 'once';
 
 $Venus::Os::TYPES{$^O} = 'linux';
+
+=encoding
+
+utf8
+
+=cut
 
 =name
 
@@ -55,11 +63,15 @@ method: is_sun
 method: is_vms
 method: is_win
 method: name
+method: new
 method: paths
 method: quote
+method: read
+method: syscall
 method: type
 method: where
 method: which
+method: write
 
 =cut
 
@@ -1163,6 +1175,42 @@ $ENV{PATH} = join((Venus::Os->is_win ? ';' : ':'),
     t/path/usr/sbin
   ));
 
+=method new
+
+The new method constructs an instance of the package.
+
+=signature new
+
+  new(any @args) (Venus::Os)
+
+=metadata new
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 new
+
+  package main;
+
+  use Venus::Os;
+
+  my $new = Venus::Os->new;
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 1, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+
+  $result
+});
+
 =method paths
 
 The paths method returns the paths specified by the C<"PATH"> environment
@@ -1314,6 +1362,349 @@ $test->for('example', 4, 'quote', sub {
   $Venus::Os::TYPES{$^O} = 'mswin32';
   my $result = $tryable->result;
   is $result, '"hello \"world\""';
+
+  $result
+});
+
+=method read
+
+The read method reads from a file, filehandle, or STDIN, and returns the data.
+To read from STDIN provide the string C<"STDIN">. The method defaults to reading from STDIN.
+
+=signature read
+
+  read(any $from) (string)
+
+=metadata read
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 read
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read;
+
+  # from STDIN
+
+  # "..."
+
+=cut
+
+$test->for('example', 1, 'read', sub {
+  my ($tryable) = @_;
+  my $input = '...';
+  open my $fake_stdin, '<', \$input;
+  local *STDIN = $fake_stdin;
+  my $result = $tryable->result;
+  is $result, '...';
+
+  $result
+});
+
+=example-2 read
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('STDIN');
+
+  # from STDIN
+
+  # "..."
+
+=cut
+
+$test->for('example', 2, 'read', sub {
+  my ($tryable) = @_;
+  my $input = '...';
+  open my $fake_stdin, '<', \$input;
+  local *STDIN = $fake_stdin;
+  my $result = $tryable->result;
+  is $result, '...';
+
+  $result
+});
+
+=example-3 read
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/iso-8859-1.txt');
+
+  # from file
+
+  # "Hello, world! This is ISO-8859-1."
+
+=cut
+
+$test->for('example', 3, 'read', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is $result, 'Hello, world! This is ISO-8859-1.';
+
+  $result
+});
+
+=example-4 read
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  open my $fh, '<', 't/data/texts/iso-8859-1.txt';
+
+  my $read = $os->read($fh);
+
+  # from filehandle
+
+  # "Hello, world! This is ISO-8859-1."
+
+=cut
+
+$test->for('example', 4, 'read', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is $result, 'Hello, world! This is ISO-8859-1.';
+
+  $result
+});
+
+=example-5 read
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  use IO::File;
+
+  my $fh = IO::File->new('t/data/texts/iso-8859-1.txt', 'r');
+
+  my $read = $os->read($fh);
+
+  # from filehandle
+
+  # "Hello, world! This is ISO-8859-1."
+
+=cut
+
+$test->for('example', 5, 'read', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is $result, 'Hello, world! This is ISO-8859-1.';
+
+  $result
+});
+
+=example-6 read
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-16be.txt');
+
+  # from UTF-16BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=cut
+
+$test->for('example', 6, 'read', sub {
+    require Encode;
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is $result, 'Hello, world! こんにちは世界！';
+
+  $result
+});
+
+=example-7 read
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-16le.txt');
+
+  # from UTF-16LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=cut
+
+$test->for('example', 7, 'read', sub {
+    require Encode;
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is $result, 'Hello, world! こんにちは世界！';
+
+  $result
+});
+
+=example-8 read
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-32be.txt');
+
+  # from UTF-32BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=cut
+
+$test->for('example', 8, 'read', sub {
+    require Encode;
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is $result, 'Hello, world! こんにちは世界！';
+
+  $result
+});
+
+=example-9 read
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-32le.txt');
+
+  # from UTF-32LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=cut
+
+$test->for('example', 9, 'read', sub {
+    require Encode;
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is $result, 'Hello, world! こんにちは世界！';
+
+  $result
+});
+
+=example-10 read
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-8.txt');
+
+  # from UTF-8 encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=cut
+
+$test->for('example', 10, 'read', sub {
+    require Encode;
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  is $result, 'Hello, world! こんにちは世界！';
+
+  $result
+});
+
+=method syscall
+
+The syscall method executes the command and arguments provided, via
+L<perlfunc/system>, and returns the invocant.
+
+=signature syscall
+
+  syscall(any @data) (Venus::Os)
+
+=metadata syscall
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 syscall
+
+  package main;
+
+  use Venus::Os;
+
+  my $os = Venus::Os->new;
+
+  $os->syscall($^X, '--help');
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 1, 'syscall', sub {
+  my ($tryable) = @_;
+  require Venus::Space;
+  my $patched = Venus::Space->new('Venus::Os')->patch('_system', sub{0});
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  $patched->unpatch;
+
+  $result
+});
+
+=example-2 syscall
+
+  package main;
+
+  use Venus::Os;
+
+  my $os = Venus::Os->new;
+
+  $os->syscall('.help');
+
+  # Exception! (isa Venus::Os::Error) (see error_on_system_call)
+
+=cut
+
+$test->for('example', 2, 'syscall', sub {
+  plan skip_all => 'skip Os#syscall on win32' if $^O =~ /win32/i;
+  my ($tryable) = @_;
+  require Venus::Space;
+  my $patched = Venus::Space->new('Venus::Os')->patch('_system', sub{1});
+  ok my $result = $tryable->error(\my $error)->safe('result');
+  ok $error->isa('Venus::Os::Error');
+  ok $error->isa('Venus::Error');
+  $patched->unpatch;
 
   $result
 });
@@ -1850,6 +2241,822 @@ $test->for('example', 6, 'which', sub {
   ok !defined $result;
 
   !$result
+});
+
+=method write
+
+The write method writes to a file, filehandle, STDOUT, or STDERR, and returns
+the invocant. To write to STDOUT provide the string C<"STDOUT">. To write to
+STDERR provide the string C<"STDERR">. The method defaults to writing to
+STDOUT.
+
+=signature write
+
+  write(any $into, string $data, string $encoding) (Venus::Os)
+
+=metadata write
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write;
+
+  # to STDOUT
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 1, 'write', sub {
+  my ($tryable) = @_;
+  my $output;
+  open my $fake_stdout, '>', \$output;
+  local *STDOUT = $fake_stdout;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $output, undef;
+
+  $result
+});
+
+=example-2 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write(undef, '');
+
+  # to STDOUT
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 2, 'write', sub {
+  my ($tryable) = @_;
+  my $output;
+  open my $fake_stdout, '>', \$output;
+  local *STDOUT = $fake_stdout;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $output, undef;
+
+  $result
+});
+
+=example-3 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDOUT');
+
+  # to STDOUT
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 3, 'write', sub {
+  my ($tryable) = @_;
+  my $output;
+  open my $fake_stdout, '>', \$output;
+  local *STDOUT = $fake_stdout;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $output, undef;
+
+  $result
+});
+
+=example-4 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDOUT', '...');
+
+  # to STDOUT
+
+  # '...'
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 4, 'write', sub {
+  my ($tryable) = @_;
+  my $output;
+  open my $fake_stdout, '>', \$output;
+  local *STDOUT = $fake_stdout;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $output, '...';
+
+  $result
+});
+
+=example-5 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDERR');
+
+  # to STDERR
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 5, 'write', sub {
+  my ($tryable) = @_;
+  my $output;
+  open my $fake_stderr, '>', \$output;
+  local *STDERR = $fake_stderr;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $output, undef;
+
+  $result
+});
+
+=example-6 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDERR', '...');
+
+  # to STDERR
+
+  # '...'
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 6, 'write', sub {
+  my ($tryable) = @_;
+  my $output;
+  open my $fake_stderr, '>', \$output;
+  local *STDERR = $fake_stderr;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $output, '...';
+
+  $result
+});
+
+=example-7 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/iso-8859-1.txt';
+
+  my $write = $os->write($file, 'Hello, world! This is ISO-8859-1.');
+
+  # to file
+
+  # "Hello, world! This is ISO-8859-1."
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 7, 'write', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $result->read('t/data/texts/iso-8859-1.txt'),
+    'Hello, world! This is ISO-8859-1.';
+
+  $result
+});
+
+=example-8 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  open my $fh, '<', 't/data/texts/iso-8859-1.txt';
+
+  my $write = $os->write($fh, 'Hello, world! This is ISO-8859-1.');
+
+  # to file
+
+  # "Hello, world! This is ISO-8859-1."
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 8, 'write', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $result->read('t/data/texts/iso-8859-1.txt'), 'Hello, world! This is ISO-8859-1.';
+
+  $result
+});
+
+=example-9 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  use IO::File;
+
+  my $fh = IO::File->new('t/data/texts/iso-8859-1.txt', 'w');
+
+  my $write = $os->write($fh, 'Hello, world! This is ISO-8859-1.');
+
+  # to ISO-8859-1 encoded file
+
+  # "Hello, world! This is ISO-8859-1."
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 9, 'write', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $result->read('t/data/texts/iso-8859-1.txt'), 'Hello, world! This is ISO-8859-1.';
+
+  $result
+});
+
+=example-10 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-16be.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-16BE');
+
+  # to UTF-16BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 10, 'write', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $result->read('t/data/texts/utf-16be.txt'),
+    'Hello, world! こんにちは世界！';
+
+  $result
+});
+
+=example-11 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-16le.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-16LE');
+
+  # to UTF-16LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 11, 'write', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $result->read('t/data/texts/utf-16le.txt'),
+    'Hello, world! こんにちは世界！';
+
+  $result
+});
+
+=example-12 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-32be.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-32BE');
+
+  # to UTF-32BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 12, 'write', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $result->read('t/data/texts/utf-32be.txt'),
+    'Hello, world! こんにちは世界！';
+
+  $result
+});
+
+=example-13 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-32le.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-32LE');
+
+  # to UTF-32LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 13, 'write', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $result->read('t/data/texts/utf-32le.txt'),
+    'Hello, world! こんにちは世界！';
+
+  $result
+});
+
+=example-14 write
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-8.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-8');
+
+  # to UTF-8 encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=cut
+
+$test->for('example', 14, 'write', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Os');
+  is $result->read('t/data/texts/utf-8.txt'),
+    'Hello, world! こんにちは世界！';
+
+  $result
+});
+
+=error error_on_read_binmode
+
+This package may raise an C<on.read.binmode> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_read_binmode> method.
+
+=cut
+
+$test->for('error', 'error_on_read_binmode');
+
+=example-1 error_on_read_binmode
+
+  # given: synopsis;
+
+  my $error = $os->error_on_read_binmode({
+    binmode => ':raw',
+    error => 'No such file',
+    from => '/path/to/nowhere',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.read.binmode"
+
+  # my $render = $error->render;
+
+  # "Can't binmode on read: No such file"
+
+=cut
+
+$test->for('example', 1, 'error_on_read_binmode', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.read.binmode";
+  my $render = $result->render;
+  is $render, "Can't binmode on read: No such file";
+
+  $result
+});
+
+=error error_on_read_open_file
+
+This package may raise an C<on.read.open.file> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_read_open_file> method.
+
+=cut
+
+$test->for('error', 'error_on_read_open_file');
+
+=example-1 error_on_read_open_file
+
+  # given: synopsis;
+
+  my $error = $os->error_on_read_open_file({
+    error => 'No such file',
+    file => '/path/to/nowhere',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.read.open.file"
+
+  # my $render = $error->render;
+
+  # "Can't open "/path/to/nowhere" for reading: No such file"
+
+=cut
+
+$test->for('example', 1, 'error_on_read_open_file', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.read.open.file";
+  my $render = $result->render;
+  is $render, "Can't open \"/path/to/nowhere\" for reading: No such file";
+
+  $result
+});
+
+=error error_on_read_open_stdin
+
+This package may raise an C<on.read.open.stdin> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_read_open_stdin> method.
+
+=cut
+
+$test->for('error', 'error_on_read_open_stdin');
+
+=example-1 error_on_read_open_stdin
+
+  # given: synopsis;
+
+  my $error = $os->error_on_read_open_stdin({
+    error => 'Unknown',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.read.open.stdin"
+
+  # my $render = $error->render;
+
+  # "Can't open STDIN for reading: Unknown"
+
+=cut
+
+$test->for('example', 1, 'error_on_read_open_stdin', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.read.open.stdin";
+  my $render = $result->render;
+  is $render, "Can't open STDIN for reading: Unknown";
+
+  $result
+});
+
+=error error_on_read_seek
+
+This package may raise an C<on.read.seek> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_read_seek> method.
+
+=cut
+
+$test->for('error', 'error_on_read_seek');
+
+=example-1 error_on_read_seek
+
+  # given: synopsis;
+
+  my $error = $os->error_on_read_seek({
+    error => 'Unknown',
+    filehandle => \*FH,
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.read.seek"
+
+  # my $render = $error->render;
+
+  # "Can't seek in filehandle: Unknown"
+
+=cut
+
+$test->for('example', 1, 'error_on_read_seek', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.read.seek";
+  my $render = $result->render;
+  is $render, "Can't seek in filehandle: Unknown";
+
+  $result
+});
+
+=error error_on_read_seek_reset
+
+This package may raise an C<on.read.seek.reset> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_read_seek_reset> method.
+
+=cut
+
+$test->for('error', 'error_on_read_seek_reset');
+
+=example-1 error_on_read_seek_reset
+
+  # given: synopsis;
+
+  my $error = $os->error_on_read_seek_reset({
+    error => 'Unknown',
+    filehandle => \*FH,
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.read.seek.reset"
+
+  # my $render = $error->render;
+
+  # "Can't reset seek in filehandle: Unknown"
+
+=cut
+
+$test->for('example', 1, 'error_on_read_seek_reset', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.read.seek.reset";
+  my $render = $result->render;
+  is $render, "Can't reset seek in filehandle: Unknown";
+
+  $result
+});
+
+=error error_on_write_binmode
+
+This package may raise an C<on.write.binmode> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_write_binmode> method.
+
+=cut
+
+$test->for('error', 'error_on_write_binmode');
+
+=example-1 error_on_write_binmode
+
+  # given: synopsis;
+
+  my $error = $os->error_on_write_binmode({
+    binmode => ':raw',
+    error => 'No such file',
+    from => '/path/to/nowhere',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.write.binmode"
+
+  # my $render = $error->render;
+
+  # "Can't binmode on write: No such file"
+
+=cut
+
+$test->for('example', 1, 'error_on_write_binmode', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.write.binmode";
+  my $render = $result->render;
+  is $render, "Can't binmode on write: No such file";
+
+  $result
+});
+
+=error error_on_write_open_file
+
+This package may raise an C<on.write.open.file> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_write_open_file> method.
+
+=cut
+
+$test->for('error', 'error_on_write_open_file');
+
+=example-1 error_on_write_open_file
+
+  # given: synopsis;
+
+  my $error = $os->error_on_write_open_file({
+    error => 'No such file',
+    file => '/path/to/nowhere',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.write.open.file"
+
+  # my $render = $error->render;
+
+  # "Can't open "/path/to/nowhere" for writing: No such file"
+
+=cut
+
+$test->for('example', 1, 'error_on_write_open_file', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.write.open.file";
+  my $render = $result->render;
+  is $render, "Can't open \"/path/to/nowhere\" for writing: No such file";
+
+  $result
+});
+
+=error error_on_write_open_stderr
+
+This package may raise an C<on.write.open.stderr> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_write_open_stderr> method.
+
+=cut
+
+$test->for('error', 'error_on_write_open_stderr');
+
+=example-1 error_on_write_open_stderr
+
+  # given: synopsis;
+
+  my $error = $os->error_on_write_open_stderr({
+    error => 'Unknown',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.write.open.stderr"
+
+  # my $render = $error->render;
+
+  # "Can't open STDERR for writing: Unknown"
+
+=cut
+
+$test->for('example', 1, 'error_on_write_open_stderr', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.write.open.stderr";
+  my $render = $result->render;
+  is $render, "Can't open STDERR for writing: Unknown";
+
+  $result
+});
+
+=error error_on_write_open_stdout
+
+This package may raise an C<on.write.open.stdout> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_write_open_stdout> method.
+
+=cut
+
+$test->for('error', 'error_on_write_open_stdout');
+
+=example-1 error_on_write_open_stdout
+
+  # given: synopsis;
+
+  my $error = $os->error_on_write_open_stdout({
+    error => 'Unknown',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.write.open.stdout"
+
+  # my $render = $error->render;
+
+  # "Can't open STDOUT for writing: Unknown"
+
+=cut
+
+$test->for('example', 1, 'error_on_write_open_stdout', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.write.open.stdout";
+  my $render = $result->render;
+  is $render, "Can't open STDOUT for writing: Unknown";
+
+  $result
 });
 
 =partials

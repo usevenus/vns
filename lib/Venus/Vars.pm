@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
 
+# INHERITS
+
 base 'Venus::Kind::Utility';
+
+# INTEGRATES
 
 with 'Venus::Role::Valuable';
 with 'Venus::Role::Buildable';
@@ -29,6 +35,18 @@ sub build_proxy {
     return $self->get($method) if !$has_value; # no value
     return $self->set($method, $value);
   };
+}
+
+sub build_data {
+  my ($self, $data, $xargs) = @_;
+
+  $data->{value} ||= {};
+
+  $data->{value} = ({%{$data->{value}}, %{$xargs}});
+
+  $data->{value} = $self->default if !keys %{$data->{value}};
+
+  return $data;
 }
 
 sub build_self {

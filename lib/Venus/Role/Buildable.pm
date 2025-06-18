@@ -5,6 +5,8 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Role 'with';
 
 # BUILDERS
@@ -40,6 +42,13 @@ sub BUILDARGS {
 
   # build_args should not accept a single-arg (non-hash)
   my $ignore = @args == 1 && ref $args[0] ne 'HASH';
+
+  # build_data partitions expected and unexpected arguments
+  if ($self->can('build_data') && !$ignore) {
+    @args = @args == 1 ? ({}, $args[0]) : ({}, {@args});
+    do{$args[0]->{$_} = delete $args[1]->{$_} if exists $args[1]->{$_}} for $self->META->attrs;
+    @args = ($self->build_data(@args));
+  }
 
   # standard arguments
   if ($self->can('build_args') && !$ignore) {

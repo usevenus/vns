@@ -7,6 +7,7 @@ use warnings;
 
 use Test::More;
 use Venus::Test;
+use Venus;
 
 my $test = test(__FILE__);
 
@@ -46,6 +47,7 @@ method: last_match_end
 method: last_match_start
 method: matched
 method: named_captures
+method: new
 method: prematched
 method: postmatched
 method: set
@@ -94,8 +96,8 @@ $test->for('inherits');
 
 =integrates
 
+Venus::Role::Encaseable
 Venus::Role::Explainable
-Venus::Role::Stashable
 
 =cut
 
@@ -496,6 +498,69 @@ $test->for('example', 2, 'named_captures', sub {
   $result
 });
 
+=method new
+
+The new method constructs an instance of the package.
+
+=signature new
+
+  new(any @args) (Venus::Search)
+
+=metadata new
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 new
+
+  package main;
+
+  use Venus::Search;
+
+  my $new = Venus::Search->new;
+
+  # bless(..., "Venus::Search")
+
+=cut
+
+$test->for('example', 1, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Search');
+  is $result->string, '';
+  is $result->regexp, qr//;
+
+  !$result
+});
+
+=example-2 new
+
+  package main;
+
+  use Venus::Search;
+
+  my $new = Venus::Search->new(
+    string => 'hello world',
+    regexp => '(hello)',
+  );
+
+  # bless(..., "Venus::Search")
+
+=cut
+
+$test->for('example', 2, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Search');
+  is $result->string, 'hello world';
+  is $result->regexp, '(hello)';
+
+  $result
+});
+
 =method prematched
 
 The prematched method returns the portion of the string before the regular
@@ -592,6 +657,47 @@ $test->for('example', 1, 'set', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
   ok $result eq "hello universe";
+
+  $result
+});
+
+=error error_on_evaluate
+
+This package may raise an C<on.evaluate> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_evaluate> method.
+
+=cut
+
+$test->for('error', 'error_on_evaluate');
+
+=example-1 error_on_evaluate
+
+  # given: synopsis;
+
+  my $error = $search->error_on_evaluate({
+    error => 'Exception!',
+  });
+
+  # ...
+
+  # my $name = $error->name;
+
+  # "on.evaluate"
+
+  # my $render = $error->render;
+
+  # "Exception!"
+
+=cut
+
+$test->for('example', 1, 'error_on_evaluate', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.evaluate";
+  my $render = $result->render;
+  is $render, "Exception!";
 
   $result
 });
@@ -764,47 +870,6 @@ $test->for('operator', '(~~)');
 
 $test->for('example', 1, '(~~)', sub {
   1;
-});
-
-=error error_on_evaluate
-
-This package may raise an error_on_evaluate exception.
-
-=cut
-
-$test->for('error', 'error_on_evaluate');
-
-=example-1 error_on_evaluate
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_evaluate',
-    error => 'Exception!',
-  };
-
-  my $error = $search->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_evaluate"
-
-  # my $message = $error->message;
-
-  # "Exception!"
-
-=cut
-
-$test->for('example', 1, 'error_on_evaluate', sub {
-  my ($tryable) = @_;
-  my $result = $tryable->result;
-  isa_ok $result, 'Venus::Error';
-  my $name = $result->name;
-  is $name, "on_evaluate";
-  my $message = $result->message;
-  is $message, "Exception!";
-
-  $result
 });
 
 =partials

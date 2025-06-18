@@ -5,12 +5,20 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
+
+# INHERITS
 
 base 'Venus::Kind::Utility';
 
+# INTEGRATES
+
+with 'Venus::Role::Encaseable';
 with 'Venus::Role::Explainable';
-with 'Venus::Role::Stashable';
+
+# OVERLOADS
 
 use overload (
   '""' => 'explain',
@@ -24,8 +32,10 @@ use overload (
 # ATTRIBUTES
 
 attr 'name';
+attr 'cause';
 attr 'context';
 attr 'message';
+attr 'offset';
 attr 'verbose';
 
 # BUILDERS
@@ -41,11 +51,33 @@ sub build_arg {
 sub build_self {
   my ($self, $data) = @_;
 
-  $self->name($data->{name}) if $self->name;
-  $self->context('(None)') if !$self->context;
-  $self->message('Exception!') if !$self->message;
-  $self->verbose($ENV{VENUS_ERROR_VERBOSE} // 1) if !exists $data->{verbose};
-  $self->trace($ENV{VENUS_ERROR_TRACE_OFFSET} // 2) if !@{$self->frames};
+  if ($data->{name}) {
+    $self->name($data->{name});
+  }
+
+  if (!$self->context) {
+    $self->context('N/A');
+  }
+
+  if (!$self->message) {
+    $self->message('Exception!');
+  }
+
+  if (!exists $data->{verbose}) {
+    $self->verbose($ENV{VENUS_ERROR_VERBOSE} // 1);
+  }
+
+  if (!exists $data->{offset}) {
+    $self->offset($ENV{VENUS_ERROR_TRACE_OFFSET} // 2);
+  }
+
+  if (!@{$self->frames}) {
+    $self->trace($self->offset);
+  }
+
+  if (my $stash = delete $data->{stash}) {
+    %{$self->stash} = %{$stash};
+  }
 
   return $self;
 }
@@ -68,33 +100,18 @@ sub arguments {
   return $arguments->[$index];
 }
 
-
 sub as {
   my ($self, $name) = @_;
 
   $name = $self->id($name);
 
-  my $method = "as_${name}";
+  my $method = $self->method('as', $name);
 
   $self = ref $self ? $self : $self->new;
 
-  if (!$self->can($method)) {
-    return $self->do('name', $name);
-  }
+  return $self->do('name', $name) if !$self->can($method);
 
   return $self->$method;
-}
-
-sub assertion {
-  my ($self) = @_;
-
-  my $assertion = $self->SUPER::assertion;
-
-  $assertion->match('string')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-  return $assertion;
 }
 
 sub callframe {
@@ -113,18 +130,57 @@ sub callframe {
   return $callframe->[$index];
 }
 
+sub capture {
+  my ($self, @args) = @_;
+
+  $self->stash(captured => {
+    callframe => [caller($self->offset // 0)],
+    arguments => [@args],
+  });
+
+  return $self;
+}
+
 sub captured {
   my ($self) = @_;
 
-  return $self->stash('captured');
+  my $captured = $self->stash->{captured};
+
+  return $captured;
 }
 
-sub id {
-  my ($self, $name) = @_;
+sub copy {
+  my ($self, $data) = @_;
 
-  $name = lc $name =~ s/\W+/_/gr if $name;
+  if (!$data->isa('Venus::Error')) {
+    return $self;
+  }
 
-  return $name;
+  if ($data->name) {
+    $self->name($data->name)
+  }
+
+  if ($data->context) {
+    $self->context($data->context)
+  }
+
+  if ($data->message) {
+    $self->message($data->message)
+  }
+
+  if (defined $data->verbose) {
+    $self->verbose($data->verbose)
+  }
+
+  if (@{$data->frames}) {
+    $self->recase('frames', $data->frames)
+  }
+
+  if (my $stash = $data->stash) {
+    %{$self->stash} = (%{$self->stash}, %{$stash});
+  }
+
+  return $self;
 }
 
 sub explain {
@@ -132,16 +188,16 @@ sub explain {
 
   $self->trace(1, 1) if !@{$self->frames};
 
-  my $frames = $self->{'$frames'};
+  my $frames = $self->frames;
   my $message = $self->render;
 
   my @stacktrace = "$message" =~ s/^\s+|\s+$//gr;
 
   return join "\n", @stacktrace, "" if !$self->verbose;
 
-  push @stacktrace, 'Name:', $self->name || '(None)';
+  push @stacktrace, 'Name:', $self->name || 'N/A';
   push @stacktrace, 'Type:', ref($self);
-  push @stacktrace, 'Context:', $self->context || '(None)';
+  push @stacktrace, 'Context:', $self->context || 'N/A';
 
   no warnings 'once';
 
@@ -189,47 +245,15 @@ sub explain {
     push @stacktrace, "$subr\n  in $file at line $line";
   }
 
+  my $cause = $self->cause;
+
+  if ($cause) {
+    $cause = join("\n", "", "Cause:\n", "$cause");
+    chomp $cause;
+    push @stacktrace, $cause;
+  }
+
   return join "\n", @stacktrace, "";
-}
-
-sub frames {
-  my ($self) = @_;
-
-  return $self->{'$frames'} //= [];
-}
-
-sub is {
-  my ($self, $name) = @_;
-
-  $name = $self->id($name);
-
-  my $method = "is_${name}";
-
-  if ($self->name && !$self->can($method)) {
-    return $self->name eq $name ? true : false;
-  }
-
-  return (ref $self ? $self: $self->new)->$method ? true : false;
-}
-
-sub name {
-  my ($self, $name) = @_;
-
-  return $self->ITEM('name', $self->id($name) // ());
-}
-
-sub of {
-  my ($self, $name) = @_;
-
-  $name = $self->id($name);
-
-  my $method = "of_${name}";
-
-  if ($self->name && !$self->can($method)) {
-    return $self->name =~ /$name/ ? true : false;
-  }
-
-  return (ref $self ? $self: $self->new)->$method ? true : false;
 }
 
 sub frame {
@@ -254,6 +278,114 @@ sub frame {
   };
 }
 
+sub frames {
+  my ($self) = @_;
+
+  return $self->encase('frames', []);
+}
+
+sub get {
+  my ($self, @args) = @_;
+
+  @args = map $self->$_, @args;
+
+  return wantarray ? (@args) : $args[0];
+}
+
+sub id {
+  my ($self, @args) = @_;
+
+  my $name = join '.', grep defined, @args;
+
+  $name = lc $name =~ s/\W+/./gr if $name;
+
+  return $name;
+}
+
+sub input {
+  my ($self, @args) = @_;
+
+  $self->stash(input => {
+    callframe => [caller($self->offset // 0)],
+    arguments => [@args],
+  });
+
+  return $self;
+}
+
+sub is {
+  my ($self, $name) = @_;
+
+  $name = $self->id($name);
+
+  my $method = $self->method('is', $name);
+
+  return false if !$self->name && !$self->can($method);
+
+  return $self->name eq $name ? true : false if $self->name && !$self->can($method);
+
+  return (ref $self ? $self: $self->new)->$method ? true : false;
+}
+
+sub label {
+  my ($self, $name) = @_;
+
+  $name = lc $name =~ s/\W/_/gr if $name;
+
+  return $name;
+}
+
+sub method {
+  my ($self, @name) = @_;
+
+  @name = map {lc s/\W/_/gr} @name;
+
+  return join '_', @name;
+}
+
+sub name {
+  my ($self, $name) = @_;
+
+  return $self->ITEM('name', defined $name ? $self->id($name) || () : ());
+}
+
+sub of {
+  my ($self, $name) = @_;
+
+  $name = $self->id($name);
+
+  my $method = $self->method('of', $name);
+
+  return false if !$self->name && !$self->can($method);
+
+  return $self->name =~ /$name/ ? true : false if $self->name && !$self->can($method);
+
+  return (ref $self ? $self: $self->new)->$method ? true : false;
+}
+
+sub on {
+  my ($self, $name) = @_;
+
+  $self = ref $self ? $self : $self->new;
+
+  $name ||= (split(/::/, (caller($self->offset // 0))[3]))[-1];
+
+  $self->name($self->id('on', $name)) if $name && $name ne '__ANON__' && $name ne '(eval)';
+
+  return $self;
+}
+
+sub output {
+  my ($self, @args) = @_;
+
+  $self->stash(output => {
+    callframe => [caller($self->offset // 0)],
+    arguments => [@args],
+  });
+
+  return $self;
+}
+
 sub render {
   my ($self) = @_;
 
@@ -261,6 +393,7 @@ sub render {
   my $stashed = $self->stash;
 
   while (my($key, $value) = each(%$stashed)) {
+    next if !defined $value;
     my $token = quotemeta $key;
     $message =~ s/\{\{\s*$token\s*\}\}/$value/g;
   }
@@ -268,12 +401,152 @@ sub render {
   return $message;
 }
 
-sub throw {
+sub reset {
+  my ($self) = @_;
+
+  $self->verbose($ENV{VENUS_ERROR_VERBOSE} // 1) if !defined $self->verbose;
+
+  $self->offset($ENV{VENUS_ERROR_TRACE_OFFSET} // 1) if !defined $self->offset;
+
+  $self->context((caller(($self->offset // 0) + 1))[3]);
+
+  $self->trace(($self->offset // 0) + 1);
+
+  return $self;
+}
+
+sub set {
   my ($self, @args) = @_;
 
-  $self = $self->new(@args) if !ref $self;
+  if (@args > 2 && not @args % 2) {
+    my %data = @args;
 
-  die $self;
+    $self->$_($data{$_}) for keys %data;
+
+    return $self;
+  }
+
+  if (@args > 0 && ref $args[0] eq 'HASH') {
+    my %data = %{$args[0]};
+
+    $self->$_($data{$_}) for keys %data;
+
+    return $self;
+  }
+
+  my ($key, @value) = @args;
+
+  $self->$key(@value);
+
+  return $self;
+}
+
+sub stash {
+  my ($self, @args) = @_;
+
+  if (@args > 2 && not @args % 2) {
+    my %data = @args;
+
+    $self->stash($_, $data{$_}) for keys %data;
+
+    return $self->stash;
+  }
+
+  if (@args > 0 && ref $args[0] eq 'HASH') {
+    my %data = %{$args[0]};
+
+    if (!%data) {
+      return $self->recase('stashed', {});
+    }
+
+    $self->stash($_, $data{$_}) for keys %data;
+
+    return $self->stash;
+  }
+
+  my ($key, @value) = @args;
+
+  my $stashed = $self->encase('stashed', {});
+
+  return $stashed if !defined $key;
+
+  return $stashed->{$key} if !@value;
+
+  my $value = $stashed->{$key} = $value[0];
+
+  return $value;
+}
+
+sub sysinfo {
+  my ($self) = @_;
+
+  $self->system_name;
+  $self->system_path;
+  $self->system_perl_path;
+  $self->system_perl_version;
+  $self->system_process_id;
+  $self->system_script_args;
+  $self->system_script_path;
+
+  return $self;
+}
+
+sub system_name {
+  my ($self, @args) = @_;
+
+  $self->stash('system_name', @args ? $args[0] : $^O);
+
+  return $self;
+}
+
+sub system_path {
+  my ($self, @args) = @_;
+
+  require Cwd;
+
+  $self->stash('system_path', @args ? $args[0] : Cwd->getcwd);
+
+  return $self;
+}
+
+sub system_perl_path {
+  my ($self, @args) = @_;
+
+  $self->stash('system_perl_path', @args ? $args[0] : $^X);
+
+  return $self;
+}
+
+sub system_perl_version {
+  my ($self, @args) = @_;
+
+  $self->stash('system_perl_version', @args ? $args[0] : "$^V");
+
+  return $self;
+}
+
+sub system_process_id {
+  my ($self, @args) = @_;
+
+  $self->stash('system_process_id', @args ? $args[0] : $$);
+
+  return $self;
+}
+
+sub system_script_args {
+  my ($self, @args) = @_;
+
+  $self->stash('system_script_args', @args ? [@args] : [@ARGV]);
+
+  return $self;
+}
+
+sub system_script_path {
+  my ($self, @args) = @_;
+
+  $self->stash('system_script_path', @args ? $args[0] : $0);
+
+  return $self;
 }
 
 sub trace {
@@ -283,13 +556,21 @@ sub trace {
 
   @$frames = ();
 
-  for (my $i = $offset // 1; my @caller = caller($i); $i++) {
+  for (my $i = $offset // $self->offset; my @caller = caller($i); $i++) {
     push @$frames, [@caller];
 
     last if defined $limit && $i + 1 == $offset + $limit;
   }
 
   return $self;
+}
+
+sub throw {
+  my ($self, @args) = @_;
+
+  $self = $self->new(@args) if !ref $self;
+
+  die $self;
 }
 
 1;

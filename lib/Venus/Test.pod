@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Test - Test Class
@@ -2920,6 +2920,58 @@ I<Since C<3.55>>
   my $more = $test->more('ok', true);
 
   # true
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Test)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Test;
+
+  my $new = Venus::Test->new;
+
+  # bless(..., "Venus::Test")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Test;
+
+  my $new = Venus::Test->new('t/Venus_Test.t');
+
+  # bless(..., "Venus::Test")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Test;
+
+  my $new = Venus::Test->new(file => 't/Venus_Test.t');
+
+  # bless(..., "Venus::Test")
 
 =back
 
@@ -6001,29 +6053,26 @@ This package may raise the following errors:
 
 =item error: C<error_on_abstract>
 
-This package may raise an error_on_abstract exception.
+This package may raise an C<on.abstract> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_abstract> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_abstract',
-  };
+  my $error = $test->error_on_abstract({
+    file => 't/Venus_Test.t',
+  });
 
-  my $error = $test->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_abstract"
+  # "on.abstract"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Test file \"t/Venus_Test.t\" missing abstract section"
-
-  # my $file = $error->stash('file');
-
-  # "t/Venus_Test.t"
 
 =back
 
@@ -6031,29 +6080,26 @@ B<example 1>
 
 =item error: C<error_on_description>
 
-This package may raise an error_on_description exception.
+This package may raise an C<on.description> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_description> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_description',
-  };
+  my $error = $test->error_on_description({
+    file => 't/Venus_Test.t',
+  });
 
-  my $error = $test->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_description"
+  # "on.description"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Test file \"t/Venus_Test.t\" missing description section"
-
-  # my $file = $error->stash('file');
-
-  # "t/Venus_Test.t"
 
 =back
 
@@ -6061,29 +6107,26 @@ B<example 1>
 
 =item error: C<error_on_name>
 
-This package may raise an error_on_name exception.
+This package may raise an C<on.name> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_name> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_name',
-  };
+  my $error = $test->error_on_name({
+    file => 't/Venus_Test.t',
+  });
 
-  my $error = $test->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_name"
+  # "on.name"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Test file \"t/Venus_Test.t\" missing name section"
-
-  # my $file = $error->stash('file');
-
-  # "t/Venus_Test.t"
 
 =back
 
@@ -6091,29 +6134,26 @@ B<example 1>
 
 =item error: C<error_on_synopsis>
 
-This package may raise an error_on_synopsis exception.
+This package may raise an C<on.synopsis> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_synopsis> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_synopsis',
-  };
+  my $error = $test->error_on_synopsis({
+    file => 't/Venus_Test.t',
+  });
 
-  my $error = $test->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_synopsis"
+  # "on.synopsis"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Test file \"t/Venus_Test.t\" missing synopsis section"
-
-  # my $file = $error->stash('file');
-
-  # "t/Venus_Test.t"
 
 =back
 
@@ -6121,29 +6161,26 @@ B<example 1>
 
 =item error: C<error_on_tagline>
 
-This package may raise an error_on_tagline exception.
+This package may raise an C<on.tagline> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_tagline> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_tagline',
-  };
+  my $error = $test->error_on_tagline({
+    file => 't/Venus_Test.t',
+  });
 
-  my $error = $test->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_tagline"
+  # "on.tagline"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Test file \"t/Venus_Test.t\" missing tagline section"
-
-  # my $file = $error->stash('file');
-
-  # "t/Venus_Test.t"
 
 =back
 

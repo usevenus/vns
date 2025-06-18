@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
 
+# INHERITS
+
 base 'Venus::Kind::Utility';
+
+# INTEGRATES
 
 with 'Venus::Role::Valuable';
 with 'Venus::Role::Buildable';
@@ -48,6 +54,14 @@ sub clear {
   return $self;
 }
 
+sub count {
+  my ($self, @args) = @_;
+
+  my $result = $self->result(@args);
+
+  return scalar @$result;
+}
+
 sub data {
   my ($self, $data) = @_;
 
@@ -58,13 +72,21 @@ sub data {
   return $self;
 }
 
+sub defined {
+  my ($self) = @_;
+
+  $self->when(sub{CORE::defined($_[0])});
+
+  return $self;
+}
+
 sub expr {
   my ($self, $topic) = @_;
 
   $self->when(sub{
     my $value = $_[0];
 
-    if (!defined $value) {
+    if (!CORE::defined($value)) {
       return false;
     }
     if (Scalar::Util::blessed($value) && !overload::Overloaded($value)) {
@@ -93,7 +115,7 @@ sub just {
   $self->when(sub{
     my $value = $_[0];
 
-    if (!defined $value) {
+    if (!CORE::defined($value)) {
       return false;
     }
     if (Scalar::Util::blessed($value) && !overload::Overloaded($value)) {
@@ -121,12 +143,30 @@ sub none {
   return $self;
 }
 
+sub object {
+  my ($self) = @_;
+
+  require Scalar::Util;
+
+  $self->when(sub{Scalar::Util::blessed($_[0])});
+
+  return $self;
+}
+
 sub only {
   my ($self, $code) = @_;
 
   $self->on_only($code);
 
   return $self;
+}
+
+sub reduce {
+  my ($self, @args) = @_;
+
+  my $result = $self->new(scalar $self->result(@args));
+
+  return $result;
 }
 
 sub result {
@@ -139,7 +179,11 @@ sub result {
   my $matched = 0;
 
   local $_ = $value;
-  return wantarray ? ($result, $matched) : $result if !$self->on_only->($value);
+  if (!$self->on_only->($value)) {
+    local $_ = $value;
+    $result = $self->on_none->($value) || [];
+    return wantarray ? ($result, $matched) : $result;
+  }
 
   for my $item (@$value) {
     local $_ = $item;
@@ -207,6 +251,16 @@ sub then {
   my $next = $#{$self->on_when};
 
   $self->on_then->[$next] = UNIVERSAL::isa($code, 'CODE') ? $code : sub{$code};
+
+  return $self;
+}
+
+sub type {
+  my ($self, $expr) = @_;
+
+  require Venus::Type;
+
+  $self->when(sub{Venus::Type->new->check($expr)->eval($_[0])});
 
   return $self;
 }

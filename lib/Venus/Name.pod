@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Name - Name Class
@@ -301,6 +301,58 @@ I<Since C<0.01>>
   my $lookslike_a_pragma = $name->lookslike_a_pragma;
 
   # ""
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Name)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Name;
+
+  my $new = Venus::Name->new;
+
+  # bless(..., "Venus::Name")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Name;
+
+  my $new = Venus::Name->new('Foo/Bar');
+
+  # bless(..., "Venus::Name")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Name;
+
+  my $new = Venus::Name->new(value => 'Foo/Bar');
+
+  # bless(..., "Venus::Name")
 
 =back
 

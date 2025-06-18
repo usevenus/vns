@@ -5,6 +5,8 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Role 'with';
 
 # BUILDERS
@@ -59,7 +61,27 @@ sub coerce_into {
 
   my $name = lc $space->label;
 
-  if (my $method = $self->can("coerce_into_${name}")) {
+  require Venus::Name;
+  require Venus::What;
+
+  my $aliases = {
+    array => 'arrayref',
+    code => 'coderef',
+    hash => 'hashref',
+    regexp => 'regexpref',
+    scalar => 'scalarref',
+  };
+
+  my $type = lc Venus::Name->new(scalar Venus::What->new(value => $value)->identify)->label;
+
+  $type = $aliases->{$type} || $type;
+
+  my $method;
+
+  if ($method = $self->can("coerce_into_${name}_from_${type}")) {
+    return $self->$method($class, $value);
+  }
+  elsif ($method = $self->can("coerce_into_${name}")) {
     return $self->$method($class, $value);
   }
   if (Scalar::Util::blessed($value) && $value->isa($class)) {
@@ -79,7 +101,30 @@ sub coerce_onto {
 
   $value = $data->{$name} if $#_ < 4;
 
-  if (my $method = $self->can("coerce_${name}")) {
+  require Venus::Name;
+  require Venus::What;
+
+  my $aliases = {
+    array => 'arrayref',
+    code => 'coderef',
+    hash => 'hashref',
+    regexp => 'regexpref',
+    scalar => 'scalarref',
+  };
+
+  my $type = lc Venus::Name->new(scalar Venus::What->new(value => $value)->identify)->label;
+
+  $type = $aliases->{$type} || $type;
+
+  my $method;
+
+  if ($method = $self->can("coerce_onto_${name}_from_${type}")) {
+    return $data->{$name} = $self->$method(\&coerce_into, $class, $value);
+  }
+  elsif ($method = $self->can("coerce_onto_${name}")) {
+    return $data->{$name} = $self->$method(\&coerce_into, $class, $value);
+  }
+  elsif ($method = $self->can("coerce_${name}")) {
     return $data->{$name} = $self->$method(\&coerce_into, $class, $value);
   }
   else {

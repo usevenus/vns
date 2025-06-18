@@ -5,11 +5,18 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
+
+# INHERITS
 
 base 'Venus::Kind::Utility';
 
+# INTEGRATES
+
 with 'Venus::Role::Mappable';
+with 'Venus::Role::Encaseable';
 
 # ATTRIBUTES
 
@@ -89,19 +96,6 @@ sub any {
   return $found ? true : false;
 }
 
-sub assertion {
-  my ($self) = @_;
-
-  my $assert = $self->SUPER::assertion;
-
-  $assert->match('arrayref')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-
-  return $assert;
-}
-
 sub attest {
   my ($self) = @_;
 
@@ -119,16 +113,16 @@ sub attest {
 sub call {
   my ($self, $mapper, $method, @args) = @_;
 
-  require Venus::Type;
+  require Venus::What;
 
   return $self->$mapper(sub{
     my ($key, $val) = @_;
 
-    my $type = Venus::Type->new($val)->deduce;
+    my $what = Venus::What->new($val)->deduce;
 
-    local $_ = $type;
+    local $_ = $what;
 
-    $type->$method(@args)
+    $what->$method(@args)
   });
 }
 
@@ -296,7 +290,17 @@ sub head {
 sub index {
   my ($self) = @_;
 
-  return $self->{index} ||= {};
+  my $index = $self->encase('index', {});
+
+  return $index;
+}
+
+sub index_by_deduced {
+  my ($self) = @_;
+
+  my $deduced = $self->index->{deduced} ||= {};
+
+  return $deduced;
 }
 
 sub index_by_digest {
@@ -326,10 +330,12 @@ sub index_by_refaddr {
 sub insert {
   my ($self, $value) = @_;
 
+  my $value_to_deduced = $self->value_to_deduced($value);
   my $value_to_object = $self->value_to_object($value);
 
   my $value_to_digest = $self->value_to_digest($value_to_object);
   my $index_by_digest = $self->index_by_digest;
+  my $index_by_deduced = $self->index_by_deduced;
 
   if (exists $index_by_digest->{$value_to_digest}) {
     return $index_by_digest->{$value_to_digest};
@@ -347,6 +353,7 @@ sub insert {
 
   $index_by_digest->{$value_to_digest} = $value_to_object;
   $index_by_refaddr->{$value_to_refaddr} = $value_to_digest;
+  $index_by_deduced->{$value_to_digest} = $value_to_deduced;
 
   return $value_to_object;
 }
@@ -463,7 +470,7 @@ sub merge {
 
   for my $data (@data) {
     if (Scalar::Util::blessed($data)) {
-      $self->push($data->isa('Venus::Set') ? $data->list : $data);
+      $self->push(($data->isa('Venus::Set') || $data->isa('Venus::Array')) ? $data->list : $data);
     }
     else {
       $self->push($data);
@@ -493,6 +500,14 @@ sub none {
   }
 
   return $found ? false : true;
+}
+
+sub object_to_value {
+  my ($self, $value) = @_;
+
+  require Venus::What;
+
+  return Venus::What->new($value)->detract;
 }
 
 sub one {
@@ -593,24 +608,9 @@ sub range {
 
   return $self->slice(@args) if @args > 1;
 
-  my ($note) = @args;
+  require Venus::Range;
 
-  return $self->slice if !defined $note;
-
-  my ($f, $l) = split /:/, $note, 2;
-
-  my $data = $self->get;
-
-  $f = 0 if !defined $f || $f eq '';
-  $l = $f if !defined $l;
-  $l = $#$data if !defined $l || $l eq '';
-
-  $f = 0+$f;
-  $l = 0+$l;
-
-  $l = $#$data + $l if $f > -1 && $l < 0;
-
-  return $self->slice($f..$l);
+  return scalar Venus::Range->parse(@args, $self->get)->select;
 }
 
 sub remove {
@@ -640,13 +640,18 @@ sub remove {
     CORE::grep {$index_by_order->{$_} ne $value_to_digest}
       CORE::sort(CORE::keys(%{$index_by_order}));
 
-  return $value_to_object;
+  my $index_by_deduced = $self->index_by_deduced;
+  my $value_to_deduced = delete $index_by_deduced->{$value_to_digest};
+
+  return $value_to_deduced
+    ? $self->object_to_value($value_to_object)
+    : $value_to_object;
 }
 
 sub reset {
   my ($self, @data) = @_;
 
-  delete $self->{index};
+  $self->uncase('index');
 
   $self->insert($_) for @data;
 
@@ -826,13 +831,28 @@ sub unshift {
 sub value {
   my ($self) = @_;
 
+  my $results = [];
+
+  my $index_by_deduced = $self->index_by_deduced;
   my $index_by_digest = $self->index_by_digest;
   my $index_by_order = $self->index_by_order;
 
-  return [
-    CORE::map {$index_by_digest->{$index_by_order->{$_}}}
-      CORE::sort(CORE::keys(%{$index_by_order}))
-  ];
+  for my $index (CORE::sort(CORE::keys(%{$index_by_order}))) {
+    my $digest = $index_by_order->{$index};
+    my $deduced = $index_by_deduced->{$digest};
+    my $value = $index_by_digest->{$index_by_order->{$index}};
+    CORE::push(@{$results}, $deduced ? $self->object_to_value($value) : $value);
+  }
+
+  return $results;
+}
+
+sub value_to_deduced {
+  my ($self, $value) = @_;
+
+  require Scalar::Util;
+
+  return Scalar::Util::blessed($value) ? false : true;
 }
 
 sub value_to_digest {
@@ -849,9 +869,9 @@ sub value_to_digest {
 sub value_to_object {
   my ($self, $value) = @_;
 
-  require Venus::Type;
+  require Venus::What;
 
-  return Venus::Type->new($value)->deduce;
+  return Venus::What->new($value)->deduce;
 }
 
 sub value_to_refaddr {

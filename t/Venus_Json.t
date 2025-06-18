@@ -7,6 +7,7 @@ use warnings;
 
 use Test::More;
 use Venus::Test;
+use Venus;
 
 if (require Venus::Json && not Venus::Json->package) {
   diag 'No suitable JSON library found' if $ENV{VENUS_DEBUG};
@@ -43,6 +44,7 @@ $test->for('abstract');
 
 method: decode
 method: encode
+method: new
 
 =cut
 
@@ -176,9 +178,88 @@ $test->for('example', 1, 'encode', sub {
   $result
 });
 
+=method new
+
+The new method constructs an instance of the package.
+
+=signature new
+
+  new(any @args) (Venus::Json)
+
+=metadata new
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 new
+
+  package main;
+
+  use Venus::Json;
+
+  my $new = Venus::Json->new;
+
+  # bless(..., "Venus::Json")
+
+=cut
+
+$test->for('example', 1, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Json');
+
+  $result
+});
+
+=example-2 new
+
+  package main;
+
+  use Venus::Json;
+
+  my $new = Venus::Json->new({password => 'secret'});
+
+  # bless(..., "Venus::Json")
+
+=cut
+
+$test->for('example', 2, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Json');
+  is_deeply $result->value, {password => 'secret'};
+
+  $result
+});
+
+=example-3 new
+
+  package main;
+
+  use Venus::Json;
+
+  my $new = Venus::Json->new(value => {password => 'secret'});
+
+  # bless(..., "Venus::Json")
+
+=cut
+
+$test->for('example', 3, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Json');
+  is_deeply $result->value, {password => 'secret'};
+
+  $result
+});
+
 =error error_on_config
 
-This package may raise an error_on_config exception.
+This package may raise an C<on.config> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_config> method.
 
 =cut
 
@@ -188,17 +269,15 @@ $test->for('error', 'error_on_config');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_config',
-  };
+  my $error = $json->error_on_config;
 
-  my $error = $json->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_config"
+  # "on.config"
 
-  # my $message = $error->message;
+  # my $render = $error->render;
 
   # "No suitable JSON package"
 
@@ -209,9 +288,9 @@ $test->for('example', 1, 'error_on_config', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_config";
-  my $message = $result->message;
-  is $message, "No suitable JSON package";
+  is $name, "on.config";
+  my $render = $result->render;
+  is $render, "No suitable JSON package";
 
   $result
 });

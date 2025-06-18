@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Core - Core Base Class
@@ -544,6 +544,130 @@ I<Since C<1.00>>
 
 =cut
 
+=head2 clone
+
+  clone() (object)
+
+The CLONE method is an object construction lifecycle hook that returns a deep
+clone of the invocant. The invocant must be blessed, meaning that the method
+only applies to objects that are instances of a package. If the invocant is not
+blessed, an exception will be raised. This method uses deep cloning to create
+an independent copy of the object, including any private instance data, nested
+structures or references within the object.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item clone example 1
+
+  package User;
+
+  use base 'Venus::Core';
+
+  package main;
+
+  my $user = User->BLESS('Elliot');
+
+  my $clone = $user->CLONE;
+
+  # bless({name => 'Elliot'}, 'User')
+
+=back
+
+=over 4
+
+=item clone example 2
+
+  package User;
+
+  use base 'Venus::Core';
+
+  package main;
+
+  my $user = User->BLESS('Elliot');
+
+  my $clone = User->CLONE;
+
+  # Exception! "Can't clone without an instance of \"User\""
+
+=back
+
+=over 4
+
+=item clone example 3
+
+  package User;
+
+  use base 'Venus::Core';
+
+  User->MASK('password');
+
+  sub get_password {
+    my ($self) = @_;
+
+    $self->password;
+  }
+
+  sub set_password {
+    my ($self) = @_;
+
+    $self->password('secret');
+  }
+
+  package main;
+
+  my $user = User->BLESS('Elliot');
+
+  $user->set_password;
+
+  my $clone = $user->CLONE;
+
+  # bless({name => 'Elliot'}, 'User')
+
+=back
+
+=cut
+
+=head2 construct
+
+  construct() (any)
+
+The CONSTRUCT method is an object construction lifecycle hook that is
+automatically called after the L</BLESS> method, without any arguments. It is
+intended to prepare the instance for usage, separate from the build process,
+allowing for any setup or post-processing needed after the object has been
+blessed. This method's return value is not used in any subsequent processing,
+so its primary purpose is side effects or additional setup.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item construct example 1
+
+  package User;
+
+  use base 'Venus::Core';
+
+  sub CONSTRUCT {
+    my ($self) = @_;
+
+    $self->{ready} = 1;
+
+    return $self;
+  }
+
+  package main;
+
+  my $user = User->BLESS('Elliot');
+
+  # bless({name => 'Elliot', ready => 1}, 'User')
+
+=back
+
+=cut
+
 =head2 data
 
   DATA() (Ref)
@@ -596,6 +720,55 @@ I<Since C<1.00>>
 
 =cut
 
+=head2 deconstruct
+
+  deconstruct() (any)
+
+The DECONSTRUCT method is an object destruction lifecycle hook that is called
+just before the L</DESTROY> method. It provides an opportunity to perform any
+necessary cleanup or resource release on the instance before it is destroyed.
+This can include actions like disconnecting from external resources, clearing
+caches, or logging. The method returns the instance, but its return value is
+not used in subsequent processing.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item deconstruct example 1
+
+  package User;
+
+  use base 'Venus::Core';
+
+  our $CALLS = 0;
+
+  our $USERS = 0;
+
+  sub CONSTRUCT {
+    return $CALLS = $USERS += 1;
+  }
+
+  sub DECONSTRUCT {
+    return $USERS--;
+  }
+
+  package main;
+
+  my $user;
+
+  $user = User->BLESS('Elliot');
+
+  $user = User->BLESS('Elliot');
+
+  undef $user;
+
+  # undef
+
+=back
+
+=cut
+
 =head2 destroy
 
   DESTROY() (any)
@@ -613,14 +786,14 @@ I<Since C<1.00>>
 
   use base 'Venus::Core';
 
-  our $USERS = 0;
+  our $TRIES = 0;
 
   sub BUILD {
-    return $USERS++;
+    return $TRIES++;
   }
 
   sub DESTROY {
-    return $USERS--;
+    return $TRIES--;
   }
 
   package main;
@@ -980,6 +1153,99 @@ I<Since C<1.11>>
 
 =cut
 
+=head2 mask
+
+  mask(string $name, any @args) (string | object)
+
+The MASK method is a class-building lifecycle hook that installs private
+instance data accessors in the calling package. The accessor created allows
+private access to an instance variable, ensuring that it can only be accessed
+within the class or its subclasses. The method takes the name of the private
+variable as the first argument and any additional parameters needed for
+configuration. Attempting to access or set this variable outside of the class
+will raise an exception. This feature is useful for creating encapsulated
+attributes that maintain controlled visibility.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item mask example 1
+
+  package User;
+
+  use base 'Venus::Core';
+
+  User->MASK('password');
+
+  package main;
+
+  my $user = User->BLESS(name => 'Elliot');
+
+  $user->password;
+
+  # Exception! "Can't get/set private variable \"password\" outside the class or subclass of \"User\""
+
+=back
+
+=over 4
+
+=item mask example 2
+
+  package User;
+
+  use base 'Venus::Core';
+
+  User->MASK('password');
+
+  package main;
+
+  my $user = User->BLESS(name => 'Elliot');
+
+  User->password;
+
+  # Exception! "Can't get/set private variable \"password\" without an instance of \"User\""
+
+=back
+
+=over 4
+
+=item mask example 3
+
+  package User;
+
+  use base 'Venus::Core';
+
+  User->MASK('password');
+
+  sub get_password {
+    my ($self) = @_;
+
+    $self->password;
+  }
+
+  sub set_password {
+    my ($self) = @_;
+
+    $self->password('secret');
+  }
+
+  package main;
+
+  my $user = User->BLESS(name => 'Elliot');
+
+  $user->set_password;
+
+  # "secret"
+
+  $user;
+
+  # bless({name => 'Elliot'}, 'User')
+
+=back
+
+=cut
+
 =head2 meta
 
   META() (Venus::Meta)
@@ -1168,6 +1434,8 @@ The SET method is a class instance lifecycle hook which is responsible for
 I<"setting"> instance items (or attribute values). By default, all class
 attributes I<"setters"> are dispatched to this method.
 
+I<Since C<2.91>>
+
 =over 4
 
 =item set example 1
@@ -1292,6 +1560,33 @@ I<Since C<2.91>>
   package main;
 
   User->UNIMPORT;
+
+  # 'User'
+
+=back
+
+=cut
+
+=head2 use
+
+  USE(string $into, any @args) (any)
+
+The USE method is a class building lifecycle hook which is invoked
+whenever the L<perlfunc/use> declaration is used.
+
+I<Since C<2.91>>
+
+=over 4
+
+=item use example 1
+
+  package User;
+
+  use base 'Venus::Core';
+
+  package main;
+
+  User->USE;
 
   # 'User'
 

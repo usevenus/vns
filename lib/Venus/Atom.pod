@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Atom - Atom Class
@@ -86,6 +86,58 @@ I<Since C<3.55>>
 
 =cut
 
+=head2 new
+
+  new(any @args) (Venus::Atom)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Atom;
+
+  my $new = Venus::Atom->new;
+
+  # bless(..., "Venus::Atom")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Atom;
+
+  my $new = Venus::Atom->new('Important');
+
+  # bless(..., "Venus::Atom")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Atom;
+
+  my $new = Venus::Atom->new(value => 'Important');
+
+  # bless(..., "Venus::Atom")
+
+=back
+
+=cut
+
 =head2 set
 
   set(any $data) (any)
@@ -139,30 +191,24 @@ This package may raise the following errors:
 
 =item error: C<error_on_set>
 
-This package may raise an error_on_set exception.
+This package may raise an C<on.set> error, as an instance of
+C<Venus::Atom::Error>, via the C<error_on_set> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_set',
-    value => 'test',
-  };
+  my $error = $atom->error_on_set;
 
-  my $error = $atom->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_set"
+  # "on.set"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
-  # "Can't re-set atom value to \"test\""
-
-  # my $value = $error->stash('value');
-
-  # "test"
+  # "Can't re-set atom value"
 
 =back
 

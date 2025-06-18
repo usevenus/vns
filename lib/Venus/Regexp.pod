@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Regexp - Regexp Class
@@ -1606,6 +1606,58 @@ I<Since C<0.08>>
   my $result = $lvalue->ne($rvalue);
 
   # 1
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Regexp)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Regexp;
+
+  my $new = Venus::Regexp->new;
+
+  # bless(..., "Venus::Regexp")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Regexp;
+
+  my $new = Venus::Regexp->new(qr/(?<greet>\w+) (?<username>\w+)/u);
+
+  # bless(..., "Venus::Regexp")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Regexp;
+
+  my $new = Venus::Regexp->new(value => qr/(?<greet>\w+) (?<username>\w+)/u);
+
+  # bless(..., "Venus::Regexp")
 
 =back
 

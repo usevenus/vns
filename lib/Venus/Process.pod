@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Process - Process Class
@@ -1801,6 +1801,58 @@ I<Since C<3.40>>
   my $limit = $parent->limit(2);
 
   # true
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Process)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Process;
+
+  my $new = Venus::Process->new;
+
+  # bless(..., "Venus::Process")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Process;
+
+  my $new = Venus::Process->new(1);
+
+  # bless(..., "Venus::Process")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Process;
+
+  my $new = Venus::Process->new(value => 1);
+
+  # bless(..., "Venus::Process")
 
 =back
 
@@ -3732,36 +3784,28 @@ This package may raise the following errors:
 
 =item error: C<error_on_chdir>
 
-This package may raise an error_on_chdir exception.
+This package may raise an C<on.chdir> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_chdir> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_chdir',
+  my $error = $parent->error_on_chdir({
     error => $!,
     path => '/nowhere',
     pid => 123,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_chdir"
+  # "on.chdir"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Can't chdir \"$path\": $!"
-
-  # my $path = $error->stash('path');
-
-  # "/nowhere"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
 
 =back
 
@@ -3769,31 +3813,27 @@ B<example 1>
 
 =item error: C<error_on_fork_process>
 
-This package may raise an error_on_fork_process exception.
+This package may raise an C<on.fork.process> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_fork_process> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_fork_process',
+  my $error = $parent->error_on_fork_process({
     error => $!,
     pid => 123,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_fork_process"
+  # "on.fork.process"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Can't fork process $pid: $!"
-
-  # my $pid = $error->stash('pid');
-
-  # "123"
 
 =back
 
@@ -3801,30 +3841,26 @@ B<example 1>
 
 =item error: C<error_on_fork_support>
 
-This package may raise an error_on_fork_support exception.
+This package may raise an C<on.fork.support> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_fork_support> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_fork_support',
+  my $error = $parent->error_on_fork_support({
     pid => 123,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_fork_support"
+  # "on.fork.support"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Can't fork process $pid: Fork emulation not supported"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
 
 =back
 
@@ -3832,30 +3868,26 @@ B<example 1>
 
 =item error: C<error_on_ping>
 
-This package may raise an error_on_ping exception.
+This package may raise an C<on.ping> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_ping> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_ping',
+  my $error = $parent->error_on_ping({
     pid => 123,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_ping"
+  # "on.ping"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Process 123 not responding to ping"
-
-  # my $pid = $error->stash('pid');
-
-  # "123"
 
 =back
 
@@ -3863,31 +3895,27 @@ B<example 1>
 
 =item error: C<error_on_setid>
 
-This package may raise an error_on_setid exception.
+This package may raise an C<on.setid> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_setid> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_setid',
+  my $error = $parent->error_on_setid({
     error => $!,
     pid => 123,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_setid"
+  # "on.setid"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Can't start a new session: $!"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
 
 =back
 
@@ -3895,36 +3923,28 @@ B<example 1>
 
 =item error: C<error_on_stderr>
 
-This package may raise an error_on_stderr exception.
+This package may raise an C<on.stderr> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_stderr> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_stderr',
+  my $error = $parent->error_on_stderr({
     error => $!,
     path => "/nowhere",
     pid => 123,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_stderr"
+  # "on.stderr"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Can't redirect STDERR to \"/nowhere\": $!"
-
-  # my $path = $error->stash('path');
-
-  # "/nowhere"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
 
 =back
 
@@ -3932,36 +3952,28 @@ B<example 1>
 
 =item error: C<error_on_stdin>
 
-This package may raise an error_on_stdin exception.
+This package may raise an C<on.stdin> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_stdin> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_stdin',
+  my $error = $parent->error_on_stdin({
     error => $!,
     path => "/nowhere",
     pid => 123,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_stdin"
+  # "on.stdin"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Can't redirect STDIN to \"$path\": $!"
-
-  # my $path = $error->stash('path');
-
-  # "/nowhere"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
 
 =back
 
@@ -3969,36 +3981,28 @@ B<example 1>
 
 =item error: C<error_on_stdout>
 
-This package may raise an error_on_stdout exception.
+This package may raise an C<on.stdout> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_stdout> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_stdout',
+  my $error = $parent->error_on_stdout({
     error => $!,
     path => "/nowhere",
     pid => 123,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_stdout"
+  # "on.stdout"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Can't redirect STDOUT to \"$path\": $!"
-
-  # my $path = $error->stash('path');
-
-  # "/nowhere"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
 
 =back
 
@@ -4006,43 +4010,27 @@ B<example 1>
 
 =item error: C<error_on_timeout_poll>
 
-This package may raise an error_on_timeout_poll exception.
+This package may raise an C<on.timeout.poll> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_timeout_poll> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_timeout_poll',
+  my $error = $parent->error_on_timeout_poll({
     code => sub{},
     timeout => 0,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_timeout_poll"
+  # "on.timeout.poll"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Timed out after 0 seconds in process 12345 while polling __ANON__"
-
-  # my $code = $error->stash('code');
-
-  # sub{}
-
-  # my $exchange = $error->stash('exchange');
-
-  # undef
-
-  # my $pid = $error->stash('pid');
-
-  # 12345
-
-  # my $timeout = $error->stash('timeout');
-
-  # 0
 
 =back
 
@@ -4050,43 +4038,27 @@ B<example 1>
 
 =item error: C<error_on_timeout_pool>
 
-This package may raise an error_on_timeout_pool exception.
+This package may raise an C<on.timeout.pool> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_timeout_pool> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_timeout_pool',
+  my $error = $parent->error_on_timeout_pool({
     pool_size => 2,
     timeout => 0,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_timeout_pool"
+  # "on.timeout.pool"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Timed out after 0 seconds in process 12345 while pooling"
-
-  # my $exchange = $error->stash('exchange');
-
-  # undef
-
-  # my $pid = $error->stash('pid');
-
-  # 12345
-
-  # my $pool_size = $error->stash('pool_size');
-
-  # 2
-
-  # my $timeout = $error->stash('timeout');
-
-  # 0
 
 =back
 
@@ -4094,43 +4066,27 @@ B<example 1>
 
 =item error: C<error_on_timeout_sync>
 
-This package may raise an error_on_timeout_sync exception.
+This package may raise an C<on.timeout.sync> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_timeout_sync> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_timeout_sync',
+  my $error = $parent->error_on_timeout_sync({
     pool_size => 2,
     timeout => 0,
-  };
+  });
 
-  my $error = $parent->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_timeout_sync"
+  # "on.timeout.sync"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Timed out after 0 seconds in process 12345 while syncing"
-
-  # my $exchange = $error->stash('exchange');
-
-  # undef
-
-  # my $pid = $error->stash('pid');
-
-  # 12345
-
-  # my $pool_size = $error->stash('pool_size');
-
-  # 2
-
-  # my $timeout = $error->stash('timeout');
-
-  # 0
 
 =back
 

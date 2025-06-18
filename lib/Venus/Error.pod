@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Error - Error Class
@@ -41,33 +41,205 @@ This package has the following attributes:
 
 =head2 name
 
-  name(Str)
+  name(string $name) (string)
 
-This attribute is read-write, accepts C<(Str)> values, and is optional.
+The name attribute is read-write, accepts C<string> values, and is optional.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item name example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $set_name = $error->name("on.save");
+
+  # "on.save"
+
+=back
+
+=over 4
+
+=item name example 2
+
+  # given: synopsis
+
+  # given: example-1 name
+
+  package main;
+
+  my $get_name = $error->name;
+
+  # "on.save"
+
+=back
+
+=cut
+
+=head2 cause
+
+  cause(Venus::Error $error) (Venus::Error)
+
+The cause attribute is read-write, accepts C<Venus::Error> values, and is
+optional.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item cause example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $set_cause = $error->cause(Venus::Error->new);
+
+  # bless(..., "Venus::Error")
+
+=back
+
+=over 4
+
+=item cause example 2
+
+  # given: synopsis
+
+  # given: example-1 cause
+
+  package main;
+
+  my $get_cause = $error->cause;
+
+  # bless(..., "Venus::Error")
+
+=back
 
 =cut
 
 =head2 context
 
-  context(Str)
+  context(string $context) (string)
 
-This attribute is read-write, accepts C<(Str)> values, is optional, and defaults to C<'(None)'>.
+The context attribute is read-write, accepts C<string> values, and is optional.
+Defaults to C<'N/A'>.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item context example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $set_context = $error->context("main::main");
+
+  # "main::main"
+
+=back
+
+=over 4
+
+=item context example 2
+
+  # given: synopsis
+
+  # given: example-1 context
+
+  package main;
+
+  my $get_context = $error->context;
+
+  # "main::main"
+
+=back
 
 =cut
 
 =head2 message
 
-  message(Str)
+  message(string $message) (string)
 
-This attribute is read-write, accepts C<(Str)> values, is optional, and defaults to C<'Exception!'>.
+The message attribute is read-write, accepts C<string> values, and is optional.
+Defaults to C<'Exception!'>.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item message example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $set_message = $error->message("Exception!");
+
+  # "Exception!"
+
+=back
+
+=over 4
+
+=item message example 2
+
+  # given: synopsis
+
+  # given: example-1 message
+
+  package main;
+
+  my $get_message = $error->message;
+
+  # "Exception!"
+
+=back
 
 =cut
 
 =head2 verbose
 
-  verbose(Int)
+  verbose(number $verbose) (number)
 
-This attribute is read-write, accepts C<(Int)> values, is optional, and defaults to C<1>.
+The verbose attribute is read-write, accepts C<number> values, and is optional.
+Defaults to C<true>.
+
+I<Since C<0.01>>
+
+=over 4
+
+=item verbose example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $set_verbose = $error->verbose(true);
+
+  # true
+
+=back
+
+=over 4
+
+=item verbose example 2
+
+  # given: synopsis
+
+  # given: example-1 verbose
+
+  package main;
+
+  my $get_verbose = $error->verbose;
+
+  # true
+
+=back
 
 =cut
 
@@ -85,7 +257,7 @@ This package integrates behaviors from:
 
 L<Venus::Role::Explainable>
 
-L<Venus::Role::Stashable>
+L<Venus::Role::Encaseable>
 
 =cut
 
@@ -122,9 +294,9 @@ I<Since C<2.55>>
 
   package main;
 
-  use Venus::Throw;
+  use Venus::Error;
 
-  my $error = Venus::Throw->new->capture(1..4)->catch('error');
+  my $error = Venus::Error->new->capture(1..4);
 
   my $arguments = $error->arguments;
 
@@ -138,9 +310,9 @@ I<Since C<2.55>>
 
   package main;
 
-  use Venus::Throw;
+  use Venus::Error;
 
-  my $error = Venus::Throw->new->capture(1..4)->catch('error');
+  my $error = Venus::Error->new->capture(1..4);
 
   my $arguments = $error->arguments(0);
 
@@ -322,9 +494,9 @@ I<Since C<2.55>>
 
   package main;
 
-  use Venus::Throw;
+  use Venus::Error;
 
-  my $error = Venus::Throw->new->do('frame', 0)->capture->catch('error');
+  my $error = Venus::Error->new->do('offset', 0)->capture;
 
   my $callframe = $error->callframe;
 
@@ -338,13 +510,38 @@ I<Since C<2.55>>
 
   package main;
 
-  use Venus::Throw;
+  use Venus::Error;
 
-  my $error = Venus::Throw->new->do('frame', 0)->capture->catch('error');
+  my $error = Venus::Error->new->do('offset', 0)->capture;
 
   my $package = $error->callframe(0);
 
   # 'main'
+
+=back
+
+=cut
+
+=head2 capture
+
+  capture(any @args) (Venus::Error)
+
+The capture method captures the L<caller> info at the L</frame> specified, in
+the object stash, and returns the invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item capture example 1
+
+  # given: synopsis
+
+  package main;
+
+  $error = $error->capture;
+
+  # bless({...}, 'Venus::Error')
 
 =back
 
@@ -372,6 +569,69 @@ I<Since C<2.55>>
 
 =cut
 
+=head2 copy
+
+  copy(Venus::Error $error) (Venus::Error)
+
+The copy method copied the properties of the L<Venus::Error> provided into the
+invocant and returns the invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item copy example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $oops = Venus::Error->as('on.oops');
+
+  my $copy = $error->copy($oops);
+
+  # bless({ ... }, 'Venus::Error')
+
+  # $error->name;
+
+  # "on.oops"
+
+=back
+
+=over 4
+
+=item copy example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $oops = Venus::Error->as('on.oops');
+
+  $oops->message('Oops, something happened.');
+
+  $oops->stash(what => 'Unknown');
+
+  my $copy = $error->copy($oops);
+
+  # bless({ ... }, 'Venus::Error')
+
+  # $error->name;
+
+  # "on.oops"
+
+  # $error->message;
+
+  # "Oops, something happened."
+
+  # $error->stash('what');
+
+  # "Unknown"
+
+=back
+
+=cut
+
 =head2 explain
 
   explain() (string)
@@ -387,9 +647,90 @@ I<Since C<0.01>>
 
   # given: synopsis;
 
+  $error->verbose(0);
+
   my $explain = $error->explain;
 
-  # "Exception! in ...
+  # "Exception!" in ...
+
+=back
+
+=over 4
+
+=item explain example 2
+
+  # given: synopsis;
+
+  $error->verbose(1);
+
+  my $explain = $error->explain;
+
+  # "Exception!" in ...
+
+=back
+
+=over 4
+
+=item explain example 3
+
+  # given: synopsis;
+
+  $error->name('on.save.error');
+
+  $error->verbose(1);
+
+  my $explain = $error->explain;
+
+  # "Exception!" in ...
+
+=back
+
+=over 4
+
+=item explain example 4
+
+  # given: synopsis;
+
+  $error->name('on.save.error');
+
+  $error->stash('what', 'Unknown');
+
+  $error->verbose(1);
+
+  my $explain = $error->explain;
+
+  # "Exception!" in ...
+
+=back
+
+=over 4
+
+=item explain example 5
+
+  package main;
+
+  use Venus::Error;
+
+  my $step3 = Venus::Error->new(
+    name => 'step3',
+    message => 'Step 3: Failed',
+  );
+
+  my $step2 = Venus::Error->new(
+    name => 'step2',
+    message => 'Step 2: Failed',
+    cause => $step3,
+  );
+
+  my $step1 = Venus::Error->new(
+    name => 'step1',
+    message => 'Step 1: Failed',
+    cause => $step2,
+  );
+
+  my $explain = $step1->explain;
+
+  # "Step 1: Failed" in ...
 
 =back
 
@@ -479,6 +820,86 @@ I<Since C<0.01>>
   #     ...
   #   ],
   # ]
+
+=back
+
+=cut
+
+=head2 get
+
+  get(string @args) (any)
+
+The get method takes one or more attribute and/or method names and returns the
+result of calling each attribute and/or method. In scalar context returns a
+single value. In list context results a list of values.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item get example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $get = $error->get('verbose');
+
+  # true
+
+=back
+
+=over 4
+
+=item get example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $get = $error->get('verbose', 'context');
+
+  # true
+
+=back
+
+=over 4
+
+=item get example 3
+
+  # given: synopsis
+
+  package main;
+
+  my @get = $error->get('verbose', 'message');
+
+  # (true, 'Exception!')
+
+=back
+
+=cut
+
+=head2 input
+
+  input(any @args) (Venus::Error)
+
+The input method captures the arguments provided as associates them with a
+L<"callframe"|perlfunc/caller> based on the level specified by L</offset>, in
+the object stash, and returns the invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item input example 1
+
+  # given: synopsis
+
+  package main;
+
+  $error = $error->input(1..4);
+
+  # bless({...}, 'Venus::Error')
 
 =back
 
@@ -651,9 +1072,61 @@ I<Since C<1.02>>
 
   package main;
 
-  my $is = Virtual::Error->new->as('on.SAVE.error')->is('on_save_error');
+  my $is = Virtual::Error->new->as('on.SAVE.error')->is('on.save.error');
 
   # 1
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Error)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Error;
+
+  my $new = Venus::Error->new;
+
+  # bless(..., "Venus::Error")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Error;
+
+  my $new = Venus::Error->new('Oops!');
+
+  # bless(..., "Venus::Error")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Error;
+
+  my $new = Venus::Error->new(message => 'Oops!');
+
+  # bless(..., "Venus::Error")
 
 =back
 
@@ -834,6 +1307,62 @@ I<Since C<1.11>>
 
 =cut
 
+=head2 on
+
+  on(string $name) (Venus::Error)
+
+The on method sets a L</name> for the error in the form of
+C<"on.$subroutine.$name"> or C<"on.$name"> (if outside of a subroutine) and
+returns the invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item on example 1
+
+  # given: synopsis
+
+  package main;
+
+  $error = $error->on('handler');
+
+  # bless({...}, 'Venus::Error')
+
+  # $error->name;
+
+  # "on.handler"
+
+=back
+
+=cut
+
+=head2 output
+
+  output(any @args) (Venus::Error)
+
+The output method captures the arguments provided as associates them with a
+L<"callframe"|perlfunc/caller> based on the level specified by L</offset>, in
+the object stash, and returns the invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item output example 1
+
+  # given: synopsis
+
+  package main;
+
+  $error = $error->output(1..4);
+
+  # bless({...}, 'Venus::Error')
+
+=back
+
+=cut
+
 =head2 render
 
   render() (string)
@@ -859,6 +1388,599 @@ I<Since C<3.30>>
   my $render = $error->render;
 
   # "Signal received: SIGKILL"
+
+=back
+
+=cut
+
+=head2 reset
+
+  reset() (Venus::Error)
+
+The reset method resets the L</offset> and L</verbose> attributes if they're
+not already set, resets the L</context> based on the L<caller>, and rebuilds
+the stacktrace, then returns the invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item reset example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $reset = $error->reset;
+
+  # bless(..., "Venus::Error")
+
+=back
+
+=over 4
+
+=item reset example 2
+
+  package main;
+
+  use Venus::Error;
+
+  my $error = Venus::Error->new(offset => 0, verbose => 0);
+
+  my $reset = $error->reset;
+
+  # bless(..., "Venus::Error")
+
+=back
+
+=cut
+
+=head2 set
+
+  set(any @args) (any)
+
+The set method sets one or more attributes and/or methods on the invocant. This
+method accepts key/value pairs or a hashref of key/value pairs and returns the
+invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item set example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $set = $error->set(message => 'Oops!');
+
+  # bless(..., "Venus::Error")
+
+=back
+
+=over 4
+
+=item set example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $set = $error->set(message => 'Oops!', verbose => false);
+
+  # bless(..., "Venus::Error")
+
+=back
+
+=over 4
+
+=item set example 3
+
+  # given: synopsis
+
+  package main;
+
+  my $set = $error->set({message => 'Oops!', verbose => false});
+
+  # bless(..., "Venus::Error")
+
+=back
+
+=cut
+
+=head2 stash
+
+  stash(string $key, any $value) (any)
+
+The stash method gets and sets ad-hoc data related to the invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item stash example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $stash = $error->stash;
+
+  # {}
+
+=back
+
+=over 4
+
+=item stash example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $stash = $error->stash('package');
+
+  # undef
+
+=back
+
+=over 4
+
+=item stash example 3
+
+  # given: synopsis
+
+  package main;
+
+  my $stash = $error->stash('package', 'Example');
+
+  # "Example"
+
+=back
+
+=over 4
+
+=item stash example 4
+
+  # given: synopsis
+
+  package main;
+
+  $error->stash('package', 'Example');
+
+  my $stash = $error->stash('package');
+
+  # "Example"
+
+=back
+
+=over 4
+
+=item stash example 5
+
+  # given: synopsis
+
+  package main;
+
+  my $stash = $error->stash('package', 'Example', routine => 'execute');
+
+  # {
+  #   package => "Example",
+  #   routine => "execute",
+  # }
+
+=back
+
+=over 4
+
+=item stash example 6
+
+  # given: synopsis
+
+  package main;
+
+  my $stash = $error->stash({'package', 'Example', routine => 'execute'});
+
+  # {
+  #   package => "Example",
+  #   routine => "execute",
+  # }
+
+=back
+
+=cut
+
+=head2 sysinfo
+
+  sysinfo() (Venus::Error)
+
+The sysinfo method calls all the C<system_*> methods and L<"stashes"|/stash>
+the system information.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item sysinfo example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $sysinfo = $error->sysinfo;
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_name');
+
+  # $^O
+
+  # $error->stash('system_path');
+
+  # /path/to/cwd
+
+  # $error->stash('system_perl_path');
+
+  # $^X
+
+  # $error->stash('system_perl_path');
+
+  # $^X
+
+  # $error->stash('system_perl_version');
+
+  # $^V
+
+  # $error->stash('system_process_id');
+
+  # $$
+
+  # $error->stash('system_script_args');
+
+  # [@ARGV]
+
+  # $error->stash('system_script_path');
+
+  # $0
+
+=back
+
+=cut
+
+=head2 system_name
+
+  system_name(string $value) (Venus::Error)
+
+The system_name method L<"stashes"|/stash> a value representing the
+I<"system name"> and returns the invocant. If no value is provided this method
+will use C<$^O> as the default.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item system_name example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $system_name = $error->system_name;
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_name');
+
+  # $^O
+
+=back
+
+=over 4
+
+=item system_name example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $system_name = $error->system_name($^O);
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_name');
+
+  # $^O
+
+=back
+
+=cut
+
+=head2 system_path
+
+  system_path(string $value) (Venus::Error)
+
+The system_path method L<"stashes"|/stash> a value representing the
+I<"system_path"> and returns the invocant. If no value is provided this method
+will use C<Cwd/getcwd> as the default.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item system_path example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $system_path = $error->system_path;
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_path');
+
+  # /path/to/cwd
+
+=back
+
+=over 4
+
+=item system_path example 2
+
+  # given: synopsis
+
+  package main;
+
+  use Cwd ();
+
+  my $system_path = $error->system_path(Cwd->getcwd);
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_path');
+
+  # /path/to/cwd
+
+=back
+
+=cut
+
+=head2 system_perl_path
+
+  system_perl_path(string $value) (Venus::Error)
+
+The system_perl_path method L<"stashes"|/stash> a value representing the
+I<"system_perl_path"> and returns the invocant. If no value is provided this
+method will use C<$^X> as the default.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item system_perl_path example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $system_perl_path = $error->system_perl_path;
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_perl_path');
+
+  # $^X
+
+=back
+
+=over 4
+
+=item system_perl_path example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $system_perl_path = $error->system_perl_path($^X);
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_perl_path');
+
+  # $^X
+
+=back
+
+=cut
+
+=head2 system_perl_version
+
+  system_perl_version(string $value) (Venus::Error)
+
+The system_perl_version method L<"stashes"|/stash> a value representing the
+I<"system_perl_version"> and returns the invocant. If no value is provided this
+method will use C<$^V> as the default.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item system_perl_version example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $system_perl_version = $error->system_perl_version;
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_perl_version');
+
+  # $^V
+
+=back
+
+=over 4
+
+=item system_perl_version example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $system_perl_version = $error->system_perl_version($^V);
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_perl_version');
+
+  # $^V
+
+=back
+
+=cut
+
+=head2 system_process_id
+
+  system_process_id(string $value) (Venus::Error)
+
+The system_process_id method L<"stashes"|/stash> a value representing the
+I<"system_process_id"> and returns the invocant. If no value is provided this
+method will use C<$$> as the default.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item system_process_id example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $system_process_id = $error->system_process_id;
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_process_id');
+
+  # $$
+
+=back
+
+=over 4
+
+=item system_process_id example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $system_process_id = $error->system_process_id($$);
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_process_id');
+
+  # $$
+
+=back
+
+=cut
+
+=head2 system_script_args
+
+  system_script_args(string $value) (Venus::Error)
+
+The system_script_args method L<"stashes"|/stash> a value representing the
+I<"system"> and returns the invocant. If no value is provided this method will
+use C<[@ARGV]> as the default.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item system_script_args example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $system_script_args = $error->system_script_args;
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_script_args');
+
+  # [@ARGV]
+
+=back
+
+=over 4
+
+=item system_script_args example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $system_script_args = $error->system_script_args(@ARGV);
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_script_args');
+
+  # [@ARGV]
+
+=back
+
+=cut
+
+=head2 system_script_path
+
+  system_script_path(string $value) (Venus::Error)
+
+The system_script_path method L<"stashes"|/stash> a value representing the
+I<"system_script_path"> and returns the invocant. If no value is provided this
+method will use C<$0> as the default.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item system_script_path example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $system_script_path = $error->system_script_path;
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_script_path');
+
+  # $0
+
+=back
+
+=over 4
+
+=item system_script_path example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $system_script_path = $error->system_script_path($0);
+
+  # bless(..., "Venus::Error")
+
+  # $error->stash('system_script_path');
+
+  # $0
 
 =back
 

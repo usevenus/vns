@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Json - Json Class
@@ -131,6 +131,58 @@ I<Since C<0.01>>
 
 =cut
 
+=head2 new
+
+  new(any @args) (Venus::Json)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Json;
+
+  my $new = Venus::Json->new;
+
+  # bless(..., "Venus::Json")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Json;
+
+  my $new = Venus::Json->new({password => 'secret'});
+
+  # bless(..., "Venus::Json")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Json;
+
+  my $new = Venus::Json->new(value => {password => 'secret'});
+
+  # bless(..., "Venus::Json")
+
+=back
+
+=cut
+
 =head1 ERRORS
 
 This package may raise the following errors:
@@ -141,23 +193,22 @@ This package may raise the following errors:
 
 =item error: C<error_on_config>
 
-This package may raise an error_on_config exception.
+This package may raise an C<on.config> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_config> method.
 
 B<example 1>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_config',
-  };
+  my $error = $json->error_on_config;
 
-  my $error = $json->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_config"
+  # "on.config"
 
-  # my $message = $error->message;
+  # my $render = $error->render;
 
   # "No suitable JSON package"
 

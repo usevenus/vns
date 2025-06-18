@@ -1,0 +1,27 @@
+#!/usr/bin/env perl
+
+package main;
+
+use 5.018;
+
+use strict;
+use warnings;
+
+use Cwd ();
+use File::Basename ();
+use File::Spec ();
+
+our $lib;
+
+BEGIN {
+  $lib = File::Spec->catfile(
+    File::Basename::dirname(File::Basename::dirname(Cwd::realpath($0))),
+    'lib',
+  );
+}
+
+use lib $lib;
+
+use Venus::Task::Venus::New;
+
+run Venus::Task::Venus::New 'vns-new';

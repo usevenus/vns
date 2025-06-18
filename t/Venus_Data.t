@@ -7,6 +7,7 @@ use warnings;
 
 use Test::More;
 use Venus::Test;
+use Venus;
 
 my $test = test(__FILE__);
 
@@ -40,6 +41,7 @@ method: count
 method: data
 method: docs
 method: find
+method: new
 method: search
 method: string
 method: text
@@ -402,16 +404,94 @@ $test->for('example', 4, 'find', sub {
   $result
 });
 
+=method new
+
+The new method constructs an instance of the package.
+
+=signature new
+
+  new(any @args) (Venus::Data)
+
+=metadata new
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 new
+
+  package main;
+
+  use Venus::Data;
+
+  my $new = Venus::Data->new;
+
+  # bless(..., "Venus::Data")
+
+=cut
+
+$test->for('example', 1, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Data');
+
+  $result
+});
+
+=example-2 new
+
+  package main;
+
+  use Venus::Data;
+
+  my $new = Venus::Data->new('t/data/sections');
+
+  # bless(..., "Venus::Data")
+
+=cut
+
+$test->for('example', 2, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Data');
+  is $result->value, 't/data/sections';
+
+  $result
+});
+
+=example-3 new
+
+  package main;
+
+  use Venus::Data;
+
+  my $new = Venus::Data->new(value => 't/data/sections');
+
+  # bless(..., "Venus::Data")
+
+=cut
+
+$test->for('example', 3, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Data');
+  is $result->value, 't/data/sections';
+
+  $result
+});
+
 =method search
 
 The search method returns the set of blocks matching the criteria provided.
 This method can return a list of values in list-context.
 
-=signature find
+=signature search
 
   find(hashref $criteria) (arrayref)
 
-=metadata find
+=metadata search
 
 {
   since => '0.01',

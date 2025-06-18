@@ -7,6 +7,7 @@ use warnings;
 
 use Test::More;
 use Venus::Test;
+use Venus;
 use File::Temp;
 use Venus;
 
@@ -71,6 +72,7 @@ method: locate
 method: meta
 method: mock
 method: name
+method: new
 method: parent
 method: parse
 method: parts
@@ -1970,6 +1972,64 @@ $test->for('example', 1, 'name', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->result;
   ok $result eq 'Foo::Bar';
+
+  $result
+});
+
+=method new
+
+The new method constructs an instance of the package.
+
+=signature new
+
+  new(any @args) (Venus::Space)
+
+=metadata new
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 new
+
+  package main;
+
+  use Venus::Space;
+
+  my $new = Venus::Space->new('Foo::Bar');
+
+  # bless(..., "Venus::Space")
+
+=cut
+
+$test->for('example', 1, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Space');
+  is $result->value, 'Foo::Bar';
+
+  $result
+});
+
+=example-2 new
+
+  package main;
+
+  use Venus::Space;
+
+  my $new = Venus::Space->new(value => 'Foo::Bar');
+
+  # bless(..., "Venus::Space")
+
+=cut
+
+$test->for('example', 2, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Space');
+  is $result->value, 'Foo::Bar';
 
   $result
 });
@@ -3915,7 +3975,8 @@ $test->for('example', 2, 'version', sub {
 
 =error error_on_call_missing
 
-This package may raise an error_on_call_missing exception.
+This package may raise an C<on.call.missing> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_call_missing> method.
 
 =cut
 
@@ -3925,29 +3986,20 @@ $test->for('error', 'error_on_call_missing');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_call_missing',
+  my $error = $space->error_on_call_missing({
     package => 'Example',
     routine => 'execute',
-  };
+  });
 
-  my $error = $space->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_call_missing"
+  # "on.call.missing"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Unable to locate class method \"execute\" via package \"Example\""
-
-  # my $package = $error->stash('package');
-
-  # "Example"
-
-  # my $routine = $error->stash('routine');
-
-  # "execute"
 
 =cut
 
@@ -3956,20 +4008,17 @@ $test->for('example', 1, 'error_on_call_missing', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_call_missing";
-  my $message = $result->render;
-  is $message, "Unable to locate class method \"execute\" via package \"Example\"";
-  my $package = $result->stash('package');
-  is $package, "Example";
-  my $routine = $result->stash('routine');
-  is $routine, "execute";
+  is $name, "on.call.missing";
+  my $render = $result->render;
+  is $render, "Unable to locate class method \"execute\" via package \"Example\"";
 
   $result
 });
 
 =error error_on_call_undefined
 
-This package may raise an error_on_call_undefined exception.
+This package may raise an C<on.call.undefined> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_call_undefined> method.
 
 =cut
 
@@ -3979,29 +4028,20 @@ $test->for('error', 'error_on_call_undefined');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_call_undefined',
+  my $error = $space->error_on_call_undefined({
     package => 'Example',
     routine => 'execute',
-  };
+  });
 
-  my $error = $space->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_call_undefined"
+  # "on.call.undefined"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Attempt to call undefined class method in package \"Example\""
-
-  # my $package = $error->stash('package');
-
-  # "Example"
-
-  # my $routine = $error->stash('routine');
-
-  # "execute"
 
 =cut
 
@@ -4010,20 +4050,17 @@ $test->for('example', 1, 'error_on_call_undefined', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_call_undefined";
-  my $message = $result->render;
-  is $message, "Attempt to call undefined class method in package \"Example\"";
-  my $package = $result->stash('package');
-  is $package, "Example";
-  my $routine = $result->stash('routine');
-  is $routine, "execute";
+  is $name, "on.call.undefined";
+  my $render = $result->render;
+  is $render, "Attempt to call undefined class method in package \"Example\"";
 
   $result
 });
 
 =error error_on_cop_missing
 
-This package may raise an error_on_cop_missing exception.
+This package may raise an C<on.cop.missing> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_cop_missing> method.
 
 =cut
 
@@ -4033,29 +4070,20 @@ $test->for('error', 'error_on_cop_missing');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_cop_missing',
+  my $error = $space->error_on_cop_missing({
     package => 'Example',
     routine => 'execute',
-  };
+  });
 
-  my $error = $space->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_cop_missing"
+  # "on.cop.missing"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Unable to locate object method \"execute\" via package \"Example\""
-
-  # my $package = $error->stash('package');
-
-  # "Example"
-
-  # my $routine = $error->stash('routine');
-
-  # "execute"
 
 =cut
 
@@ -4064,20 +4092,17 @@ $test->for('example', 1, 'error_on_cop_missing', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_cop_missing";
-  my $message = $result->render;
-  is $message, "Unable to locate object method \"execute\" via package \"Example\"";
-  my $package = $result->stash('package');
-  is $package, "Example";
-  my $routine = $result->stash('routine');
-  is $routine, "execute";
+  is $name, "on.cop.missing";
+  my $render = $result->render;
+  is $render, "Unable to locate object method \"execute\" via package \"Example\"";
 
   $result
 });
 
 =error error_on_cop_undefined
 
-This package may raise an error_on_cop_undefined exception.
+This package may raise an C<on.cop.undefined> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_cop_undefined> method.
 
 =cut
 
@@ -4087,29 +4112,20 @@ $test->for('error', 'error_on_cop_undefined');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_cop_undefined',
+  my $error = $space->error_on_cop_undefined({
     package => 'Example',
     routine => 'execute',
-  };
+  });
 
-  my $error = $space->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_cop_undefined"
+  # "on.cop.undefined"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Attempt to cop undefined object method from package \"$class\""
-
-  # my $package = $error->stash('package');
-
-  # "Example"
-
-  # my $routine = $error->stash('routine');
-
-  # "execute"
 
 =cut
 
@@ -4118,20 +4134,17 @@ $test->for('example', 1, 'error_on_cop_undefined', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_cop_undefined";
-  my $message = $result->render;
-  is $message, "Attempt to cop undefined object method from package \"Example\"";
-  my $package = $result->stash('package');
-  is $package, "Example";
-  my $routine = $result->stash('routine');
-  is $routine, "execute";
+  is $name, "on.cop.undefined";
+  my $render = $result->render;
+  is $render, "Attempt to cop undefined object method from package \"Example\"";
 
   $result
 });
 
 =error error_on_eval
 
-This package may raise an error_on_eval exception.
+This package may raise an C<on.eval> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_eval> method.
 
 =cut
 
@@ -4141,25 +4154,20 @@ $test->for('error', 'error_on_eval');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_eval',
+  my $error = $space->error_on_eval({
     error => 'Exception!',
     package => 'Example',
-  };
+  });
 
-  my $error = $space->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_eval"
+  # "on.eval"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Exception!"
-
-  # my $package = $error->stash('package');
-
-  # "Example"
 
 =cut
 
@@ -4168,18 +4176,17 @@ $test->for('example', 1, 'error_on_eval', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_eval";
-  my $message = $result->render;
-  is $message, "Exception!";
-  my $package = $result->stash('package');
-  is $package, "Example";
+  is $name, "on.eval";
+  my $render = $result->render;
+  is $render, "Exception!";
 
   $result
 });
 
 =error error_on_load
 
-This package may raise an error_on_load exception.
+This package may raise an C<on.load> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_load> method.
 
 =cut
 
@@ -4189,25 +4196,20 @@ $test->for('error', 'error_on_load');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_load',
+  my $error = $space->error_on_load({
     package => 'Example',
     error => 'cause unknown',
-  };
+  });
 
-  my $error = $space->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_load"
+  # "on.load"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Error attempting to load Example: \"cause unknown\""
-
-  # my $package = $error->stash('package');
-
-  # "Example"
 
 =cut
 
@@ -4216,65 +4218,9 @@ $test->for('example', 1, 'error_on_load', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_load";
-  my $message = $result->render;
-  is $message, "Error attempting to load Example: \"cause unknown\"";
-  my $package = $result->stash('package');
-  is $package, "Example";
-
-  $result
-});
-
-=error error_on_swap
-
-This package may raise an error_on_swap exception.
-
-=cut
-
-$test->for('error', 'error_on_swap');
-
-=example-1 error_on_swap
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_swap',
-    package => 'Example',
-    routine => 'execute',
-  };
-
-  my $error = $space->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_swap"
-
-  # my $message = $error->render;
-
-  # "Attempt to swap undefined subroutine in package \"$class\""
-
-  # my $package = $error->stash('package');
-
-  # "Example"
-
-  # my $routine = $error->stash('routine');
-
-  # "execute"
-
-=cut
-
-$test->for('example', 1, 'error_on_swap', sub {
-  my ($tryable) = @_;
-  my $result = $tryable->result;
-  isa_ok $result, 'Venus::Error';
-  my $name = $result->name;
-  is $name, "on_swap";
-  my $message = $result->render;
-  is $message, "Attempt to swap undefined subroutine in package \"Example\"";
-  my $package = $result->stash('package');
-  is $package, "Example";
-  my $routine = $result->stash('routine');
-  is $routine, "execute";
+  is $name, "on.load";
+  my $render = $result->render;
+  is $render, "Error attempting to load Example: \"cause unknown\"";
 
   $result
 });

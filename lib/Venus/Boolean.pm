@@ -5,12 +5,18 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base';
+
+# INHERITS
 
 base 'Venus::Kind::Value';
 
 use Venus::True;
 use Venus::False;
+
+# STATE
 
 state $true = Venus::True->value;
 state $true_ref = \$true;
@@ -19,6 +25,8 @@ state $true_type = 'true';
 state $false = Venus::False->value;
 state $false_ref = \$false;
 state $false_type = 'false';
+
+# OVERLOADS
 
 use overload (
   '!' => sub{$_[0]->get ? $false : $true},
@@ -72,16 +80,6 @@ sub build_self {
 }
 
 # METHODS
-
-sub assertion {
-  my ($self) = @_;
-
-  my $assert = $self->SUPER::assertion;
-
-  $assert->clear->expression('boolean');
-
-  return $assert;
-}
 
 sub comparer {
   my ($self) = @_;

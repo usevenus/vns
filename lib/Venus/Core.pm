@@ -21,6 +21,7 @@ sub ATTR {
   my ($self, $attr, @args) = @_;
 
   no strict 'refs';
+
   no warnings 'redefine';
 
   *{"@{[$self->NAME]}::$attr"} = sub {$_[0]->ITEM($attr, @_[1..$#_])}
@@ -78,6 +79,8 @@ sub BLESS {
 
   $anew->BUILD($data);
 
+  $anew->CONSTRUCT;
+
   return $anew if $name eq 'Venus::Meta';
 
   require Venus::Meta;
@@ -101,16 +104,84 @@ sub BUILDARGS {
   return (@args);
 }
 
+sub CLONE {
+  my ($self) = @_;
+
+  require Scalar::Util;
+
+  if (!Scalar::Util::blessed($self)) {
+    require Venus;
+
+    Venus::fault("Can't clone without an instance of \"${self}\"");
+  }
+
+  require Storable;
+
+  local $Storable::Deparse = 1;
+
+  local $Storable::Eval = 1;
+
+  my $clone = Storable::dclone($self);
+
+  my $store = $self->STORE;
+
+  my $from_refaddr = Scalar::Util::refaddr($self);
+
+  my $into_refaddr = Scalar::Util::refaddr($clone);
+
+  my $instance = $store->()->{$into_refaddr} = Storable::dclone($store->()->{$from_refaddr} ||= {});
+
+  return $clone;
+}
+
+sub CONSTRUCT {
+  my ($self) = @_;
+
+  return $self;
+}
+
 sub DATA {
   my ($self, $data) = @_;
 
   return $data || {};
 }
 
+sub DECONSTRUCT {
+  my ($self) = @_;
+
+  return $self;
+}
+
 sub DESTROY {
   my ($self) = @_;
 
-  return;
+  $self->DECONSTRUCT;
+
+  require Scalar::Util;
+
+  if (!Scalar::Util::blessed($self)) {
+    return $self;
+  }
+
+  my $class = $self->NAME;
+
+  no strict 'refs';
+
+  no warnings 'once';
+
+  my $refaddr = Scalar::Util::refaddr($self);
+
+  my $store = $class->STORE;
+
+  return $self if !$store;
+
+  my $stored = $store->();
+
+  return $self if !$stored;
+
+  delete $stored->{$refaddr};
+
+  return $self;
 }
 
 sub DOES {
@@ -156,9 +227,7 @@ sub IMPORT {
 sub ITEM {
   my ($self, $name, @args) = @_;
 
-  return undef if !$name;
-  return $self->GET($name) if !@args;
-  return $self->SET($name, $args[0]);
+  return $name ? (@args ? $self->SET($name, $args[0]) : $self->GET($name)) : undef;
 }
 
 sub META {
@@ -205,6 +274,57 @@ sub MIXIN {
   return $self;
 }
 
+sub MASK {
+  my ($self, $mask, @args) = @_;
+
+  no strict 'refs';
+
+  no warnings 'redefine';
+
+  my $store = $self->STORE;
+
+  *{"@{[$self->NAME]}::$mask"} = sub {
+    my ($self, @args) = @_;
+
+    my $caller = caller;
+
+    require Scalar::Util;
+
+    if (!Scalar::Util::blessed($self)) {
+      require Venus;
+
+      Venus::fault("Can't get/set private variable \"${mask}\" without an instance of \"${self}\"");
+    }
+
+    my $class = ref $self;
+
+    if ($caller ne $class && !$class->isa($caller)) {
+      require Venus;
+
+      Venus::fault("Can't get/set private variable \"${mask}\" outside the class or subclass of \"${class}\"");
+    }
+
+    my $refaddr = Scalar::Util::refaddr($self);
+
+    no warnings 'once';
+
+    my $variable = $store->()->{$refaddr} ||= {};
+
+    return @args ? ($variable->{$mask} = $args[0]) : $variable->{$mask};
+  }
+  if !$self->can($mask);
+
+  my $index = int(keys(%{$${"@{[$self->NAME]}::META"}{MASK}})) + 1;
+
+  $${"@{[$self->NAME]}::META"}{MASK}{$mask} = [$index, [$mask, @args]];
+
+  my $metacache = join '::', $self->NAME, $self->METACACHE;
+
+  ${$metacache} = undef;
+
+  return $self;
+}
+
 sub NAME {
   my ($self) = @_;
 
@@ -241,6 +361,36 @@ sub SET {
   my ($self, $name, $data) = @_;
 
   return $self->{$name} = $data;
+}
+
+sub STORE {
+  my ($self) = @_;
+
+  no strict 'refs';
+
+  no warnings 'once';
+
+  state $cache = {};
+
+  return $cache->{$self->NAME} if $cache->{$self->NAME};
+
+  my $name = 'STORE';
+
+  for my $class ($self->NAME, $self->META->bases) {
+    if (ref ${"${class}::${name}"} eq 'CODE') {
+      $cache->{$self->NAME} = ${"${class}::${name}"};
+      last;
+    }
+  }
+
+  my $data = {};
+
+  $cache->{$self->NAME} ||= ${"@{[$self->NAME]}::${name}"} = sub{
+    my $caller = caller;
+    return $caller eq __PACKAGE__ ? $data : {}
+  };
+
+  return $cache->{$self->NAME};
 }
 
 sub SUBS {

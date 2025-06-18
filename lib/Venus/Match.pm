@@ -5,15 +5,21 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
 
+use Scalar::Util ();
+
+# INHERITS
+
 base 'Venus::Kind::Utility';
+
+# INTEGRATES
 
 with 'Venus::Role::Valuable';
 with 'Venus::Role::Buildable';
 with 'Venus::Role::Accessible';
-
-use Scalar::Util ();
 
 # ATTRIBUTES
 
@@ -37,6 +43,14 @@ sub build_self {
 
 # METHODS
 
+sub boolean {
+  my ($self) = @_;
+
+  $self->then(sub{return true})->none(sub{return false});
+
+  return $self;
+}
+
 sub clear {
   my ($self) = @_;
 
@@ -58,13 +72,21 @@ sub data {
   return $self;
 }
 
+sub defined {
+  my ($self) = @_;
+
+  $self->only(sub{CORE::defined($_[0])});
+
+  return $self;
+}
+
 sub expr {
   my ($self, $topic) = @_;
 
   $self->when(sub{
     my $value = $self->value;
 
-    if (!defined $value) {
+    if (!CORE::defined($value)) {
       return false;
     }
     if (Scalar::Util::blessed($value) && !overload::Overloaded($value)) {
@@ -93,7 +115,7 @@ sub just {
   $self->when(sub{
     my $value = $self->value;
 
-    if (!defined $value) {
+    if (!CORE::defined($value)) {
       return false;
     }
     if (Scalar::Util::blessed($value) && !overload::Overloaded($value)) {
@@ -121,6 +143,16 @@ sub none {
   return $self;
 }
 
+sub object {
+  my ($self) = @_;
+
+  require Scalar::Util;
+
+  $self->only(sub{Scalar::Util::blessed($_[0])});
+
+  return $self;
+}
+
 sub only {
   my ($self, $code) = @_;
 
@@ -139,7 +171,11 @@ sub result {
   my $value = $self->value;
 
   local $_ = $value;
-  return wantarray ? ($result, $matched) : $result if !$self->on_only->($value);
+  if (!$self->on_only->($value)) {
+    local $_ = $value;
+    $result = $self->on_none->($value);
+    return wantarray ? ($result, $matched) : $result;
+  }
 
   for (my $i = 0; $i < @{$self->on_when}; $i++) {
     if ($self->on_when->[$i]->($value)) {
@@ -155,6 +191,14 @@ sub result {
   }
 
   return wantarray ? ($result, $matched) : $result;
+}
+
+sub take {
+  my ($self) = @_;
+
+  $self->then(sub{return $_[0]})->none(sub{return undef});
+
+  return $self;
 }
 
 sub test {
@@ -188,6 +232,16 @@ sub then {
   return $self;
 }
 
+sub type {
+  my ($self, $expr) = @_;
+
+  require Venus::Type;
+
+  $self->when(sub{Venus::Type->new->check($expr)->eval($_[0])});
+
+  return $self;
+}
+
 sub when {
   my ($self, $code, @args) = @_;
 
@@ -208,6 +262,14 @@ sub where {
   $self->then(sub{$where->result(@_)});
 
   return $where;
+}
+
+sub yesno {
+  my ($self) = @_;
+
+  $self->then(sub{return "yes"})->none(sub{return "no"});
+
+  return $self;
 }
 
 1;

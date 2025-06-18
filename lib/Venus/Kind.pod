@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Kind - Kind Base Class
@@ -37,8 +37,6 @@ This package provides identity and methods common across all L<Venus> classes.
 
 This package integrates behaviors from:
 
-L<Venus::Role::Assertable>
-
 L<Venus::Role::Boxable>
 
 L<Venus::Role::Catchable>
@@ -76,30 +74,6 @@ L<Venus::Role::Tryable>
 =head1 METHODS
 
 This package provides the following methods:
-
-=cut
-
-=head2 assertion
-
-  assertion() (Venus::Assert)
-
-The assertion method returns a L<Venus::Assert> object based on the invocant.
-
-I<Since C<1.23>>
-
-=over 4
-
-=item assertion example 1
-
-  # given: synopsis
-
-  package main;
-
-  my $assertion = $example->assertion;
-
-  # bless({name => "Example"}, "Venus::Assert")
-
-=back
 
 =cut
 

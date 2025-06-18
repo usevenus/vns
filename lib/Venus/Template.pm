@@ -5,14 +5,28 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
 
+# INHERITS
+
 base 'Venus::Kind::Utility';
+
+# INTEGRATES
 
 with 'Venus::Role::Valuable';
 with 'Venus::Role::Buildable';
 with 'Venus::Role::Accessible';
 with 'Venus::Role::Explainable';
+
+# STATE
+
+state $TOKEN_PATH_NOTATION = qr/[a-z_][\w.]*/;
+state $TOKEN_TAG_OPEN = qr/\{\{/;
+state $TOKEN_TAG_CLOSE = qr/\}\}/;
+
+# OVERLOADS
 
 use overload (
   '""' => 'explain',
@@ -25,35 +39,24 @@ use overload (
 
 # ATTRIBUTES
 
-attr 'markers';
-attr 'variables';
+attr 'context';
 
 # BUILDERS
 
-sub build_self {
-  my ($self, $data) = @_;
+sub build_data {
+  my ($self, $data, $args) = @_;
 
-  $self->markers([qr/\{\{/, qr/\}\}/]) if !defined $self->markers;
-  $self->variables({}) if !defined $self->variables;
+  $data->{context} = $data->{context} ? ({%{$data->{context}}, %{$args}}) : $args;
 
-  return $self;
+  $data->{value} ||= '';
+
+  return $data;
 }
 
 # METHODS
 
-sub assertion {
-  my ($self) = @_;
-
-  my $assertion = $self->SUPER::assertion;
-
-  $assertion->match('string')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-  return $assertion;
-}
-
 sub default {
+
   return '';
 }
 
@@ -90,109 +93,127 @@ sub mappable {
 }
 
 sub render {
-  my ($self, $content, $variables) = @_;
+  my ($self, $content, $context, $parent_loops) = @_;
 
   if (!defined $content) {
     $content = $self->get;
   }
 
-  if (!defined $variables) {
-    $variables = $self->variables;
+  if (!defined $context) {
+    $context = $self->context;
   }
   else {
-    $variables = $self->mappable($self->variables)->merge(
-      $self->mappable($variables)->get
+    $context = $self->mappable($self->context)->merge(
+      $self->mappable($context)->get
     );
   }
 
   $content =~ s/^\r?\n//;
   $content =~ s/\r?\n\ *$//;
 
-  $content = $self->render_blocks($content, $variables);
+  $parent_loops ||= [];
 
-  $content = $self->render_tokens($content, $variables);
+  $content = $self->render_blocks($content, $context, $parent_loops);
+
+  $content = $self->render_tokens($content, $context);
 
   return $content;
 }
 
 sub render_blocks {
-  my ($self, $content, $variables) = @_;
+  my ($self, $content, $context, $parent_loops) = @_;
 
-  my ($stag, $etag) = @{$self->markers};
+  my $token_tag_open = $TOKEN_TAG_OPEN;
 
-  my $path = qr/[a-z_][\w.]*/;
+  my $token_tag_close = $TOKEN_TAG_CLOSE;
+
+  my $path = $TOKEN_PATH_NOTATION;
 
   my $regexp = qr{
-    $stag
+    (?<!\\)
+    (?<!\\\{)
+    $token_tag_open
     \s*
     (FOR|IF|IF\sNOT)
     \s+
     ($path)
     \s*
-    $etag
-    (.+)
-    $stag
+    $token_tag_close
+    (?!\})
+    (.+?)
+    (?<!\\)
+    (?<!\\\{)
+    $token_tag_open
     \s*
     (END)
     \s+
     \2
     \s*
-    $etag
+    $token_tag_close
+    (?!\})
   }xis;
 
-  $variables = $self->mappable($variables);
+  $parent_loops ||= [];
+
+  $context = $self->mappable($context);
 
   $content =~ s{
     $regexp
   }{
-    my ($type, $path, $body) = ($1, $2, $3);
+    my ($type, $path, $block) = ($1, $2, $3);
     if (lc($type) eq 'if') {
       $self->render_if(
-        $body, $variables, !!scalar($variables->path($path)), $path
+        $block, $context, !!scalar($context->path($path)), $path, $parent_loops,
       );
     }
     elsif (lc($type) eq 'if not') {
       $self->render_if_not(
-        $body, $variables, !!scalar($variables->path($path)), $path
+        $block, $context, !!scalar($context->path($path)), $path, $parent_loops,
       );
     }
     elsif (lc($type) eq 'for') {
       $self->render_foreach(
-        $body, $self->mappable($variables->path($path))
+        $block, $self->mappable($context->path($path)), $parent_loops,
       );
     }
   }gsex;
+
+  $content =~ s/\\(\{\{|\}\})/$1/g;
 
   return $content;
 }
 
 sub render_if {
-  my ($self, $context, $variables, $boolean, $path) = @_;
+  my ($self, $content, $context, $boolean, $path, $parent_loops) = @_;
 
-  my $mappable = $self->mappable($variables);
+  my $mappable = $self->mappable($context);
 
-  my ($stag, $etag) = @{$self->markers};
+  my $token_tag_open = $TOKEN_TAG_OPEN;
+
+  my $token_tag_close = $TOKEN_TAG_CLOSE;
 
   $path = quotemeta $path;
 
   my $regexp = qr{
-    $stag
+    $token_tag_open
     \s*
     ELSE
     \s+
     $path
     \s*
-    $etag
+    $token_tag_close
   }xis;
 
-  my ($a, $b) = split /$regexp/, $context;
+  $parent_loops ||= [];
+
+  my ($a, $b) = split /$regexp/, $content;
 
   if ($boolean) {
-    return $self->render($a, $mappable);
+    return $self->render($a, $mappable, $parent_loops);
   }
   else {
     if ($b) {
-      return $self->render($b, $mappable);
+      return $self->render($b, $mappable, $parent_loops);
     }
     else {
       return '';
@@ -201,32 +222,36 @@ sub render_if {
 }
 
 sub render_if_not {
-  my ($self, $context, $variables, $boolean, $path) = @_;
+  my ($self, $content, $context, $boolean, $path, $parent_loops) = @_;
 
-  my $mappable = $self->mappable($variables);
+  my $mappable = $self->mappable($context);
 
-  my ($stag, $etag) = @{$self->markers};
+  my $token_tag_open = $TOKEN_TAG_OPEN;
+
+  my $token_tag_close = $TOKEN_TAG_CLOSE;
 
   $path = quotemeta $path;
 
   my $regexp = qr{
-    $stag
+    $token_tag_open
     \s*
     ELSE
     \s+
     $path
     \s*
-    $etag
+    $token_tag_close
   }xis;
 
-  my ($a, $b) = split /$regexp/, $context;
+  $parent_loops ||= [];
+
+  my ($a, $b) = split /$regexp/, $content;
 
   if (!$boolean) {
-    return $self->render($a, $mappable);
+    return $self->render($a, $mappable, $parent_loops);
   }
   else {
     if ($b) {
-      return $self->render($b, $mappable);
+      return $self->render($b, $mappable, $parent_loops);
     }
     else {
       return '';
@@ -235,46 +260,71 @@ sub render_if_not {
 }
 
 sub render_foreach {
-  my ($self, $context, $mappable) = @_;
+  my ($self, $content, $context, $parent_loops) = @_;
 
-  $mappable = $self->mappable($mappable);
+  $context = $self->mappable($context);
 
-  if (!$mappable->isa('Venus::Array')) {
+  if (!$context->isa('Venus::Array')) {
     return '';
   }
 
-  my @results = $self->mappable($mappable)->each(sub {
+  $parent_loops ||= [];
+
+  my @results = $self->mappable($context)->each(sub {
     my (@args) = @_;
-    $self->render($context, $self->mappable($args[1])->do(
-      'set', 'loop', {index => $args[0], place => $args[0]+1},
-    ));
+
+    my $value = $args[1];
+
+    my $loop = {
+      index => $args[0],
+      item => $value,
+      level => {},
+      parent => $parent_loops->[0],
+      place => $args[0]+1,
+    };
+
+    my $iteration_parent_loops = [$loop, @{$parent_loops}];
+
+    $loop->{level}->{$_} = $iteration_parent_loops->[$_]
+      for map {$#{$iteration_parent_loops} - $_} 0..$#{$iteration_parent_loops};
+
+    $value = ref($value) ? $value : {};
+
+    $self->render($content, $self->mappable($value)->do('set', 'loop', $loop), $iteration_parent_loops);
   });
 
   return join "\n", grep !!$_, @results;
 }
 
 sub render_tokens {
-  my ($self, $content, $variables) = @_;
+  my ($self, $content, $context) = @_;
 
-  my ($stag, $etag) = @{$self->markers};
+  my $token_tag_open = $TOKEN_TAG_OPEN;
 
-  my $path = qr/[a-z_][\w.]*/;
+  my $token_tag_close = $TOKEN_TAG_CLOSE;
+
+  my $path = $TOKEN_PATH_NOTATION;
 
   my $regexp = qr{
-    $stag
+    (?<!\\)
+    (?<!\\\{)
+    $token_tag_open
     \s*
     ($path)
     \s*
-    $etag
+    $token_tag_close
+    (?!\})
   }xi;
 
-  $variables = $self->mappable($variables);
+  $context = $self->mappable($context);
 
   $content =~ s{
     $regexp
   }{
-    scalar($variables->path($1)) // ''
+    scalar($context->path($1)) // ''
   }gsex;
+
+  $content =~ s/\\(\{\{|\}\})/$1/g;
 
   return $content;
 }

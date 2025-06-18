@@ -5,7 +5,7 @@ use 5.018;
 use strict;
 use warnings;
 
-# IMPORT
+# IMPORTS
 
 sub import {
   my ($self, @args) = @_;
@@ -80,6 +80,8 @@ sub import {
 
   return $self;
 }
+
+# ROUTINES
 
 sub attr {
   my ($from, @args) = @_;

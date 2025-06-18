@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Scalar::Util ();
 
+# STATE
+
 state $false = Scalar::Util::dualvar(0, "0");
+
+# OVERLOADS
 
 use overload (
   '!' => sub{!$false},

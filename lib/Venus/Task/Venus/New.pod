@@ -1,0 +1,250 @@
+﻿
+=head1 NAME
+
+Venus::Task::Venus::New - vns new
+
+=cut
+
+=head1 ABSTRACT
+
+Task Class for Venus CLI
+
+=cut
+
+=head1 SYNOPSIS
+
+  use Venus::Task::Venus::New;
+
+  my $task = Venus::Task::Venus::New->new;
+
+  # bless(.., 'Venus::Task::Venus::New')
+
+=cut
+
+=head1 DESCRIPTION
+
+This package is a task class for the C<vns-new> CLI, and C<vns new>
+sub-command.
+
+=cut
+
+=head1 INHERITS
+
+This package inherits behaviors from:
+
+L<Venus::Task::Venus>
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Task::Venus::New)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Task::Venus::New;
+
+  my $task = Venus::Task::Venus::New->new;
+
+  # bless({...}, 'Venus::Task::Venus::New')
+
+=back
+
+=cut
+
+=head2 perform
+
+  perform() (Venus::Task::Venus::New)
+
+The perform method executes the CLI logic.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item perform example 1
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::New')
+
+  # creates a .vns.pl file
+
+=back
+
+=over 4
+
+=item perform example 2
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('pl');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::New')
+
+  # creates a .vns.pl file
+
+=back
+
+=over 4
+
+=item perform example 3
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('perl');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::New')
+
+  # creates a .vns.perl file
+
+=back
+
+=over 4
+
+=item perform example 4
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('json');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::New')
+
+  # creates a .vns.json file
+
+=back
+
+=over 4
+
+=item perform example 5
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('js');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::New')
+
+  # creates a .vns.js file
+
+=back
+
+=over 4
+
+=item perform example 6
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('yaml');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::New')
+
+  # creates a .vns.yaml file
+
+=back
+
+=over 4
+
+=item perform example 7
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('yml');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::New')
+
+  # creates a .vns.yml file
+
+=back
+
+=over 4
+
+=item perform example 8
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('toml');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::New')
+
+  # Error: type "toml" invalid
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

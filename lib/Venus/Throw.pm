@@ -5,26 +5,26 @@ use 5.018;
 use strict;
 use warnings;
 
-use Venus::Class 'attr', 'base', 'with';
+# IMPORTS
 
-base 'Venus::Kind::Utility';
+use Venus::Class 'attr', 'base';
 
-with 'Venus::Role::Stashable';
+# INHERITS
+
+base 'Venus::Error';
+
+# OVERLOADS
 
 use overload (
-  '""' => sub{$_[0]->catch('error')->explain},
-  '~~' => sub{$_[0]->catch('error')->explain},
+  '""' => sub{$_[0]->error->explain},
+  '~~' => sub{$_[0]->error->explain},
   fallback => 1,
 );
 
 # ATTRIBUTES
 
-attr 'frame';
-attr 'name';
-attr 'message';
 attr 'package';
 attr 'parent';
-attr 'context';
 
 # BUILDERS
 
@@ -39,107 +39,98 @@ sub build_arg {
 sub build_self {
   my ($self, $data) = @_;
 
-  $self->parent('Venus::Error') if !$self->parent;
+  if (!$self->parent) {
+    $self->parent('Venus::Error');
+  }
+
+  if (my $stash = delete $data->{stash}) {
+    %{$self->stash} = %{$stash};
+  }
 
   return $self;
 }
 
 # METHODS
 
-sub as {
-  my ($self, $name) = @_;
+sub die {
+  my ($self, $data) = @_;
 
-  $self->name($name);
+  $data ||= {};
 
-  return $self;
-}
+  $data->{raise} = true;
 
-sub assertion {
-  my ($self) = @_;
+  @_ = ($self, $data);
 
-  my $assertion = $self->SUPER::assertion;
-
-  $assertion->match('string')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-  return $assertion;
-}
-
-sub capture {
-  my ($self, @args) = @_;
-
-  my $frame = $self->frame;
-
-  $self->stash(captured => {
-    callframe => [caller($frame // 1)],
-    arguments => [@args],
-  });
-
-  return $self;
+  goto $self->can('error');
 }
 
 sub error {
   my ($self, $data) = @_;
 
-  require Venus::Error;
+  $data ||= {};
 
-  my $frame = $self->frame;
-  my $name = $self->name;
-  my $context = $self->context || (caller($frame // 1))[3];
-  my $package = $self->package || join('::', map ucfirst, (caller(0))[0], 'error');
+  for my $key (keys %{$data}) {
+    next if $key eq 'die';
+    next if $key eq 'error';
+
+    $self->$key($data->{$key}) if $self->can($key);
+  }
+
+  my $context = $self->context;
+
+  if (!$context) {
+    $context = $self->context((caller(($self->offset // 0) + 1))[3]);
+  }
+
+  my $package = $self->package;
+
+  if (!$package) {
+    $package = $self->package(join('::', map ucfirst, (caller($self->offset // 0))[0], 'error'));
+  }
+
   my $parent = $self->parent;
-  my $message = $self->message;
 
-  $data //= {};
-  $data->{context} //= $context;
-  $data->{message} //= $message if $message;
-  $data->{name} //= $name if $name;
-
-  if (%{$self->stash}) {
-    $data->{'$stash'} //= $self->stash;
+  if (!$parent) {
+    $parent = $self->parent('Venus::Error');
   }
 
   local $@;
+
   if (!$package->can('new') and !eval "package $package; use base '$parent'; 1") {
-    my $throw = Venus::Throw->new(package => 'Venus::Throw::Error');
+    my $throw = $self->class->new;
     $throw->message($@);
+    $throw->package('Venus::Throw::Error');
+    $throw->parent('Venus::Error');
     $throw->stash(package => $package);
     $throw->stash(parent => $parent);
-    $throw->error;
+    $throw->die;
   }
+
   if (!$parent->isa('Venus::Error')) {
-    my $throw = Venus::Throw->new(package => 'Venus::Throw::Error');
+    my $throw = $self->class->new;
     $throw->message(qq(Parent '$parent' doesn't derive from 'Venus::Error'));
+    $throw->package('Venus::Throw::Error');
+    $throw->parent('Venus::Error');
     $throw->stash(package => $package);
     $throw->stash(parent => $parent);
-    $throw->error;
+    $throw->die;
   }
+
   if (!$package->isa('Venus::Error')) {
-    my $throw = Venus::Throw->new(package => 'Venus::Throw::Error');
+    my $throw = $self->class->new;
     $throw->message(qq(Package '$package' doesn't derive from 'Venus::Error'));
+    $throw->package('Venus::Throw::Error');
+    $throw->parent('Venus::Error');
     $throw->stash(package => $package);
     $throw->stash(parent => $parent);
-    $throw->error;
+    $throw->die;
   }
 
-  @_ = ($package->new($data ? $data : ()));
+  my $error = $package->new->copy($self);
 
-  goto $package->can('throw');
-}
+  (@_ = ($error)) && goto $error->can('throw') if $data && $data->{raise};
 
-sub on {
-  my ($self, $name) = @_;
-
-  my $frame = $self->frame;
-
-  my $routine = (split(/::/, (caller($frame // 1))[3]))[-1];
-
-  undef $routine if $routine eq '__ANON__' || $routine eq '(eval)';
-
-  $self->name(join('.', 'on', grep defined, $routine, $name)) if $routine || $name;
-
-  return $self;
+  return $error;
 }
 
 1;

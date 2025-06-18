@@ -5,53 +5,21 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base', 'with';
 
+# INHERITS
+
 base 'Venus::Kind::Utility';
+
+# INTEGRATES
 
 with 'Venus::Role::Valuable';
 with 'Venus::Role::Buildable';
 with 'Venus::Role::Proxyable';
 
 use Scalar::Util ();
-
-# HOOKS
-
-sub _clone {
-  my ($data) = @_;
-
-  if (!defined($data)) {
-    return $data;
-  }
-  elsif (!Scalar::Util::blessed($data) && ref($data) eq 'HASH') {
-    my $copy = {};
-    for my $key (keys %$data) {
-      $copy->{$key} = _clone($data->{$key});
-    }
-    return $copy;
-  }
-  elsif (!Scalar::Util::blessed($data) && ref($data) eq 'ARRAY') {
-    my $copy = [];
-    for (my $i = 0; $i < @$data; $i++) {
-      $copy->[$i] = _copy($data->[$i]);
-    }
-    return $copy;
-  }
-  else {
-    return $data;
-  }
-}
-
-sub _value {
-  my ($data) = @_;
-
-  if (keys %$data == 1 && exists $data->{value}) {
-    return $data->{value};
-  }
-  else {
-    return $data;
-  }
-}
 
 # BUILDERS
 
@@ -82,6 +50,44 @@ sub build_proxy {
   if exists $self->{value}{"\$$method"};
 
   return undef;
+}
+
+# HOOKS
+
+sub _clone {
+  my ($data) = @_;
+
+  if (!defined($data)) {
+    return $data;
+  }
+  elsif (!Scalar::Util::blessed($data) && ref($data) eq 'HASH') {
+    my $copy = {};
+    for my $key (keys %$data) {
+      $copy->{$key} = _clone($data->{$key});
+    }
+    return $copy;
+  }
+  elsif (!Scalar::Util::blessed($data) && ref($data) eq 'ARRAY') {
+    my $copy = [];
+    for (my $i = 0; $i < @$data; $i++) {
+      $copy->[$i] = _clone($data->[$i]);
+    }
+    return $copy;
+  }
+  else {
+    return $data;
+  }
+}
+
+sub _value {
+  my ($data) = @_;
+
+  if (keys %$data == 1 && exists $data->{value}) {
+    return $data->{value};
+  }
+  else {
+    return $data;
+  }
 }
 
 # METHODS

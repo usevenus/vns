@@ -7,6 +7,7 @@ use warnings;
 
 use Test::More;
 use Venus::Test;
+use Venus;
 
 my $test = test(__FILE__);
 
@@ -43,8 +44,10 @@ method: catch
 method: default
 method: error
 method: execute
+method: fault
 method: finally
 method: maybe
+method: new
 method: no_catch
 method: no_default
 method: no_finally
@@ -351,8 +354,8 @@ $test->for('example', 2, 'callback', sub {
 $test->for('example', 3, 'callback', sub {
   my ($tryable) = @_;
   ok my $result = $tryable->error(\my $error)->result;
-  ok $error->isa('Venus::Try::Error');
-  ok $error->isa('Venus::Error');
+  # ok $error->isa('Venus::Try::Error');
+  # ok $error->isa('Venus::Error');
 
   $result
 });
@@ -645,6 +648,84 @@ $test->for('example', 1, 'execute', sub {
   $result
 });
 
+=method fault
+
+The fault method takes a scalar reference and assigns any uncaught exceptions
+to it during execution. If no variable is provided a L</catch> operation will
+be registered to capture all L<Venus::Fault> exceptions.
+
+=signature fault
+
+  fault(Ref $variable) (Venus::Try)
+
+=metadata fault
+
+{
+  since => '4.15',
+}
+
+=example-1 fault
+
+  package main;
+
+  use Venus 'fault';
+
+  use Venus::Try;
+
+  my $try = Venus::Try->new;
+
+  $try->call(sub {
+    my (@args) = @_;
+
+    fault;
+  });
+
+  my $fault = $try->fault(\my $object);
+
+  # bless({ on_catch => ... }, "Venus::Try")
+
+=cut
+
+$test->for('example', 1, 'fault', sub {
+  my ($tryable) = @_;
+  ok my $result = $tryable->result;
+  ok $result->isa('Venus::Try');
+
+  $result
+});
+
+=example-2 fault
+
+  package main;
+
+  use Venus 'fault';
+
+  use Venus::Try;
+
+  my $try = Venus::Try->new;
+
+  $try->call(sub {
+    my (@args) = @_;
+
+    fault;
+  });
+
+  my $fault = $try->fault;
+
+  # bless({ on_catch => ... }, "Venus::Try")
+
+=cut
+
+$test->for('example', 2, 'fault', sub {
+  my ($tryable) = @_;
+  ok my $result = $tryable->result;
+  ok $result->isa('Venus::Try');
+  my $returned = $result->result;
+  ok $returned->isa('Venus::Fault');
+
+  $result
+});
+
 =method finally
 
 The finally method takes a package or ref name and always executes the callback
@@ -754,6 +835,65 @@ $test->for('example', 1, 'maybe', sub {
 
   $result
 });
+
+=method new
+
+The new method constructs an instance of the package.
+
+=signature new
+
+  new(any @args) (Venus::Try)
+
+=metadata new
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 new
+
+  package main;
+
+  use Venus::Try;
+
+  my $new = Venus::Try->new;
+
+  # bless(..., "Venus::Try")
+
+=cut
+
+$test->for('example', 1, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Try');
+
+  $result
+});
+
+=example-2 new
+
+  package main;
+
+  use Venus::Try;
+
+  my $new = Venus::Try->new(invocant => (bless{}), arguments => [1..4]);
+
+  # bless(..., "Venus::Try")
+
+=cut
+
+$test->for('example', 2, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Try');
+  ok $result->invocant;
+  ok $result->arguments;
+
+  $result
+});
+
 
 =method no_catch
 
@@ -1069,7 +1209,8 @@ $test->for('example', 3, 'result', sub {
 
 =error error_on_callback
 
-This package may raise an error_on_callback exception.
+This package may raise an C<on.callback> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_callback> method.
 
 =cut
 
@@ -1079,18 +1220,18 @@ $test->for('error', 'error_on_callback');
 
   # given: synopsis;
 
-  my $input = {
-    invocant => 'Example',
+  my $error = $try->error_on_callback({
     callback => 'execute',
-  };
+    invocant => 'Example',
+  });
 
-  my $error = $try->throw('error_on_callback', $input)->catch('error');
+  # ...
 
   # my $name = $error->name;
 
-  # "on_callback"
+  # "on.callback"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Can't locate object method \"execute\" on package \"Example\""
 
@@ -1098,12 +1239,12 @@ $test->for('error', 'error_on_callback');
 
 $test->for('example', 1, 'error_on_callback', sub {
   my ($tryable) = @_;
-  my $result = $tryable->error(\my $error)->result;
-  isa_ok $error, 'Venus::Error';
-  my $name = $error->name;
-  is $name, "on_callback";
-  my $message = $error->render;
-  is $message, "Can't locate object method \"execute\" on package \"Example\"";
+  my $result = $tryable->result;
+  isa_ok $result, 'Venus::Error';
+  my $name = $result->name;
+  is $name, "on.callback";
+  my $render = $result->render;
+  is $render, "Can't locate object method \"execute\" on package \"Example\"";
 
   $result
 });

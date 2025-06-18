@@ -25,6 +25,56 @@ sub BUILD {
   return $self;
 }
 
+sub clone {
+  my ($self) = @_;
+
+  return $self->CLONE;
+}
+
+sub CONSTRUCT {
+  my ($self, @data) = @_;
+
+  no strict 'refs';
+
+  my @mixins = @{$self->META->mixins};
+
+  for my $action (grep defined, map *{"${_}::CONSTRUCT"}{"CODE"}, @mixins) {
+    $self->$action(@data);
+  }
+
+  my @roles = @{$self->META->roles};
+
+  for my $action (grep defined, map *{"${_}::CONSTRUCT"}{"CODE"}, @roles) {
+    $self->$action(@data);
+  }
+
+  $self->SUPER::CONSTRUCT;
+
+  return $self;
+}
+
+sub DECONSTRUCT {
+  my ($self, @data) = @_;
+
+  no strict 'refs';
+
+  my @mixins = @{$self->META->mixins};
+
+  for my $action (grep defined, map *{"${_}::DECONSTRUCT"}{"CODE"}, @mixins) {
+    $self->$action(@data);
+  }
+
+  my @roles = @{$self->META->roles};
+
+  for my $action (grep defined, map *{"${_}::DECONSTRUCT"}{"CODE"}, @roles) {
+    $self->$action(@data);
+  }
+
+  $self->SUPER::DECONSTRUCT;
+
+  return $self;
+}
+
 sub DESTROY {
   my ($self, @data) = @_;
 
@@ -41,6 +91,8 @@ sub DESTROY {
   for my $action (grep defined, map *{"${_}::DESTROY"}{"CODE"}, @roles) {
     $self->$action(@data);
   }
+
+  $self->SUPER::DESTROY;
 
   return $self;
 }

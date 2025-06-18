@@ -8,24 +8,20 @@ use strict;
 use warnings;
 
 use Cwd ();
+use File::Basename ();
 use File::Spec ();
 
-our $HOME;
-our @PATH;
+our $lib;
 
 BEGIN {
-  $ENV{VENUS_SHIM} = 1;
-  $ENV{VENUS_TASK_AUTO} = 1;
-  $ENV{VENUS_TASK_NAME} = 'vns';
+  $lib = File::Spec->catfile(
+    File::Basename::dirname(File::Basename::dirname(Cwd::realpath($0))),
+    'lib',
+  );
 }
 
-BEGIN {
-  @PATH = File::Spec->splitdir(Cwd::realpath($0));
-  $HOME = File::Spec->catfile(splice(@PATH, 0, -2), 'lib');
-}
+use lib $lib;
 
-use lib "$HOME";
+use Venus::Task::Venus;
 
-use Venus::Run;
-
-1;
+run Venus::Task::Venus 'vns';

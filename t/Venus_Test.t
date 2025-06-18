@@ -94,6 +94,7 @@ method: fail
 method: for
 method: like
 method: more
+method: new
 method: okay
 method: okay_can
 method: okay_isa
@@ -4004,6 +4005,84 @@ $test->for('example', 1, 'more', sub {
   my $result = $tryable->result;
   ok defined $result;
   is $result, true;
+
+  $result
+});
+
+=method new
+
+The new method constructs an instance of the package.
+
+=signature new
+
+  new(any @args) (Venus::Test)
+
+=metadata new
+
+{
+  since => '4.15',
+}
+
+=cut
+
+=example-1 new
+
+  package main;
+
+  use Venus::Test;
+
+  my $new = Venus::Test->new;
+
+  # bless(..., "Venus::Test")
+
+=cut
+
+$test->for('example', 1, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Test');
+
+  $result
+});
+
+=example-2 new
+
+  package main;
+
+  use Venus::Test;
+
+  my $new = Venus::Test->new('t/Venus_Test.t');
+
+  # bless(..., "Venus::Test")
+
+=cut
+
+$test->for('example', 2, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Test');
+  is $result->file, 't/Venus_Test.t';
+
+  $result
+});
+
+=example-3 new
+
+  package main;
+
+  use Venus::Test;
+
+  my $new = Venus::Test->new(file => 't/Venus_Test.t');
+
+  # bless(..., "Venus::Test")
+
+=cut
+
+$test->for('example', 3, 'new', sub {
+  my ($tryable) = @_;
+  my $result = $tryable->result;
+  ok $result->isa('Venus::Test');
+  is $result->file, 't/Venus_Test.t';
 
   $result
 });
@@ -7998,7 +8077,8 @@ reusability and reduces the need for complicated state and test setup.
 
 =error error_on_abstract
 
-This package may raise an error_on_abstract exception.
+This package may raise an C<on.abstract> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_abstract> method.
 
 =cut
 
@@ -8008,23 +8088,19 @@ $test->for('error', 'error_on_abstract');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_abstract',
-  };
+  my $error = $test->error_on_abstract({
+    file => 't/Venus_Test.t',
+  });
 
-  my $error = $test->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_abstract"
+  # "on.abstract"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Test file \"t/Venus_Test.t\" missing abstract section"
-
-  # my $file = $error->stash('file');
-
-  # "t/Venus_Test.t"
 
 =cut
 
@@ -8033,18 +8109,17 @@ $test->for('example', 1, 'error_on_abstract', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_abstract";
-  my $message = $result->render;
-  like $message, qr/Test file .*Venus_Test.* abstract section/;
-  my $file = $result->stash('file');
-  like $file, qr/Venus_Test/;
+  is $name, "on.abstract";
+  my $render = $result->render;
+  is $render, "Test file \"t/Venus_Test.t\" missing abstract section";
 
   $result
 });
 
 =error error_on_description
 
-This package may raise an error_on_description exception.
+This package may raise an C<on.description> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_description> method.
 
 =cut
 
@@ -8054,23 +8129,19 @@ $test->for('error', 'error_on_description');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_description',
-  };
+  my $error = $test->error_on_description({
+    file => 't/Venus_Test.t',
+  });
 
-  my $error = $test->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_description"
+  # "on.description"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Test file \"t/Venus_Test.t\" missing description section"
-
-  # my $file = $error->stash('file');
-
-  # "t/Venus_Test.t"
 
 =cut
 
@@ -8079,18 +8150,17 @@ $test->for('example', 1, 'error_on_description', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_description";
-  my $message = $result->render;
-  like $message, qr/Test file .*Venus_Test.* description section/;
-  my $file = $result->stash('file');
-  like $file, qr/Venus_Test/;
+  is $name, "on.description";
+  my $render = $result->render;
+  is $render, "Test file \"t/Venus_Test.t\" missing description section";
 
   $result
 });
 
 =error error_on_name
 
-This package may raise an error_on_name exception.
+This package may raise an C<on.name> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_name> method.
 
 =cut
 
@@ -8100,23 +8170,19 @@ $test->for('error', 'error_on_name');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_name',
-  };
+  my $error = $test->error_on_name({
+    file => 't/Venus_Test.t',
+  });
 
-  my $error = $test->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_name"
+  # "on.name"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Test file \"t/Venus_Test.t\" missing name section"
-
-  # my $file = $error->stash('file');
-
-  # "t/Venus_Test.t"
 
 =cut
 
@@ -8125,18 +8191,17 @@ $test->for('example', 1, 'error_on_name', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_name";
-  my $message = $result->render;
-  like $message, qr/Test file .*Venus_Test.* name section/;
-  my $file = $result->stash('file');
-  like $file, qr/Venus_Test/;
+  is $name, "on.name";
+  my $render = $result->render;
+  is $render, "Test file \"t/Venus_Test.t\" missing name section";
 
   $result
 });
 
 =error error_on_synopsis
 
-This package may raise an error_on_synopsis exception.
+This package may raise an C<on.synopsis> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_synopsis> method.
 
 =cut
 
@@ -8146,23 +8211,19 @@ $test->for('error', 'error_on_synopsis');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_synopsis',
-  };
+  my $error = $test->error_on_synopsis({
+    file => 't/Venus_Test.t',
+  });
 
-  my $error = $test->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_synopsis"
+  # "on.synopsis"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Test file \"t/Venus_Test.t\" missing synopsis section"
-
-  # my $file = $error->stash('file');
-
-  # "t/Venus_Test.t"
 
 =cut
 
@@ -8171,18 +8232,17 @@ $test->for('example', 1, 'error_on_synopsis', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_synopsis";
-  my $message = $result->render;
-  like $message, qr/Test file .*Venus_Test.* synopsis section/;
-  my $file = $result->stash('file');
-  like $file, qr/Venus_Test/;
+  is $name, "on.synopsis";
+  my $render = $result->render;
+  is $render, "Test file \"t/Venus_Test.t\" missing synopsis section";
 
   $result
 });
 
 =error error_on_tagline
 
-This package may raise an error_on_tagline exception.
+This package may raise an C<on.tagline> error, as an instance of
+C<Venus::Cli::Error>, via the C<error_on_tagline> method.
 
 =cut
 
@@ -8192,23 +8252,19 @@ $test->for('error', 'error_on_tagline');
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_tagline',
-  };
+  my $error = $test->error_on_tagline({
+    file => 't/Venus_Test.t',
+  });
 
-  my $error = $test->catch('error', $input);
+  # ...
 
   # my $name = $error->name;
 
-  # "on_tagline"
+  # "on.tagline"
 
-  # my $message = $error->render;
+  # my $render = $error->render;
 
   # "Test file \"t/Venus_Test.t\" missing tagline section"
-
-  # my $file = $error->stash('file');
-
-  # "t/Venus_Test.t"
 
 =cut
 
@@ -8217,11 +8273,9 @@ $test->for('example', 1, 'error_on_tagline', sub {
   my $result = $tryable->result;
   isa_ok $result, 'Venus::Error';
   my $name = $result->name;
-  is $name, "on_tagline";
-  my $message = $result->render;
-  like $message, qr/Test file .*Venus_Test.* tagline section/;
-  my $file = $result->stash('file');
-  like $file, qr/Venus_Test/;
+  is $name, "on.tagline";
+  my $render = $result->render;
+  is $render, "Test file \"t/Venus_Test.t\" missing tagline section";
 
   $result
 });
@@ -8239,4 +8293,4 @@ $test->for('partials');
 
 $test->render('lib/Venus/Test.pod') if $ENV{VENUS_RENDER};
 
-$test->done;
+ok 1 and done_testing;

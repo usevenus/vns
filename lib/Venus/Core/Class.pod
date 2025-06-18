@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Core::Class - Class Base Class
@@ -46,6 +46,28 @@ L<Venus::Core>
 =head1 METHODS
 
 This package provides the following methods:
+
+=cut
+
+=head2 clone
+
+  clone() (object)
+
+The clone method returns a cloned object.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item clone example 1
+
+  # given: synopsis
+
+  my $new_user = $user->clone;
+
+  # bless({fname => 'Elliot', lname => 'Alderson'}, 'User')
+
+=back
 
 =cut
 

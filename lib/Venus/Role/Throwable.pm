@@ -5,86 +5,92 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Role 'with';
 
 # METHODS
 
-sub error {
+sub die {
   my ($self, $data) = @_;
 
-  my @args = $data;
+  $data ||= {};
 
-  unshift @args, delete $data->{throw} if $data->{throw};
+  if (!ref $data) {
+    $data = $self->can($data) ? $self->$data : {package => $data};
+  }
 
-  @_ = ($self, @args);
+  $data = {} if ref $data ne 'HASH';
 
-  goto $self->can('throw');
-}
+  my $args = $data->{throw} ? delete $data->{throw} : $data->{args} ? delete $data->{args} : undef;
 
-sub throw {
-  my ($self, $data, @args) = @_;
+  $data = $self->$args($data) if $args;
 
   require Venus::Throw;
 
-  my $throw = Venus::Throw->new(context => (caller(1))[3])->do(
-    frame => 1,
+  my ($throw) = @_ = (
+    Venus::Throw->new(
+      context => (caller(1))[3],
+      package => join('::', map ucfirst, ref($self), 'error'),
+    ),
+    $data,
   );
 
-  if (!$data) {
-    return $throw->do(
-      'package', join('::', map ucfirst, ref($self), 'error')
-    );
-  }
-  if (ref $data ne 'HASH') {
-    if ($data =~ /^\w+$/ && $self->can($data)) {
-      $data = $self->$data(@args);
-    }
-    else {
-      return $throw->do(
-        'package', $data,
-      );
-    }
+  goto $throw->can('die');
+}
+
+sub error {
+  my ($self, $data) = @_;
+
+  $data ||= {};
+
+  if (!ref $data) {
+    $data = $self->can($data) ? $self->$data : {package => $data};
   }
 
-  if (exists $data->{as}) {
-    $throw->as($data->{as});
+  $data = {} if ref $data ne 'HASH';
+
+  my $args = $data->{throw} ? delete $data->{throw} : $data->{args} ? delete $data->{args} : undef;
+
+  $data = $self->$args($data) if $args;
+
+  require Venus::Throw;
+
+  my ($throw) = @_ = (
+    Venus::Throw->new(
+      context => (caller(1))[3],
+      package => $data->{package} || join('::', map ucfirst, ref($self), 'error'),
+    ),
+    $data,
+  );
+
+  goto $throw->can('error');
+}
+
+sub throw {
+  my ($self, $data) = @_;
+
+  $data ||= {};
+
+  if (!ref $data) {
+    $data = $self->can($data) ? $self->$data : {package => $data};
   }
-  if (exists $data->{capture}) {
-    $throw->capture(@{$data->{capture}});
-  }
-  if (exists $data->{context}) {
-    $throw->context($data->{context});
-  }
-  if (exists $data->{error}) {
-    $throw->error($data->{error});
-  }
-  if (exists $data->{frame}) {
-    $throw->frame($data->{frame});
-  }
-  if (exists $data->{message}) {
-    $throw->message($data->{message});
-  }
-  if (exists $data->{name}) {
-    $throw->name($data->{name});
-  }
-  if (exists $data->{package}) {
-    $throw->package($data->{package});
-  }
-  else {
-    $throw->package(join('::', map ucfirst, ref($self), 'error'));
-  }
-  if (exists $data->{parent}) {
-    $throw->parent($data->{parent});
-  }
-  if (exists $data->{stash}) {
-    $throw->stash($_, $data->{stash}->{$_}) for keys %{$data->{stash}};
-  }
-  if (exists $data->{on}) {
-    $throw->on($data->{on});
-  }
-  if (exists $data->{raise}) {
-    @_ = ($throw);
-    goto $throw->can('error');
+
+  $data = {} if ref $data ne 'HASH';
+
+  my $args = $data->{throw} ? delete $data->{throw} : $data->{args} ? delete $data->{args} : undef;
+
+  $data = $self->$args($data) if $args;
+
+  require Venus::Throw;
+
+  my $throw = Venus::Throw->new(
+    context => (caller(1))[3],
+    package => $data->{package} || join('::', map ucfirst, ref($self), 'error'),
+  );
+
+  for my $key (keys %{$data}) {
+    $throw->$key($data->{$key}) if $throw->can($key);
   }
 
   return $throw;
@@ -93,7 +99,7 @@ sub throw {
 # EXPORTS
 
 sub EXPORT {
-  ['error', 'throw']
+  ['die', 'error', 'throw']
 }
 
 1;

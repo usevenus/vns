@@ -5,7 +5,11 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base', 'with';
+
+# INHERITS
 
 base 'Venus::Kind::Utility';
 
@@ -54,14 +58,14 @@ sub array {
 sub cast {
   my ($self, @args) = @_;
 
-  require Venus::Type;
+  require Venus::What;
 
   my $code = sub {
     my ($self, $data, $into) = @_;
 
-    my $type = Venus::Type->new($data);
+    my $what = Venus::What->new($data);
 
-    return $into ? $type->cast($into) : $type->deduce;
+    return $into ? $what->cast($into) : $what->deduce;
   };
 
   return $self->list('foreach', $code, @args);
