@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Dump - Dump Class
@@ -123,6 +123,58 @@ I<Since C<0.01>>
   my $encode = $dump->encode;
 
   # '{name => ["Ready","Robot"], stable => !!1, version => "0.12"}'
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Dump)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Dump;
+
+  my $new = Venus::Dump->new;
+
+  # bless(..., "Venus::Dump")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Dump;
+
+  my $new = Venus::Dump->new({password => 'secret'});
+
+  # bless(..., "Venus::Dump")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Dump;
+
+  my $new = Venus::Dump->new(value => {password => 'secret'});
+
+  # bless(..., "Venus::Dump")
 
 =back
 

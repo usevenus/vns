@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Role::Boxable - Boxable Role
@@ -81,6 +81,46 @@ I<Since C<0.01>>
   # bless({ value => bless(..., "Venus::String") }, "Venus::Box")
 
   # $example->box('text')->lc->ucfirst->concat('.')->unbox->get;
+
+=back
+
+=cut
+
+=head2 boxed
+
+  boxed(string | coderef $method, any @args) (object)
+
+The boxed method dispatches to L</box> and returns the "unboxed" value. This
+method supports dispatching, i.e. providing a method name and arguments whose
+return value will be acted on by this method.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item boxed example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $boxed = $example->boxed;
+
+  # bless(..., "Example")
+
+=back
+
+=over 4
+
+=item boxed example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $boxed = $example->boxed('text');
+
+  # bless({value => 'hello world'}, "Venus::String")
 
 =back
 

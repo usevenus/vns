@@ -5,12 +5,20 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
+
+# INHERITS
 
 base 'Venus::Kind::Utility';
 
+# INTEGRATES
+
 with 'Venus::Role::Buildable';
 with 'Venus::Role::Explainable';
+
+# OVERLOADS
 
 use overload (
   '""' => 'explain',
@@ -165,18 +173,6 @@ sub add_years {
   $size = ($self->timeseconds->ONE_YEAR * $size) if $size;
 
   return $self->reset($self->epoch + $size);
-}
-
-sub assertion {
-  my ($self) = @_;
-
-  my $assertion = $self->SUPER::assertion;
-
-  $assertion->match('number')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-  return $assertion;
 }
 
 sub epoch {

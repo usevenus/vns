@@ -5,20 +5,28 @@ use 5.018;
 use strict;
 use warnings;
 
-use overload (
-  '""' => 'explain',
-  '~~' => 'explain',
-  fallback => 1,
-);
+# IMPORTS
 
 use Venus::Class 'attr', 'base', 'with';
 
+# INHERITS
+
 base 'Venus::Kind::Utility';
+
+# INTEGRATES
 
 with 'Venus::Role::Valuable';
 with 'Venus::Role::Buildable';
 with 'Venus::Role::Accessible';
 with 'Venus::Role::Explainable';
+
+# OVERLOADS
+
+use overload (
+  '""' => 'explain',
+  '~~' => 'explain',
+  fallback => 1,
+);
 
 # ATTRIBUTES
 
@@ -62,21 +70,11 @@ sub build_self {
 
 # METHODS
 
-sub assertion {
-  my ($self) = @_;
-
-  my $assert = $self->SUPER::assertion;
-
-  $assert->clear->expression('hashref');
-
-  return $assert;
-}
-
 sub config {
   my ($self, $package) = @_;
 
   $package ||= $self->package
-    or $self->error({throw => 'error_on_config'});
+    or $self->error_on_config->input($self, $package)->throw;
 
   # YAML::XS
   if ($package eq 'YAML::XS') {
@@ -225,11 +223,14 @@ sub TO_BOOL {
 sub error_on_config {
   my ($self) = @_;
 
-  return {
-    name => 'on.config',
-    message => 'No suitable YAML package',
-    raise => true,
-  };
+  my $error = $self->error->sysinfo;
+
+  $error->name('on.config');
+  $error->message('No suitable YAML package');
+  $error->offset(1);
+  $error->reset;
+
+  return $error;
 }
 
 1;

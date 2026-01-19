@@ -1,3 +1,7 @@
+﻿
+=encoding UTF8
+
+=cut
 
 =head1 NAME
 
@@ -747,6 +751,30 @@ I<Since C<2.80>>
 
 =cut
 
+=head2 new
+
+  new(any @args) (Venus::Os)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Os;
+
+  my $new = Venus::Os->new;
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=cut
+
 =head2 paths
 
   paths() (arrayref)
@@ -848,6 +876,258 @@ I<Since C<2.91>>
   my $quote = $os->quote('hello "world"');
 
   # '"hello \"world\""'
+
+=back
+
+=cut
+
+=head2 read
+
+  read(any $from) (string)
+
+The read method reads from a file, filehandle, or STDIN, and returns the data.
+To read from STDIN provide the string C<"STDIN">. The method defaults to reading from STDIN.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item read example 1
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read;
+
+  # from STDIN
+
+  # "..."
+
+=back
+
+=over 4
+
+=item read example 2
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('STDIN');
+
+  # from STDIN
+
+  # "..."
+
+=back
+
+=over 4
+
+=item read example 3
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/iso-8859-1.txt');
+
+  # from file
+
+  # "Hello, world! This is ISO-8859-1."
+
+=back
+
+=over 4
+
+=item read example 4
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  open my $fh, '<', 't/data/texts/iso-8859-1.txt';
+
+  my $read = $os->read($fh);
+
+  # from filehandle
+
+  # "Hello, world! This is ISO-8859-1."
+
+=back
+
+=over 4
+
+=item read example 5
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  use IO::File;
+
+  my $fh = IO::File->new('t/data/texts/iso-8859-1.txt', 'r');
+
+  my $read = $os->read($fh);
+
+  # from filehandle
+
+  # "Hello, world! This is ISO-8859-1."
+
+=back
+
+=over 4
+
+=item read example 6
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-16be.txt');
+
+  # from UTF-16BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=back
+
+=over 4
+
+=item read example 7
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-16le.txt');
+
+  # from UTF-16LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=back
+
+=over 4
+
+=item read example 8
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-32be.txt');
+
+  # from UTF-32BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=back
+
+=over 4
+
+=item read example 9
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-32le.txt');
+
+  # from UTF-32LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=back
+
+=over 4
+
+=item read example 10
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $read = $os->read('t/data/texts/utf-8.txt');
+
+  # from UTF-8 encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+=back
+
+=over 4
+
+=item B<may raise> L<Venus::Os::Error> C<on.read.open.file>
+
+  # given: synopsis;
+
+  $os->read('/path/to/nowhere');
+
+  # Error! (on.read.open.file)
+
+=back
+
+=cut
+
+=head2 syscall
+
+  syscall(any @data) (Venus::Os)
+
+The syscall method executes the command and arguments provided, via
+L<perlfunc/system>, and returns the invocant.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item syscall example 1
+
+  package main;
+
+  use Venus::Os;
+
+  my $os = Venus::Os->new;
+
+  $os->syscall($^X, '--help');
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item syscall example 2
+
+  package main;
+
+  use Venus::Os;
+
+  my $os = Venus::Os->new;
+
+  $os->syscall('.help');
+
+  # Exception! (isa Venus::Os::Error) (see error_on_system_call)
 
 =back
 
@@ -1201,6 +1481,329 @@ I<Since C<2.80>>
   my $which = $os->which('app5');
 
   # undef
+
+=back
+
+=cut
+
+=head2 write
+
+  write(any $into, string $data, string $encoding) (Venus::Os)
+
+The write method writes to a file, filehandle, STDOUT, or STDERR, and returns
+the invocant. To write to STDOUT provide the string C<"STDOUT">. To write to
+STDERR provide the string C<"STDERR">. The method defaults to writing to
+STDOUT.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item write example 1
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write;
+
+  # to STDOUT
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 2
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write(undef, '');
+
+  # to STDOUT
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 3
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDOUT');
+
+  # to STDOUT
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 4
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDOUT', '...');
+
+  # to STDOUT
+
+  # '...'
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 5
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDERR');
+
+  # to STDERR
+
+  # ''
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 6
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $write = $os->write('STDERR', '...');
+
+  # to STDERR
+
+  # '...'
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 7
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/iso-8859-1.txt';
+
+  my $write = $os->write($file, 'Hello, world! This is ISO-8859-1.');
+
+  # to file
+
+  # "Hello, world! This is ISO-8859-1."
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 8
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  open my $fh, '<', 't/data/texts/iso-8859-1.txt';
+
+  my $write = $os->write($fh, 'Hello, world! This is ISO-8859-1.');
+
+  # to file
+
+  # "Hello, world! This is ISO-8859-1."
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 9
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  use IO::File;
+
+  my $fh = IO::File->new('t/data/texts/iso-8859-1.txt', 'w');
+
+  my $write = $os->write($fh, 'Hello, world! This is ISO-8859-1.');
+
+  # to ISO-8859-1 encoded file
+
+  # "Hello, world! This is ISO-8859-1."
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 10
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-16be.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-16BE');
+
+  # to UTF-16BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 11
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-16le.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-16LE');
+
+  # to UTF-16LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 12
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-32be.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-32BE');
+
+  # to UTF-32BE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 13
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-32le.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-32LE');
+
+  # to UTF-32LE encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item write example 14
+
+  # given: synopsis
+
+  package main;
+
+  # on linux
+
+  my $file = 't/data/texts/utf-8.txt';
+
+  my $write = $os->write($file, 'Hello, world! こんにちは世界！', 'UTF-8');
+
+  # to UTF-8 encoded file
+
+  # "Hello, world! こんにちは世界！"
+
+  # bless(..., "Venus::Os")
+
+=back
+
+=over 4
+
+=item B<may raise> L<Venus::Os::Error> C<on.write.open.file>
+
+  # given: synopsis;
+
+  $os->write('/path/to/nowhere/file.txt', 'content');
+
+  # Error! (on.write.open.file)
 
 =back
 

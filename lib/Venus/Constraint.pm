@@ -5,11 +5,17 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
 
 use Venus::Check;
 
+# INHERITS
+
 base 'Venus::Kind::Utility';
+
+# INTEGRATES
 
 with 'Venus::Role::Buildable';
 

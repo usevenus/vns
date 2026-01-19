@@ -5,7 +5,7 @@ use 5.018;
 use strict;
 use warnings;
 
-# IMPORT
+# IMPORTS
 
 sub import {
   my ($self, @args) = @_;
@@ -25,6 +25,7 @@ sub import {
     base
     false
     from
+    mask
     mixin
     role
     test
@@ -37,8 +38,17 @@ sub import {
   if ($exports{"attr"} && !*{"${from}::attr"}{"CODE"}) {
     *{"${from}::attr"} = sub {@_ = ($from, @_); goto \&attr};
   }
+  if ($exports{"after"} && !*{"${from}::after"}{"CODE"}) {
+    *{"${from}::after"} = sub ($$) {require Venus; goto \&Venus::after};
+  }
+  if ($exports{"around"} && !*{"${from}::around"}{"CODE"}) {
+    *{"${from}::around"} = sub ($$) {require Venus; goto \&Venus::around};
+  }
   if ($exports{"base"} && !*{"${from}::base"}{"CODE"}) {
     *{"${from}::base"} = sub {@_ = ($from, @_); goto \&base};
+  }
+  if ($exports{"before"} && !*{"${from}::before"}{"CODE"}) {
+    *{"${from}::before"} = sub ($$) {require Venus; goto \&Venus::before};
   }
   if ($exports{"catch"} && !*{"${from}::catch"}{"CODE"}) {
     *{"${from}::catch"} = sub (&) {require Venus; goto \&Venus::catch};
@@ -55,8 +65,17 @@ sub import {
   if ($exports{"from"} && !*{"${from}::from"}{"CODE"}) {
     *{"${from}::from"} = sub {@_ = ($from, @_); goto \&from};
   }
+  if ($exports{"handle"} && !*{"${from}::handle"}{"CODE"}) {
+    *{"${from}::handle"} = sub ($$) {require Venus; goto \&Venus::handle};
+  }
+  if ($exports{"hook"} && !*{"${from}::hook"}{"CODE"}) {
+    *{"${from}::hook"} = sub ($$$) {require Venus; goto \&Venus::hook};
+  }
   if ($exports{"raise"} && !*{"${from}::raise"}{"CODE"}) {
     *{"${from}::raise"} = sub ($;$) {require Venus; goto \&Venus::raise};
+  }
+  if ($exports{"mask"} && !*{"${from}::mask"}{"CODE"}) {
+    *{"${from}::mask"} = sub {@_ = ($from, @_); goto \&mask};
   }
   if ($exports{"mixin"} && !*{"${from}::mixin"}{"CODE"}) {
     *{"${from}::mixin"} = sub {@_ = ($from, @_); goto \&mixin};
@@ -81,6 +100,8 @@ sub import {
   return $self;
 }
 
+# ROUTINES
+
 sub attr {
   my ($from, @args) = @_;
 
@@ -101,6 +122,14 @@ sub from {
   my ($from, @args) = @_;
 
   $from->FROM(@args);
+
+  return $from;
+}
+
+sub mask {
+  my ($from, @args) = @_;
+
+  $from->MASK(@args);
 
   return $from;
 }

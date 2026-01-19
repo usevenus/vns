@@ -1,0 +1,128 @@
+﻿
+=head1 NAME
+
+Venus::Task::Venus::Get - vns get
+
+=cut
+
+=head1 ABSTRACT
+
+Task Class for Venus CLI
+
+=cut
+
+=head1 SYNOPSIS
+
+  use Venus::Task::Venus::Get;
+
+  my $task = Venus::Task::Venus::Get->new;
+
+  # bless(..., "Venus::Task::Venus::Get")
+
+=cut
+
+=head1 DESCRIPTION
+
+This package is a task class for the C<vns-get> CLI, and C<vns get>
+sub-command.
+
+=cut
+
+=head1 INHERITS
+
+This package inherits behaviors from:
+
+L<Venus::Task::Venus>
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Task::Venus::Get)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Task::Venus::Get;
+
+  my $task = Venus::Task::Venus::Get->new;
+
+  # bless({...}, 'Venus::Task::Venus::Get')
+
+=back
+
+=cut
+
+=head2 perform
+
+  perform() (Venus::Task::Venus::Get)
+
+The perform method executes the CLI logic.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item perform example 1
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('perl.perl');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::Get')
+
+=back
+
+=over 4
+
+=item perform example 2
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('perl.prove');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::Get')
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

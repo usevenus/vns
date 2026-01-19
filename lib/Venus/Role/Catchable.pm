@@ -5,6 +5,8 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Role 'fault';
 
 # AUDITS
@@ -29,6 +31,25 @@ sub catch {
   return wantarray ? ($error ? ($error, undef) : ($error, @result)) : $error;
 }
 
+sub caught {
+  my ($self, $data, $type, $code) = @_;
+
+  require Scalar::Util;
+
+  ($type, my($name)) = @$type if ref $type eq 'ARRAY';
+
+  my $is_true = $data
+    && Scalar::Util::blessed($data)
+    && $data->isa('Venus::Error')
+    && $data->isa($type || 'Venus::Error')
+    && ($data->name ? $data->of($name || '') : !$name);
+
+  return undef unless $is_true;
+
+  local $_ = $data;
+  return $code ? $code->($data) : $data;
+}
+
 sub maybe {
   my ($self, $method, @args) = @_;
 
@@ -40,7 +61,7 @@ sub maybe {
 # EXPORTS
 
 sub EXPORT {
-  ['catch', 'maybe']
+  ['catch', 'caught', 'maybe']
 }
 
 1;

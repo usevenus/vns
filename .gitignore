@@ -1,5 +1,7 @@
 /*
 
+!/.changes
+!/.claude
 !/.github
 !/bin
 !/changelog
@@ -9,10 +11,13 @@
 !/t
 !/xt
 
+/.claude/settings.local.json
+
 !CHANGES
 !CHANGES.md
 !CODE_OF_CONDUCT.md
 !CONTRIBUTING.md
+!CLAUDE.md
 !GITHUB.md
 !INSTALL
 !LICENSE
@@ -24,6 +29,7 @@
 !README
 !README.md
 !RELEASE.md
+!LIFECYCLE.md
 !VERSION
 !cpanfile
 !dist.ini

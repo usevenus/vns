@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Process - Process Class
@@ -310,6 +310,18 @@ I<Since C<0.06>>
   $parent = $parent->chdir('/xyz');
 
   # Exception! (isa Venus::Process::Error) (see error_on_chdir)
+
+=back
+
+=over 4
+
+=item B<may raise> L<Venus::Process::Error> C<on.chdir>
+
+  # given: synopsis;
+
+  $parent->chdir('/path/to/nowhere');
+
+  # Error! (on.chdir)
 
 =back
 
@@ -1806,6 +1818,58 @@ I<Since C<3.40>>
 
 =cut
 
+=head2 new
+
+  new(any @args) (Venus::Process)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Process;
+
+  my $new = Venus::Process->new;
+
+  # bless(..., "Venus::Process")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Process;
+
+  my $new = Venus::Process->new(1);
+
+  # bless(..., "Venus::Process")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Process;
+
+  my $new = Venus::Process->new(value => 1);
+
+  # bless(..., "Venus::Process")
+
+=back
+
+=cut
+
 =head2 others
 
   others() (arrayref)
@@ -2992,6 +3056,18 @@ I<Since C<0.06>>
 
 =back
 
+=over 4
+
+=item B<may raise> L<Venus::Process::Error> C<on.stderr>
+
+  # given: synopsis;
+
+  $parent->stderr('/path/to/nowhere');
+
+  # Error! (on.stderr)
+
+=back
+
 =cut
 
 =head2 stdin
@@ -3028,6 +3104,18 @@ I<Since C<0.06>>
 
 =back
 
+=over 4
+
+=item B<may raise> L<Venus::Process::Error> C<on.stdin>
+
+  # given: synopsis;
+
+  $parent->stdin('/path/to/nowhere');
+
+  # Error! (on.stdin)
+
+=back
+
 =cut
 
 =head2 stdout
@@ -3061,6 +3149,18 @@ I<Since C<0.06>>
   $parent = $parent->stdout('/nowhere');
 
   # Exception! Venus::Process::Error (error_on_stdout)
+
+=back
+
+=over 4
+
+=item B<may raise> L<Venus::Process::Error> C<on.stdout>
+
+  # given: synopsis;
+
+  $parent->stdout('/path/to/nowhere');
+
+  # Error! (on.stdout)
 
 =back
 
@@ -3721,418 +3821,6 @@ I<Since C<2.40>>
 =back
 
 =cut
-
-=head1 ERRORS
-
-This package may raise the following errors:
-
-=cut
-
-=over 4
-
-=item error: C<error_on_chdir>
-
-This package may raise an error_on_chdir exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_chdir',
-    error => $!,
-    path => '/nowhere',
-    pid => 123,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_chdir"
-
-  # my $message = $error->render;
-
-  # "Can't chdir \"$path\": $!"
-
-  # my $path = $error->stash('path');
-
-  # "/nowhere"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
-
-=back
-
-=over 4
-
-=item error: C<error_on_fork_process>
-
-This package may raise an error_on_fork_process exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_fork_process',
-    error => $!,
-    pid => 123,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_fork_process"
-
-  # my $message = $error->render;
-
-  # "Can't fork process $pid: $!"
-
-  # my $pid = $error->stash('pid');
-
-  # "123"
-
-=back
-
-=over 4
-
-=item error: C<error_on_fork_support>
-
-This package may raise an error_on_fork_support exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_fork_support',
-    pid => 123,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_fork_support"
-
-  # my $message = $error->render;
-
-  # "Can't fork process $pid: Fork emulation not supported"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
-
-=back
-
-=over 4
-
-=item error: C<error_on_ping>
-
-This package may raise an error_on_ping exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_ping',
-    pid => 123,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_ping"
-
-  # my $message = $error->render;
-
-  # "Process 123 not responding to ping"
-
-  # my $pid = $error->stash('pid');
-
-  # "123"
-
-=back
-
-=over 4
-
-=item error: C<error_on_setid>
-
-This package may raise an error_on_setid exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_setid',
-    error => $!,
-    pid => 123,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_setid"
-
-  # my $message = $error->render;
-
-  # "Can't start a new session: $!"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
-
-=back
-
-=over 4
-
-=item error: C<error_on_stderr>
-
-This package may raise an error_on_stderr exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_stderr',
-    error => $!,
-    path => "/nowhere",
-    pid => 123,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_stderr"
-
-  # my $message = $error->render;
-
-  # "Can't redirect STDERR to \"/nowhere\": $!"
-
-  # my $path = $error->stash('path');
-
-  # "/nowhere"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
-
-=back
-
-=over 4
-
-=item error: C<error_on_stdin>
-
-This package may raise an error_on_stdin exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_stdin',
-    error => $!,
-    path => "/nowhere",
-    pid => 123,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_stdin"
-
-  # my $message = $error->render;
-
-  # "Can't redirect STDIN to \"$path\": $!"
-
-  # my $path = $error->stash('path');
-
-  # "/nowhere"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
-
-=back
-
-=over 4
-
-=item error: C<error_on_stdout>
-
-This package may raise an error_on_stdout exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_stdout',
-    error => $!,
-    path => "/nowhere",
-    pid => 123,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_stdout"
-
-  # my $message = $error->render;
-
-  # "Can't redirect STDOUT to \"$path\": $!"
-
-  # my $path = $error->stash('path');
-
-  # "/nowhere"
-
-  # my $pid = $error->stash('pid');
-
-  # 123
-
-=back
-
-=over 4
-
-=item error: C<error_on_timeout_poll>
-
-This package may raise an error_on_timeout_poll exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_timeout_poll',
-    code => sub{},
-    timeout => 0,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_timeout_poll"
-
-  # my $message = $error->render;
-
-  # "Timed out after 0 seconds in process 12345 while polling __ANON__"
-
-  # my $code = $error->stash('code');
-
-  # sub{}
-
-  # my $exchange = $error->stash('exchange');
-
-  # undef
-
-  # my $pid = $error->stash('pid');
-
-  # 12345
-
-  # my $timeout = $error->stash('timeout');
-
-  # 0
-
-=back
-
-=over 4
-
-=item error: C<error_on_timeout_pool>
-
-This package may raise an error_on_timeout_pool exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_timeout_pool',
-    pool_size => 2,
-    timeout => 0,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_timeout_pool"
-
-  # my $message = $error->render;
-
-  # "Timed out after 0 seconds in process 12345 while pooling"
-
-  # my $exchange = $error->stash('exchange');
-
-  # undef
-
-  # my $pid = $error->stash('pid');
-
-  # 12345
-
-  # my $pool_size = $error->stash('pool_size');
-
-  # 2
-
-  # my $timeout = $error->stash('timeout');
-
-  # 0
-
-=back
-
-=over 4
-
-=item error: C<error_on_timeout_sync>
-
-This package may raise an error_on_timeout_sync exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_timeout_sync',
-    pool_size => 2,
-    timeout => 0,
-  };
-
-  my $error = $parent->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_timeout_sync"
-
-  # my $message = $error->render;
-
-  # "Timed out after 0 seconds in process 12345 while syncing"
-
-  # my $exchange = $error->stash('exchange');
-
-  # undef
-
-  # my $pid = $error->stash('pid');
-
-  # 12345
-
-  # my $pool_size = $error->stash('pool_size');
-
-  # 2
-
-  # my $timeout = $error->stash('timeout');
-
-  # 0
-
-=back
 
 =head1 OPERATORS
 

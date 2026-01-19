@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Search - Search Class
@@ -74,9 +74,9 @@ L<Venus::Kind::Utility>
 
 This package integrates behaviors from:
 
-L<Venus::Role::Explainable>
+L<Venus::Role::Encaseable>
 
-L<Venus::Role::Stashable>
+L<Venus::Role::Explainable>
 
 =cut
 
@@ -170,6 +170,30 @@ I<Since C<0.01>>
   my $evaluate = $search->evaluate;
 
   # Exception! (isa Venus::Search::Error) (see error_on_evaluate)
+
+=back
+
+=over 4
+
+=item B<may raise> L<Venus::Search::Error> C<on.evaluate>
+
+  package main;
+
+  use Venus::Search;
+
+  my $search = Venus::Search->new(
+    string => 'hello world',
+    regexp => 'world',
+    flags => 'i',
+  );
+
+  $search->evaluate;
+
+  $search->flags('q');
+
+  $search->evaluate;
+
+  # Error! (on.evaluate)
 
 =back
 
@@ -358,6 +382,47 @@ I<Since C<0.01>>
 
 =cut
 
+=head2 new
+
+  new(any @args) (Venus::Search)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Search;
+
+  my $new = Venus::Search->new;
+
+  # bless(..., "Venus::Search")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Search;
+
+  my $new = Venus::Search->new(
+    string => 'hello world',
+    regexp => '(hello)',
+  );
+
+  # bless(..., "Venus::Search")
+
+=back
+
+=cut
+
 =head2 postmatched
 
   postmatched() (maybe[string])
@@ -427,39 +492,6 @@ I<Since C<0.01>>
 =back
 
 =cut
-
-=head1 ERRORS
-
-This package may raise the following errors:
-
-=cut
-
-=over 4
-
-=item error: C<error_on_evaluate>
-
-This package may raise an error_on_evaluate exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_evaluate',
-    error => 'Exception!',
-  };
-
-  my $error = $search->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_evaluate"
-
-  # my $message = $error->message;
-
-  # "Exception!"
-
-=back
 
 =head1 OPERATORS
 

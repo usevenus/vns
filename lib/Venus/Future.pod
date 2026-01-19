@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Future - Future Class
@@ -1452,44 +1452,24 @@ I<Since C<3.55>>
 
 =back
 
-=cut
-
-=head1 ERRORS
-
-This package may raise the following errors:
-
-=cut
-
 =over 4
 
-=item error: C<error_on_timeout>
-
-This package may raise an error_on_timeout exception.
-
-B<example 1>
+=item B<may raise> L<Venus::Future::Error> C<on.timeout>
 
   # given: synopsis;
 
-  my $input = {
-    throw => 'error_on_timeout',
-    timeout => 10,
-  };
+  $future->promise(sub{
+    my ($resolve, $reject) = @_;
+    # never fulfilled
+  });
 
-  my $error = $future->try('error', $input)->error->result;
+  $future->wait(0);
 
-  # my $name = $error->name;
-
-  # "on_timeout"
-
-  # my $message = $error->render;
-
-  # "Future timed-out after 10 seconds"
-
-  # my $timeout = $error->stash('timeout');
-
-  # 10
+  # Error! (on.timeout)
 
 =back
+
+=cut
 
 =head1 AUTHORS
 

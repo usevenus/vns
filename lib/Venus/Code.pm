@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base';
 
+# INHERITS
+
 base 'Venus::Kind::Value';
+
+# OVERLOADS
 
 use overload (
   '&{}' => sub{$_[0]->value},
@@ -15,16 +21,6 @@ use overload (
 );
 
 # METHODS
-
-sub assertion {
-  my ($self) = @_;
-
-  my $assert = $self->SUPER::assertion;
-
-  $assert->clear->expression('coderef');
-
-  return $assert;
-}
 
 sub call {
   my ($self, @args) = @_;

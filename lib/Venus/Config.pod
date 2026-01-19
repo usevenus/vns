@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Config - Config Class
@@ -81,6 +81,129 @@ I<Since C<3.10>>
 
     return $data;
   });
+
+  # bless(..., 'Venus::Config')
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Config)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Config;
+
+  my $config = Venus::Config->new;
+
+  # bless(..., "Venus::Config")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Config;
+
+  my $config = Venus::Config->new(value => {password => 'secret'});
+
+  # bless(..., "Venus::Config")
+
+=back
+
+=cut
+
+=head2 read_env
+
+  read_env(string $data) (Venus::Config)
+
+The read_env method returns a new L<Venus::Config> object based on the string
+of key/value pairs provided. This method supports multiline values when
+enclosed in double or single quotes.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item read_env example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $read_env = $config->read_env(
+    "APPNAME=Example\nAPPVER=0.01\n# Comment\n\n\nAPPTAG=\"Godzilla\"",
+  );
+
+  # bless(..., 'Venus::Config')
+
+=back
+
+=over 4
+
+=item read_env example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $read_env = $config->read_env(
+    "MESSAGE=\"Hello\nWorld\"\nSIGNATURE='Best,\nTeam'",
+  );
+
+  # bless(..., 'Venus::Config')
+
+=back
+
+=over 4
+
+=item read_env example 3
+
+  # given: synopsis
+
+  package main;
+
+  my $read_env = $config->read_env(
+    'ESCAPE="line1\nline2\ttabbed"',
+  );
+
+  # bless(..., 'Venus::Config')
+
+=back
+
+=cut
+
+=head2 read_env_file
+
+  read_env_file(string $file) (Venus::Config)
+
+The read_env_file method uses L<Venus::Path> to return a new L<Venus::Config>
+object based on the file provided.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item read_env_file example 1
+
+  # given: synopsis
+
+  package main;
+
+  $config = $config->read_env_file('t/conf/read.env');
 
   # bless(..., 'Venus::Config')
 
@@ -310,6 +433,111 @@ I<Since C<2.91>>
   package main;
 
   $config = $config->read_yaml_file('t/conf/read.yaml');
+
+  # bless(..., 'Venus::Config')
+
+=back
+
+=cut
+
+=head2 write_env
+
+  write_env() (string)
+
+The write_env method returns a string representing environment variable
+key/value pairs based on the L</value> held by the underlying L<Venus::Config>
+object. Multiline values are escaped using C<\n> notation and enclosed in
+double quotes.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item write_env example 1
+
+  # given: synopsis
+
+  package main;
+
+  my $value = $config->value({
+    APPNAME => "Example",
+    APPTAG => "Godzilla",
+    APPVER => 0.01,
+  });
+
+  my $write_env = $config->write_env;
+
+  # "APPNAME=Example\nAPPTAG=Godzilla\nAPPVER=0.01"
+
+=back
+
+=over 4
+
+=item write_env example 2
+
+  # given: synopsis
+
+  package main;
+
+  my $value = $config->value({
+    MESSAGE => "Hello\nWorld",
+    NOTE => "line1\ttabbed",
+  });
+
+  my $write_env = $config->write_env;
+
+  # "MESSAGE=\"Hello\\nWorld\"\nNOTE=\"line1\\ttabbed\""
+
+=back
+
+=over 4
+
+=item write_env example 3
+
+  # given: synopsis
+
+  package main;
+
+  my $value = $config->value({
+    APPNAME => "Example",
+    MESSAGE => "Hello\nWorld\nGoodbye",
+    APPTAG => "Godzilla",
+  });
+
+  my $write_env = $config->write_env;
+
+  my $read_env = $config->read_env($write_env);
+
+  # bless(..., 'Venus::Config')
+
+  # round-trip: read_env(write_env($value)) == $value
+
+=back
+
+=cut
+
+=head2 write_env_file
+
+  write_env_file(string $path) (Venus::Config)
+
+The write_env_file method saves a environment configuration file and returns a new
+L<Venus::Config> object.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item write_env_file example 1
+
+  # given: synopsis
+
+  my $value = $config->value({
+    APPNAME => "Example",
+    APPTAG => "Godzilla",
+    APPVER => 0.01,
+  });
+
+  $config = $config->write_env_file('t/conf/write.env');
 
   # bless(..., 'Venus::Config')
 

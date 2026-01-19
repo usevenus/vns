@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::True - True Class
@@ -33,6 +33,30 @@ the L<Venus/true> function.
 =head1 METHODS
 
 This package provides the following methods:
+
+=cut
+
+=head2 new
+
+  new() (Venus::True)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::True;
+
+  my $new = Venus::True->new;
+
+  # bless(..., "Venus::True")
+
+=back
 
 =cut
 

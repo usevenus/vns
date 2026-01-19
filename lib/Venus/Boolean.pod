@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Boolean - Boolean Class
@@ -1799,6 +1799,58 @@ I<Since C<0.01>>
   my $negate = $boolean->negate;
 
   # 1
+
+=back
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Boolean)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Boolean;
+
+  my $new = Venus::Boolean->new;
+
+  # bless(..., "Venus::Boolean")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Boolean;
+
+  my $new = Venus::Boolean->new(1);
+
+  # bless(..., "Venus::Boolean")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Boolean;
+
+  my $new = Venus::Boolean->new(value => 1);
+
+  # bless(..., "Venus::Boolean")
 
 =back
 

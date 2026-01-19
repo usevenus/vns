@@ -5,14 +5,20 @@ use 5.018;
 use strict;
 use warnings;
 
-use Venus::Role 'with';
+# IMPORTS
+
+use Venus::Role 'mask';
+
+# ATTRIBUTES
+
+mask 'private';
 
 # BUILDERS
 
 sub BUILD {
   my ($self, $data) = @_;
 
-  $self->{'$stash'} = delete $data->{'$stash'} || {} if !$self->{'$stash'};
+  $self->private({}) if !$self->private;
 
   return $self;
 };
@@ -22,11 +28,11 @@ sub BUILD {
 sub stash {
   my ($self, $key, $value) = @_;
 
-  return $self->{'$stash'} if !exists $_[1];
+  return $self->private if !exists $_[1];
 
-  return $self->{'$stash'}->{$key} if !exists $_[2];
+  return $self->private->{$key} if !exists $_[2];
 
-  $self->{'$stash'}->{$key} = $value;
+  $self->private->{$key} = $value;
 
   return $value;
 }
@@ -34,7 +40,7 @@ sub stash {
 # EXPORTS
 
 sub EXPORT {
-  ['stash']
+  ['stash', 'private']
 }
 
 1;

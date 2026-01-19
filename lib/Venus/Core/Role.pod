@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Core::Role - Role Base Class

@@ -1,0 +1,190 @@
+﻿
+=head1 NAME
+
+Venus::Task::Venus::Gen - vns gen
+
+=cut
+
+=head1 ABSTRACT
+
+Task Class for Venus CLI
+
+=cut
+
+=head1 SYNOPSIS
+
+  package main;
+
+  use Venus::Task::Venus::Gen;
+
+  my $task = Venus::Task::Venus::Gen->new;
+
+  # bless(.., 'Venus::Task::Venus::Gen')
+
+=cut
+
+=head1 DESCRIPTION
+
+This package is a task class for the C<vns-gen> CLI, and C<vns gen>
+sub-command.
+
+=cut
+
+=head1 INHERITS
+
+This package inherits behaviors from:
+
+L<Venus::Task::Venus>
+
+=cut
+
+=head1 METHODS
+
+This package provides the following methods:
+
+=cut
+
+=head2 new
+
+  new(any @args) (Venus::Task::Venus::Gen)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Task::Venus::Gen;
+
+  my $task = Venus::Task::Venus::Gen->new;
+
+  # bless({...}, 'Venus::Task::Venus::Gen')
+
+=back
+
+=cut
+
+=head2 perform
+
+  perform() (Venus::Task::Venus::Gen)
+
+The perform method executes the CLI logic.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item perform example 1
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::Gen')
+
+=back
+
+=over 4
+
+=item perform example 2
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('--stdout', '--class');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::Gen')
+
+  # ...
+
+=back
+
+=over 4
+
+=item perform example 3
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('--stdout', '--class', '--name', 'MyApp');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::Gen')
+
+  # ...
+
+=back
+
+=over 4
+
+=item perform example 4
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('-pc', '--name', 'MyApp', '--method', 'execute');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::Gen')
+
+  # ...
+
+=back
+
+=over 4
+
+=item perform example 5
+
+  # given: synopsis
+
+  package main;
+
+  $task->prepare;
+
+  $task->parse('-pc', '--name', 'MyApp', '--attr', 'domain', '--method', 'execute');
+
+  my $perform = $task->perform;
+
+  # bless(.., 'Venus::Task::Venus::Gen')
+
+  # ...
+
+=back
+
+=cut
+
+=head1 AUTHORS
+
+Awncorp, C<awncorp@cpan.org>
+
+=cut
+
+=head1 LICENSE
+
+Copyright (C) 2022, Awncorp, C<awncorp@cpan.org>.
+
+This program is free software, you can redistribute it and/or modify it under
+the terms of the Apache license version 2.0.
+
+=cut

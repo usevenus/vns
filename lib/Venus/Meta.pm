@@ -5,7 +5,11 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus;
+
+# INHERITS
 
 use base 'Venus::Core';
 
@@ -69,6 +73,56 @@ sub base {
   my $data = {map +($_,$_), @{$self->bases}};
 
   return $data->{$name} ? true : false;
+}
+
+sub mask {
+  my ($self, $name) = @_;
+
+  return 0 if !$name;
+
+  my $data = {map +($_,$_), @{$self->masks}};
+
+  return $data->{$name} ? true : false;
+}
+
+sub masks {
+  my ($self) = @_;
+
+  if ($self->{masks}) {
+    return wantarray ? (@{$self->{masks}}) : $self->{masks};
+  }
+
+  my $name = $self->{name};
+  my @masks = masks_resolver($name);
+
+  for my $base (@{$self->bases}) {
+    push @masks, masks_resolver($base);
+  }
+
+  for my $role (@{$self->roles}) {
+    push @masks, masks_resolver($role);
+  }
+
+  my %seen;
+  my $results = $self->{masks} ||= [grep !$seen{$_}++, @masks];
+
+  return wantarray ? (@$results) : $results;
+}
+
+sub masks_resolver {
+  my ($name) = @_;
+
+  no strict 'refs';
+  no warnings 'once';
+
+  if (${"${name}::META"} && $${"${name}::META"}{MASK}) {
+    return (sort {
+      $${"${name}::META"}{MASK}{$a}[0] <=> $${"${name}::META"}{MASK}{$b}[0]
+    } keys %{$${"${name}::META"}{MASK}});
+  }
+  else {
+    return ();
+  }
 }
 
 sub bases {
@@ -144,7 +198,7 @@ sub local {
 
   no strict 'refs';
 
-  return if !int grep $type eq $_, qw(attrs bases mixins roles subs);
+  return if !int grep $type eq $_, qw(attrs bases masks mixins roles subs);
 
   my $function = "${type}_resolver";
 

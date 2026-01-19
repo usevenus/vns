@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Assert - Assert Class
@@ -732,6 +732,58 @@ I<Since C<3.55>>
 
 =cut
 
+=head2 new
+
+  new(any @args) (Venus::Assert)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Assert;
+
+  my $new = Venus::Assert->new;
+
+  # bless(..., "Venus::Assert")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Assert;
+
+  my $new = Venus::Assert->new('Float');
+
+  # bless(..., "Venus::Assert")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Assert;
+
+  my $new = Venus::Assert->new(name => 'Float');
+
+  # bless(..., "Venus::Assert")
+
+=back
+
+=cut
+
 =head2 parse
 
   parse(string $expr) (any)
@@ -794,7 +846,7 @@ I<Since C<2.01>>
 
   my $parsed = $assert->parse('enum[up,down,left,right]');
 
-  # [['enum', 'up', 'down', 'left', 'right']]
+  # ['enum', 'up', 'down', 'left', 'right']
 
 =back
 
@@ -850,7 +902,7 @@ I<Since C<2.01>>
 
   my $parsed = $assert->parse('tuple[number, arrayref, coderef]');
 
-  # [['tuple', 'number', 'arrayref', 'coderef']]
+  # ['tuple', 'number', 'arrayref', 'coderef']
 
 =back
 
@@ -864,7 +916,7 @@ I<Since C<2.01>>
 
   my $parsed = $assert->parse('tuple[number, within[arrayref, hashref], coderef]');
 
-  # [['tuple', 'number', ['within', 'arrayref', 'hashref'], 'coderef']]
+  # ['tuple', 'number', ['within', 'arrayref', 'hashref'], 'coderef']
 
 =back
 
@@ -880,13 +932,7 @@ I<Since C<2.01>>
     'tuple[number, within[arrayref, hashref] | arrayref, coderef]'
   );
 
-  # [
-  #   ['tuple', 'number',
-  #     ['either', ['within', 'arrayref', 'hashref'], 'arrayref'], 'coderef']
-  # ]
-
-
-
+  # ['tuple', 'number', ['either', ['within', 'arrayref', 'hashref'], 'arrayref'], 'coderef']
 
 =back
 
@@ -902,13 +948,13 @@ I<Since C<2.01>>
     'hashkeys["id", number | float, "upvotes", within[arrayref, boolean]]'
   );
 
-  # [[
+  # [
   #   'hashkeys',
   #   'id',
   #     ['either', 'number', 'float'],
   #   'upvotes',
   #     ['within', 'arrayref', 'boolean']
-  # ]]
+  # ]
 
 =back
 
@@ -921,7 +967,7 @@ I<Since C<2.01>>
 The render method builds and returns a type expressions suitable for providing
 to L</expression> based on the data provided.
 
-I<Since C<2.55>>
+I<Since C<4.15>>
 
 =over 4
 
@@ -933,7 +979,7 @@ I<Since C<2.55>>
 
   $assert = $assert->render;
 
-  # undef
+  # ""
 
 =back
 
@@ -961,7 +1007,7 @@ I<Since C<2.55>>
 
   $assert = $assert->render('routines', ['say', 'say_pretty']);
 
-  # 'routines["say", "say_pretty"]'
+  # 'routines[say, say_pretty]'
 
 =back
 
@@ -975,7 +1021,7 @@ I<Since C<2.55>>
 
   $assert = $assert->render('hashkeys', {id => 'number', name => 'string'});
 
-  # 'hashkeys["id", number, "name", string]'
+  # 'hashkeys[id, number, name, string]'
 
 =back
 
@@ -990,11 +1036,13 @@ I<Since C<2.55>>
   $assert = $assert->render('hashkeys', {
     id => 'number',
     profile => {
-      level => 'string',
+      hashkeys => {
+        level => 'string',
+      },
     },
   });
 
-  # 'hashkeys["id", number, "profile", hashkeys["level", string]]'
+  # 'hashkeys[id, number, profile, hashkeys[level, string]]'
 
 =back
 

@@ -5,12 +5,20 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
+
+# INHERITS
 
 base 'Venus::Kind::Utility';
 
+# INTEGRATES
+
+with 'Venus::Role::Encaseable';
 with 'Venus::Role::Explainable';
-with 'Venus::Role::Stashable';
+
+# OVERLOADS
 
 use overload (
   '""' => 'explain',
@@ -46,7 +54,7 @@ sub build_self {
 sub captures {
   my ($self) = @_;
 
-  my $evaluation = $self->stash('evaluation') || $self->evaluate;
+  my $evaluation = $self->encased('evaluation') || $self->evaluate;
 
   my $string = $self->initial;
   my $last_match_start = $self->last_match_start;
@@ -67,7 +75,7 @@ sub captures {
 sub count {
   my ($self) = @_;
 
-  my $evaluation = $self->stash('evaluation') || $self->evaluate;
+  my $evaluation = $self->encased('evaluation') || $self->evaluate;
 
   return $evaluation->[2];
 }
@@ -92,10 +100,10 @@ sub evaluate {
   my $error = $@;
 
   if ($error) {
-    $self->error({throw => 'error_on_evaluate', error => $error});
+    $self->error_on_evaluate({error => $error})->throw;
   }
 
-  return $self->stash(evaluation => [
+  return $self->recase(evaluation => [
     $regexp,
     $string,
     $captures,
@@ -113,7 +121,7 @@ sub explain {
 sub get {
   my ($self) = @_;
 
-  my $evaluation = $self->stash('evaluation') || $self->evaluate;
+  my $evaluation = $self->encased('evaluation') || $self->evaluate;
 
   return $evaluation->[1];
 }
@@ -121,7 +129,7 @@ sub get {
 sub initial {
   my ($self) = @_;
 
-  my $evaluation = $self->stash('evaluation') || $self->evaluate;
+  my $evaluation = $self->encased('evaluation') || $self->evaluate;
 
   return $evaluation->[6];
 }
@@ -129,7 +137,7 @@ sub initial {
 sub last_match_end {
   my ($self) = @_;
 
-  my $evaluation = $self->stash('evaluation') || $self->evaluate;
+  my $evaluation = $self->encased('evaluation') || $self->evaluate;
 
   return $evaluation->[4];
 }
@@ -137,7 +145,7 @@ sub last_match_end {
 sub last_match_start {
   my ($self) = @_;
 
-  my $evaluation = $self->stash('evaluation') || $self->evaluate;
+  my $evaluation = $self->encased('evaluation') || $self->evaluate;
 
   return $evaluation->[3];
 }
@@ -145,7 +153,7 @@ sub last_match_start {
 sub matched {
   my ($self) = @_;
 
-  my $evaluation = $self->stash('evaluation') || $self->evaluate;
+  my $evaluation = $self->encased('evaluation') || $self->evaluate;
 
   my $string = $self->initial;
   my $last_match_start = $self->last_match_start;
@@ -160,7 +168,7 @@ sub matched {
 sub named_captures {
   my ($self) = @_;
 
-  my $evaluation = $self->stash('evaluation') || $self->evaluate;
+  my $evaluation = $self->encased('evaluation') || $self->evaluate;
 
   return $evaluation->[5];
 }
@@ -168,7 +176,7 @@ sub named_captures {
 sub prematched {
   my ($self) = @_;
 
-  my $evaluation = $self->stash('evaluation') || $self->evaluate;
+  my $evaluation = $self->encased('evaluation') || $self->evaluate;
 
   my $string = $self->initial;
   my $last_match_start = $self->last_match_start;
@@ -183,7 +191,7 @@ sub prematched {
 sub postmatched {
   my ($self) = @_;
 
-  my $evaluation = $self->stash('evaluation') || $self->evaluate;
+  my $evaluation = $self->encased('evaluation') || $self->evaluate;
 
   my $string = $self->initial;
   my $last_match_start = $self->last_match_start;
@@ -210,13 +218,15 @@ sub set {
 sub error_on_evaluate {
   my ($self, $data) = @_;
 
-  my $result = {
-    name => 'on.evaluate',
-    raise => true,
-    message => $data->{error},
-  };
+  my $error = $self->error->sysinfo;
 
-  return $result;
+  $error->name('on.evaluate');
+  $error->message($data->{error});
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
+
+  return $error;
 }
 
 1;

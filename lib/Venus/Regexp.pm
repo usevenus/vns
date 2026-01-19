@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base';
 
+# INHERITS
+
 base 'Venus::Kind::Value';
+
+# OVERLOADS
 
 use overload (
   'eq' => sub{"$_[0]" eq "$_[1]"},
@@ -17,16 +23,6 @@ use overload (
 );
 
 # METHODS
-
-sub assertion {
-  my ($self) = @_;
-
-  my $assert = $self->SUPER::assertion;
-
-  $assert->clear->expression('regexp');
-
-  return $assert;
-}
 
 sub comparer {
   my ($self) = @_;

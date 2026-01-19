@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base';
 
+# INHERITS
+
 base 'Venus::Sealed';
+
+# OVERLOADS
 
 use overload (
   '""' => sub{$_[0]->get // ''},
@@ -35,28 +41,22 @@ sub __set {
 
   return $init->{value} = $value if !exists $init->{value};
 
-  return $self->error({throw => 'error_on_set', value => $value});
+  return $self->error_on_set->throw;
 }
 
 # ERRORS
 
 sub error_on_set {
-  my ($self, $data) = @_;
+  my ($self) = @_;
 
-  my $message = 'Can\'t re-set atom value to "{{value}}"';
+  my $error = $self->error->sysinfo;
 
-  my $stash = {
-    value => $data->{value},
-  };
+  $error->name('on.set');
+  $error->message('Can\'t re-set atom value');
+  $error->offset(1);
+  $error->reset;
 
-  my $result = {
-    name => 'on.set',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 1;

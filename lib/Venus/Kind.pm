@@ -5,7 +5,11 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'with';
+
+# INTEGRATES
 
 with 'Venus::Role::Boxable';
 with 'Venus::Role::Tryable';
@@ -20,7 +24,6 @@ with 'Venus::Role::Printable';
 with 'Venus::Role::Reflectable';
 with 'Venus::Role::Testable';
 with 'Venus::Role::Throwable';
-with 'Venus::Role::Assertable';
 with 'Venus::Role::Serializable';
 with 'Venus::Role::Mockable';
 with 'Venus::Role::Patchable';

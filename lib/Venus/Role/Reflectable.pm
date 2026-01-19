@@ -5,6 +5,8 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Role 'with';
 
 # METHODS
@@ -13,6 +15,18 @@ sub class {
   my ($self) = @_;
 
   return ref($self) || $self;
+}
+
+sub clone {
+  my ($self) = @_;
+
+  require Storable;
+
+  local $Storable::Deparse = 1;
+
+  local $Storable::Eval = 1;
+
+  return Storable::dclone($self);
 }
 
 sub meta {
@@ -26,7 +40,7 @@ sub meta {
 sub reify {
   my ($self, $method, @args) = @_;
 
-  return $self->type($method, @args)->deduce;
+  return $self->what($method, @args)->deduce;
 }
 
 sub space {
@@ -37,23 +51,23 @@ sub space {
   return Venus::Space->new($self->class);
 }
 
-sub type {
+sub what {
   my ($self, $method, @args) = @_;
 
-  require Venus::Type;
+  require Venus::What;
 
   local $_ = $self;
 
   my $value = $method
     ? $self->$method(@args) : $self->can('value') ? $self->value : $self;
 
-  return Venus::Type->new(value => $value);
+  return Venus::What->new(value => $value);
 }
 
 # EXPORTS
 
 sub EXPORT {
-  ['class', 'meta', 'reify', 'space', 'type']
+  ['class', 'clone', 'meta', 'reify', 'space', 'what']
 }
 
 1;

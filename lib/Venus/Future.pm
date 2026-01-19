@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
 
+# INHERITS
+
 base 'Venus::Kind::Utility';
+
+# INTEGRATES
 
 with 'Venus::Role::Buildable';
 
@@ -16,12 +22,6 @@ with 'Venus::Role::Buildable';
 state $FULFILLED = 'fulfilled';
 state $PENDING = 'pending';
 state $REJECTED = 'rejected';
-
-# HOOKS
-
-sub _time {
-  CORE::time();
-}
 
 # BUILDERS
 
@@ -49,6 +49,12 @@ sub build_self {
   $self->reject($result) if UNIVERSAL::isa($result, 'Venus::Error');
 
   return $self;
+}
+
+# HOOKS
+
+sub _time {
+  CORE::time();
 }
 
 # METHODS
@@ -527,7 +533,7 @@ sub wait {
       last if $seen = $self->fulfill;
     }
     if (!$seen) {
-      $self->error({throw => 'error_on_timeout', timeout => $timeout});
+      $self->error_on_timeout({timeout => $timeout})->throw;
     }
   }
   else {
@@ -544,20 +550,17 @@ sub wait {
 sub error_on_timeout {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = 'Future timed-out after {{timeout}} seconds';
 
-  my $stash = {
-    timeout => $data->{timeout},
-  };
+  $error->name('on.timeout');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.timeout',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 1;

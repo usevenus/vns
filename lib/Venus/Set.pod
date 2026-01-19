@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Set - Set Class
@@ -92,6 +92,8 @@ L<Venus::Kind::Utility>
 This package integrates behaviors from:
 
 L<Venus::Role::Mappable>
+
+L<Venus::Role::Encaseable>
 
 =cut
 
@@ -242,7 +244,7 @@ I<Since C<4.11>>
 
   package main;
 
-  $set->accept('Venus::Number');
+  $set->accept('number');
 
   my $attest = $set->attest;
 
@@ -377,7 +379,7 @@ I<Since C<4.11>>
   delete(number $index) (any)
 
 The delete method returns the value of the element at the index specified after
-removing it from the array.
+removing it from the set.
 
 I<Since C<4.11>>
 
@@ -505,7 +507,7 @@ I<Since C<4.11>>
 
   each(coderef $code) (arrayref)
 
-The each method executes a callback for each element in the array passing the
+The each method executes a callback for each element in the set passing the
 index and value as arguments. This method can return a list of values in
 list-context.
 
@@ -696,6 +698,77 @@ I<Since C<4.11>>
   });
 
   # [4..9]
+
+=back
+
+=cut
+
+=head2 head
+
+  head(number $size) (arrayref)
+
+The head method returns the topmost elements, limited by the desired size
+specified.
+
+I<Since C<4.11>>
+
+=over 4
+
+=item head example 1
+
+  # given: synopsis;
+
+  my $head = $set->head;
+
+  # [1]
+
+=back
+
+=over 4
+
+=item head example 2
+
+  # given: synopsis;
+
+  my $head = $set->head(1);
+
+  # [1]
+
+=back
+
+=over 4
+
+=item head example 3
+
+  # given: synopsis;
+
+  my $head = $set->head(2);
+
+  # [1,2]
+
+=back
+
+=over 4
+
+=item head example 4
+
+  # given: synopsis;
+
+  my $head = $set->head(5);
+
+  # [1..5]
+
+=back
+
+=over 4
+
+=item head example 5
+
+  # given: synopsis;
+
+  my $head = $set->head(20);
+
+  # [1..9]
 
 =back
 
@@ -1121,6 +1194,58 @@ I<Since C<4.11>>
 
 =cut
 
+=head2 new
+
+  new(any @args) (Venus::Set)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Set;
+
+  my $new = Venus::Set->new;
+
+  # bless(..., "Venus::Set")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Set;
+
+  my $new = Venus::Set->new([1,1,2,2,3,3,4,4,5..9]);
+
+  # bless(..., "Venus::Set")
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Set;
+
+  my $new = Venus::Set->new(value => [1,1,2,2,3,3,4,4,5..9]);
+
+  # bless(..., "Venus::Set")
+
+=back
+
+=cut
+
 =head2 none
 
   none(coderef $code) (boolean)
@@ -1205,7 +1330,7 @@ I<Since C<4.11>>
 
 =head2 order
 
-  order(number @indices) (Venus::Array)
+  order(number @indices) (Venus::Set)
 
 The order method reorders the array items based on the indices provided and
 returns the invocant.
@@ -1555,7 +1680,7 @@ I<Since C<4.11>>
 
   my $range = $set->range('-1:8');
 
-  # [9,1..9]
+  # [9]
 
 =back
 
@@ -1583,7 +1708,7 @@ I<Since C<4.11>>
 
   my $range = $set->range('0:-2');
 
-  # [1..7]
+  # [1..8]
 
 =back
 
@@ -1992,6 +2117,77 @@ I<Since C<4.11>>
   my $superset = $set->superset([0..9]);
 
   # true
+
+=back
+
+=cut
+
+=head2 tail
+
+  tail(number $size) (arrayref)
+
+The tail method returns the bottommost elements, limited by the desired size
+specified.
+
+I<Since C<4.11>>
+
+=over 4
+
+=item tail example 1
+
+  # given: synopsis;
+
+  my $tail = $set->tail;
+
+  # [9]
+
+=back
+
+=over 4
+
+=item tail example 2
+
+  # given: synopsis;
+
+  my $tail = $set->tail(1);
+
+  # [9]
+
+=back
+
+=over 4
+
+=item tail example 3
+
+  # given: synopsis;
+
+  my $tail = $set->tail(2);
+
+  # [8,9]
+
+=back
+
+=over 4
+
+=item tail example 4
+
+  # given: synopsis;
+
+  my $tail = $set->tail(5);
+
+  # [5..9]
+
+=back
+
+=over 4
+
+=item tail example 5
+
+  # given: synopsis;
+
+  my $tail = $set->tail(20);
+
+  # [1..9]
 
 =back
 

@@ -5,11 +5,19 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
+
+# INHERITS
 
 base 'Venus::Kind::Utility';
 
+# INTEGRATES
+
 with 'Venus::Role::Buildable';
+
+# OVERLOADS
 
 use overload (
   '&{}' => sub{$_[0]->validator},
@@ -124,9 +132,13 @@ sub expression {
   $data =
   $data =~ s/\s*\n+\s*/ /gr =~ s/^\s+|\s+$//gr =~ s/\[\s+/[/gr =~ s/\s+\]/]/gr;
 
+  require Venus::Type;
+
   $self->name($data) if !$self->name;
 
-  my $parsed = $self->parse($data);
+  my $parsed = Venus::Type->new->expression($data);
+
+  $parsed = [$parsed] if !ref $parsed;
 
   $self->accept(
     @{$parsed} > 0
@@ -176,7 +188,13 @@ sub parse {
   $expr =
   $expr =~ s/\s*\n+\s*/ /gr =~ s/^\s+|\s+$//gr =~ s/\[\s+/[/gr =~ s/\s+\]/]/gr;
 
-  return _type_parse($expr);
+  require Venus::Type;
+
+  my $parsed = Venus::Type->new->expression($expr);
+
+  $parsed = [$parsed] if !ref $parsed;
+
+  return $parsed;
 }
 
 sub received {
@@ -226,7 +244,9 @@ sub received {
 sub render {
   my ($self, $into, $data) = @_;
 
-  return _type_render($into, $data);
+  require Venus::Type;
+
+  return Venus::Type->new->expression([!$into ? $data : ($into, ref $data eq 'ARRAY' ? @{$data} : $data)]);
 }
 
 sub result {
@@ -282,251 +302,6 @@ sub value {
   }
 
   return $result;
-}
-
-# ROUTINES
-
-sub _type_parse {
-  my @items = _type_parse_pipes(@_);
-
-  my $either = @items > 1;
-
-  @items = map _type_parse_nested($_), @items;
-
-  return wantarray && !$either ? (@items) : [$either ? ("either") : (), @items];
-}
-
-sub _type_parse_lists {
-  my @items = @_;
-
-  my $r0 = '[\"\'\[\]]';
-  my $r1 = '[^\"\'\[\]]';
-  my $r2 = _type_subexpr_type_2();
-  my $r3 = _type_subexpr_delimiter();
-
-  return (
-    grep length,
-      map {split/,\s*(?=(?:$r1*$r0$r1*$r0)*$r1*$)(${r2}(?:${r3}[^,]*)?)?/}
-        @items
-  );
-}
-
-sub _type_parse_nested {
-  my ($expr) = @_;
-
-  return ($expr) if $expr !~ _type_regexp(_type_subexpr_type_2());
-
-  my @items = ($expr);
-
-  @items = ($expr =~ /^(\w+)\s*\[\s*(.*)\s*\]+$/g);
-
-  @items = map _type_parse_lists($_), @items;
-
-  @items = map +(
-    $_ =~ qr/^@{[_type_subexpr_type_2()]},.*$/ ? _type_parse_lists($_) : $_
-  ),
-  @items;
-
-  @items = map {s/^["']+|["']+$//gr} @items;
-
-  @items = map _type_parse($_), @items;
-
-  return (@items > 1 ? [@items] : @items);
-}
-
-sub _type_parse_pipes {
-  my ($expr) = @_;
-
-  my @items;
-
-  # i.e. tuple[number, string] | tuple[string, number]
-  if
-  (
-    _type_regexp_eval(
-      $expr, _type_regexp(_type_subexpr_type_2(), _type_subexpr_type_2())
-    )
-  )
-  {
-    @items = map _type_parse_tuples($_),
-      _type_regexp_eval($expr,
-      _type_regexp_groups(_type_subexpr_type_2(), _type_subexpr_type_2()));
-  }
-  # i.e. string | tuple[number, string]
-  elsif
-  (
-    _type_regexp_eval($expr,
-      _type_regexp(_type_subexpr_type_1(), _type_subexpr_type_2()))
-  )
-  {
-    @items = map _type_parse_tuples($_),
-      _type_regexp_eval($expr,
-      _type_regexp_groups(_type_subexpr_type_1(), _type_subexpr_type_2()));
-  }
-  # i.e. tuple[number, string] | string
-  elsif
-  (
-    _type_regexp_eval($expr,
-      _type_regexp(_type_subexpr_type_2(), _type_subexpr_type_1()))
-  )
-  {
-    @items = map _type_parse_tuples($_),
-      _type_regexp_eval($expr,
-      _type_regexp_groups(_type_subexpr_type_2(), _type_subexpr_type_1()));
-  }
-  # special condition: i.e. tuple[number, string]
-  elsif
-  (
-    _type_regexp_eval($expr, _type_regexp(_type_subexpr_type_2()))
-  )
-  {
-    @items = ($expr);
-  }
-  # i.e. "..." | tuple[number, string]
-  elsif
-  (
-    _type_regexp_eval($expr,
-      _type_regexp(_type_subexpr_type_3(), _type_subexpr_type_2()))
-  )
-  {
-    @items = _type_regexp_eval($expr,
-      _type_regexp_groups(_type_subexpr_type_3(), _type_subexpr_type_2()));
-    @items = (_type_parse_pipes($items[0]), _type_parse_tuples($items[1]));
-  }
-  # i.e. tuple[number, string] | "..."
-  elsif
-  (
-    _type_regexp_eval($expr,
-      _type_regexp(_type_subexpr_type_2(), _type_subexpr_type_3()))
-  )
-  {
-    @items = _type_regexp_eval($expr,
-      _type_regexp_groups(_type_subexpr_type_2(), _type_subexpr_type_3()));
-    @items = (_type_parse_tuples($items[0]), _type_parse_pipes($items[1]));
-  }
-  # i.e. Package::Name | "..."
-  elsif
-  (
-    _type_regexp_eval($expr,
-      _type_regexp(_type_subexpr_type_4(), _type_subexpr_type_3()))
-  )
-  {
-    @items = _type_regexp_eval($expr,
-      _type_regexp_groups(_type_subexpr_type_4(), _type_subexpr_type_3()));
-    @items = ($items[0], _type_parse_pipes($items[1]));
-  }
-  # i.e. "..." | Package::Name
-  elsif
-  (
-    _type_regexp_eval($expr,
-      _type_regexp(_type_subexpr_type_3(), _type_subexpr_type_4()))
-  )
-  {
-    @items = _type_regexp_eval($expr,
-      _type_regexp_groups(_type_subexpr_type_3(), _type_subexpr_type_4()));
-    @items = (_type_parse_pipes($items[0]), $items[1]);
-  }
-  # i.e. string | "..."
-  elsif
-  (
-    _type_regexp_eval($expr,
-      _type_regexp(_type_subexpr_type_1(), _type_subexpr_type_3()))
-  )
-  {
-    @items = _type_regexp_eval($expr,
-      _type_regexp_groups(_type_subexpr_type_1(), _type_subexpr_type_3()));
-    @items = ($items[0], _type_parse_pipes($items[1]));
-  }
-  # i.e. "..." | string
-  elsif
-  (
-    _type_regexp_eval($expr,
-      _type_regexp(_type_subexpr_type_3(), _type_subexpr_type_1()))
-  )
-  {
-    @items = _type_regexp_eval($expr,
-      _type_regexp_groups(_type_subexpr_type_3(), _type_subexpr_type_1()));
-    @items = (_type_parse_pipes($items[0]), $items[1]);
-  }
-  # i.e. "..." | "..."
-  elsif
-  (
-    _type_regexp_eval($expr,
-      _type_regexp(_type_subexpr_type_3(), _type_subexpr_type_3()))
-  )
-  {
-    @items = map _type_parse_pipes($_),
-      _type_regexp_eval($expr,
-      _type_regexp_groups(_type_subexpr_type_3(), _type_subexpr_type_3()));
-  }
-  else {
-    @items = ($expr);
-  }
-
-  return (@items);
-}
-
-sub _type_parse_tuples {
-  map +(scalar(_type_regexp_eval($_,
-    _type_regexp(_type_subexpr_type_2(), _type_subexpr_type_2())))
-      ? (_type_parse_pipes($_))
-      : ($_)), @_
-}
-
-sub _type_regexp {
-  qr/^@{[_type_regexp_joined(@_)]}$/
-}
-
-sub _type_regexp_eval {
-  map {s/^\s+|\s+$//gr} ($_[0] =~ $_[1])
-}
-
-sub _type_regexp_groups {
-  qr/^@{[_type_regexp_joined(_type_subexpr_groups(@_))]}$/
-}
-
-sub _type_regexp_joined {
-  join(_type_subexpr_delimiter(), @_)
-}
-
-sub _type_render {
-  my ($into, $data) = @_;
-
-  if (ref $data eq 'HASH') {
-    $data = join ', ', map +(qq("$_"), _type_render($into, $$data{$_})),
-      sort keys %{$data};
-    $data = "$into\[$data\]";
-  }
-
-  if (ref $data eq 'ARRAY') {
-    $data = join ', ', map +(/^\w+$/ ? qq("$_") : $_), @{$data};
-    $data = "$into\[$data\]";
-  }
-
-  return $data;
-}
-
-sub _type_subexpr_delimiter {
-  '\s*\|\s*'
-}
-
-sub _type_subexpr_groups {
-  map "($_)", @_
-}
-
-sub _type_subexpr_type_1 {
-  '\w+'
-}
-
-sub _type_subexpr_type_2 {
-  '\w+\s*\[.*\]+'
-}
-
-sub _type_subexpr_type_3 {
-  '.*'
-}
-
-sub _type_subexpr_type_4 {
-  '[A-Za-z][:\^\w]+\w*'
 }
 
 1;

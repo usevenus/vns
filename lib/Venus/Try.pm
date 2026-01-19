@@ -5,7 +5,11 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base';
+
+# INHERITS
 
 base 'Venus::Kind::Utility';
 
@@ -71,10 +75,8 @@ sub callback {
     }
 
     if (!$method) {
-      $self->throw('error_on_callback', {
-        invocant => $invocant,
-        callback => $callback,
-      });
+      $self->error_on_callback({invocant => $invocant, callback => $callback})
+        ->throw;
     }
 
     $callback = sub {goto $method};
@@ -124,6 +126,19 @@ sub execute {
     if defined($self->invocant);
 
   return wantarray ? ($callback->(@args)) : $callback->(@args);
+}
+
+sub fault {
+  my ($self, $variable) = @_;
+
+  if ($variable) {
+    $self->on_default(sub{($$variable) = @_})
+  }
+  else {
+    $self->catch('Venus::Fault');
+  }
+
+  return $self;
 }
 
 sub finally {
@@ -244,6 +259,8 @@ sub result {
 sub error_on_callback {
   my ($self, $data) = @_;
 
+  my $error = $self->throw->error->sysinfo;
+
   my $callback = $data->{callback};
   my $invocant = $data->{invocant};
 
@@ -252,19 +269,13 @@ sub error_on_callback {
       $invocant ? (ref($invocant) || $invocant) : (ref($self) || $self))
   );
 
-  my $stash = {
-    invocant => $invocant,
-    callback => $callback,
-  };
+  $error->name('on.callback');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.callback',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 1;

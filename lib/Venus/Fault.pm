@@ -5,6 +5,8 @@ use 5.018;
 use strict;
 use warnings;
 
+# OVERLOADS
+
 use overload (
   '""' => 'explain',
   'eq' => sub{$_[0]->{message} eq "$_[1]"},
@@ -25,7 +27,7 @@ sub explain {
 
   $self->trace(1) if !@{$self->frames};
 
-  my $frames = $self->{'$frames'};
+  my $frames = $self->{frames};
 
   my $file = $frames->[0][1];
   my $line = $frames->[0][2];
@@ -55,7 +57,7 @@ sub explain {
 sub frames {
   my ($self) = @_;
 
-  return $self->{'$frames'} //= [];
+  return $self->{frames} //= [];
 }
 
 sub throw {

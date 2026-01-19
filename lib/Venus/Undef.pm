@@ -5,7 +5,11 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base';
+
+# INHERITS
 
 base 'Venus::Kind::Value';
 
@@ -22,18 +26,6 @@ sub build_self {
 }
 
 # METHODS
-
-sub assertion {
-  my ($self) = @_;
-
-  my $assertion = $self->SUPER::assertion;
-
-  $assertion->match('undef')->format(sub{
-    (ref $self || $self)->new
-  });
-
-  return $assertion;
-}
 
 sub comparer {
   my ($self) = @_;

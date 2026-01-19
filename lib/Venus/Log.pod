@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Log - Log Class
@@ -331,6 +331,70 @@ I<Since C<1.68>>
   my @input = $log->input(1, 'Something failed!');
 
   # (1, 'Something failed!')
+
+=back
+
+=cut
+
+=head2 new
+
+  new(string $level | any %args | hashref $args) (Venus::Log)
+
+The new method returns a new instance of this package.
+
+I<Since C<1.68>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Log;
+
+  my $log = Venus::Log->new;
+
+  # bless(..., "Venus::Log")
+
+  # $log->level;
+
+  # "trace"
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Log;
+
+  my $log = Venus::Log->new('error');
+
+  # bless(..., "Venus::Log")
+
+  # $log->level;
+
+  # "error"
+
+=back
+
+=over 4
+
+=item new example 3
+
+  package main;
+
+  use Venus::Log;
+
+  my $log = Venus::Log->new(5);
+
+  # bless(..., "Venus::Log")
+
+  # $log->level;
+
+  # "error"
 
 =back
 

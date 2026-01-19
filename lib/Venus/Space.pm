@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base';
 
+# INHERITS
+
 base 'Venus::Name';
+
+# STATE
 
 state $SERIAL = 0;
 
@@ -34,6 +40,32 @@ sub all {
   }
 
   return $result;
+}
+
+sub after {
+  my ($self, $name, $code) = @_;
+
+  my $orig = $self->handle($name, sub{
+    my ($orig, @args) = @_;
+
+    my @return;
+
+    if (wantarray) {
+      @return = $orig->(@args);
+    }
+    elsif (defined wantarray) {
+      $return[0] = $orig->(@args);
+    }
+    else {
+      $orig->(@args);
+    }
+
+    $code->(@args);
+
+    return wantarray ? @return : defined(wantarray) ? $return[0] : ();
+  });
+
+  return $orig;
 }
 
 sub append {
@@ -76,6 +108,24 @@ sub arrays {
   return $arrays;
 }
 
+sub around {
+  my ($self, $name, $code) = @_;
+
+  my $package = $self->package;
+
+  my $qualified = "${package}::${name}";
+
+  my $current = $package->can($name);
+
+  if (!$current) {
+    $self->error_on_around_missing({package => $package, routine => $name})
+      ->input($self, $name, $code)
+      ->throw;
+  }
+
+  return $self->handle($name, $code);
+}
+
 sub attributes {
   my ($self) = @_;
 
@@ -92,6 +142,32 @@ sub basename {
   my ($self) = @_;
 
   return $self->parse->[-1];
+}
+
+sub before {
+  my ($self, $name, $code) = @_;
+
+  my $orig = $self->handle($name, sub{
+    my ($orig, @args) = @_;
+
+    $code->(@args);
+
+    my @return;
+
+    if (wantarray) {
+      @return = $orig->(@args);
+    }
+    elsif (defined wantarray) {
+      $return[0] = $orig->(@args);
+    }
+    else {
+      $orig->(@args);
+    }
+
+    return wantarray ? @return : defined(wantarray) ? $return[0] : ();
+  });
+
+  return $orig;
 }
 
 sub blessed {
@@ -118,11 +194,9 @@ sub call {
   my $class = $self->load;
 
   unless ($func) {
-    $self->error({
-      throw => 'error_on_call_undefined',
-      package => $class,
-      routine => $func,
-    });
+    $self->error_on_call_undefined({package => $class, routine => $func})
+      ->input($self, $func, @args)
+      ->throw;
   }
 
   my $next = $class->can($func);
@@ -134,11 +208,9 @@ sub call {
   }
 
   unless ($next) {
-    $self->error({
-      throw => 'error_on_call_missing',
-      package => $class,
-      routine => $func,
-    });
+    $self->error_on_call_missing({package => $class, routine => $func})
+      ->input($self, $func, @args)
+      ->throw;
   }
 
   @_ = @args; goto $next;
@@ -205,21 +277,17 @@ sub cop {
   my $class = $self->load;
 
   if (!$func) {
-    $self->error({
-      throw => 'error_on_cop_undefined',
-      package => $class,
-      routine => $func,
-    });
+    $self->error_on_cop_undefined({package => $class, routine => $func})
+      ->input($self, $func, @args)
+      ->throw;
   }
 
   my $next = $class->can($func);
 
   unless ($next) {
-    $self->error({
-      throw => 'error_on_cop_missing',
-      package => $class,
-      routine => $func,
-    });
+    $self->error_on_cop_missing({package => $class, routine => $func})
+      ->input($self, $func, @args)
+      ->throw;
   }
 
   return sub { $next->(@args ? (@args, @_) : @_) };
@@ -256,11 +324,10 @@ sub eval {
   my $result = eval join ' ', map "$_", "package @{[$self->package]};", @args;
 
   if (my $error = $@) {
-    $self->error({
-      throw => 'error_on_eval',
-      package => $self->package,
-      error => $error,
-    });
+    $self->error_on_eval({package => $self->package, error => $error})
+      ->input($self, @args)
+      ->output($error)
+      ->throw;
   }
 
   return $result;
@@ -270,6 +337,28 @@ sub explain {
   my ($self) = @_;
 
   return $self->package;
+}
+
+sub handle {
+  my ($self, $name, $code) = @_;
+
+  my $package = $self->package;
+
+  my $qualified = "${package}::${name}";
+
+  my $current = $package->can($name);
+
+  no strict 'refs';
+  no warnings 'redefine';
+
+  *{$qualified} = eval "package $package; sub { \$code->(\$current, \@_) }";
+
+  if (my $error = $@) {
+    $self->error_on_eval({package => $package, error => $error})
+      ->throw;
+  }
+
+  return $current;
 }
 
 sub hash {
@@ -297,6 +386,12 @@ sub hashes {
     sort grep !!%{"${class}::$_"},
     grep /^[_a-zA-Z]\w*$/, keys %{"${class}::"}
   ];
+}
+
+sub hook {
+  my ($self, $method, $name, $code) = @_;
+
+  return $self->$method(uc($name), $code);
 }
 
 sub id {
@@ -362,11 +457,10 @@ sub load {
   my $error = do{local $@; eval "require $class"; $@};
 
   if ($error) {
-    $self->error({
-      throw => 'error_on_load',
-      error => $error || 'cause unknown',
-      package => $class,
-    });
+    $self->error_on_load({error => $error || 'cause unknown', package => $class})
+      ->input($self)
+      ->output($error)
+      ->throw;
   }
 
   return $class;
@@ -450,7 +544,7 @@ sub parts {
 sub patch {
   my ($self, $name, $code) = @_;
 
-  my $patched = $self->{'$patched'} ||= {};
+  my $patched = $self->{patched} ||= {};
 
   my $orig = $self->swap($name, $code);
 
@@ -462,7 +556,7 @@ sub patch {
 sub patched {
   my ($self, $name) = @_;
 
-  my $patched = $self->{'$patched'};
+  my $patched = $self->{patched};
 
   return false if !$patched;
 
@@ -590,6 +684,31 @@ sub scalars {
   ];
 }
 
+sub scrub {
+  my ($self) = @_;
+
+  return $self if $self->unloaded;
+
+  my $package = $self->package;
+
+  no strict 'refs';
+
+  my $skip = qr/\A(
+    AUTOLOAD|BEGIN|CHECK|DESTROY|END|EXPORT|EXPORT_OK|EXPORT_TAGS|
+    IMPORT|INIT|ISA|UNITCHECK|VERSION|
+    import|unimport|
+    [^:]+::
+  )\z/x;
+
+  for my $name (grep !/$skip/, keys %{"${package}::"}) {
+    undef *{"${package}::${name}"};
+  }
+
+  delete $INC{$self->format('path', '%s.pm')};
+
+  return $self;
+}
+
 sub sibling {
   my ($self, @args) = @_;
 
@@ -658,11 +777,7 @@ sub swap {
   return $orig if !$code;
 
   if (!$orig) {
-    $self->error({
-      throw => 'error_on_swap',
-      package => $package,
-      routine => $name,
-    });
+    $self->error_on_swap({package => $package, routine => $name})->throw;
   }
 
   $self->routine($name, sub {$code->($orig, @_)});
@@ -746,7 +861,7 @@ sub unloaded {
 sub unpatch {
   my ($self, @names) = @_;
 
-  my $patched = $self->{'$patched'} ||= {};
+  my $patched = $self->{patched} ||= {};
 
   @names = keys %{$patched} if !@names;
 
@@ -755,7 +870,7 @@ sub unpatch {
     $self->routine($name, $orig);
   }
 
-  delete $self->{'$patched'} if !keys %{$patched};
+  delete $self->{patched} if !keys %{$patched};
 
   return $self;
 }
@@ -775,144 +890,133 @@ sub visible {
 sub error_on_call_missing {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = 'Unable to locate class method "{{routine}}" via package "{{package}}"';
 
-  my $stash = {
-    package => $data->{package},
-    routine => $data->{routine},
-  };
+  $error->name('on.call.missing');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.call.missing',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 sub error_on_call_undefined {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = join ' ', 'Attempt to call undefined class method',
     'in package "{{package}}"';
 
-  my $stash = {
-    package => $data->{package},
-    routine => $data->{routine},
-  };
+  $error->name('on.call.undefined');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.call.undefined',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
+  return $error;
+}
 
-  return $result;
+sub error_on_around_missing {
+  my ($self, $data) = @_;
+
+  my $error = $self->error->sysinfo;
+
+  my $message = join ' ', 'Unable to locate object method "{{routine}}"',
+    'via package "{{package}}"';
+
+  $error->name('on.around.missing');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
+
+  return $error;
 }
 
 sub error_on_cop_missing {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = join ' ', 'Unable to locate object method "{{routine}}"',
     'via package "{{package}}"';
 
-  my $stash = {
-    package => $data->{package},
-    routine => $data->{routine},
-  };
+  $error->name('on.cop.missing');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.cop.missing',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 sub error_on_cop_undefined {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = join ' ', 'Attempt to cop undefined object method',
     'from package "{{package}}"';
 
-  my $stash = {
-    package => $data->{package},
-    routine => $data->{routine},
-  };
+  $error->name('on.cop.undefined');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.cop.undefined',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 sub error_on_eval {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = $data->{error};
 
-  my $stash = {
-    error => $message,
-    package => $data->{package},
-  };
+  $error->name('on.eval');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.eval',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 sub error_on_load {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = 'Error attempting to load {{package}}: "{{error}}"';
 
-  my $stash = {
-    error => $data->{error},
-    package => $data->{package},
-  };
+  $error->name('on.load');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.load',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 sub error_on_swap {
   my ($self, $data) = @_;
 
+  my $error = $self->error->sysinfo;
+
   my $message = 'Attempt to swap undefined subroutine in package "{{package}}"';
 
-  my $stash = {
-    package => $data->{package},
-    routine => $data->{routine},
-  };
+  $error->name('on.swap');
+  $error->message($message);
+  $error->offset(1);
+  $error->stash($data);
+  $error->reset;
 
-  my $result = {
-    name => 'on.swap',
-    raise => true,
-    stash => $stash,
-    message => $message,
-  };
-
-  return $result;
+  return $error;
 }
 
 1;

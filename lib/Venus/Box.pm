@@ -5,7 +5,11 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'with';
+
+# INTEGRATES
 
 with 'Venus::Role::Buildable';
 with 'Venus::Role::Proxyable';
@@ -34,11 +38,11 @@ sub build_args {
 sub build_self {
   my ($self, $data) = @_;
 
-  require Venus::Type;
+  require Venus::What;
 
   $data //= {};
 
-  $self->{value} = Venus::Type->new(value => $data->{value})->deduce;
+  $self->{value} = Venus::What->new(value => $data->{value})->deduce;
 
   return $self;
 }
@@ -76,9 +80,9 @@ sub build_proxy {
         : $result;
     }
     else {
-      require Venus::Type;
+      require Venus::What;
       return ref($self)->new(
-        value => Venus::Type->new(value => $result)->deduce
+        value => Venus::What->new(value => $result)->deduce
       );
     }
   };

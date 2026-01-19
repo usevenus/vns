@@ -5,6 +5,8 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Role 'with';
 
 # METHODS
@@ -21,10 +23,16 @@ sub box {
   return Venus::Box->new(value => $value);
 }
 
+sub boxed {
+  my ($self, @args) = @_;
+
+  return $self->box(@args)->unbox;
+}
+
 # EXPORTS
 
 sub EXPORT {
-  ['box']
+  ['box', 'boxed']
 }
 
 1;

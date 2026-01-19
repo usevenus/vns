@@ -5,22 +5,28 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'attr', 'base', 'with';
+
+# INHERITS
 
 base 'Venus::Kind::Utility';
 
+# INTEGRATES
+
 with 'Venus::Role::Buildable';
+
+# STATE
+
+state $NAME = {trace => 1, debug => 2, info => 3, warn => 4, error => 5, fatal => 6};
+state $CODE = {reverse %$NAME};
 
 # ATTRIBUTES
 
 attr 'handler';
 attr 'level';
 attr 'separator';
-
-# STATE
-
-state $NAME = {trace => 1, debug => 2, info => 3, warn => 4, error => 5, fatal => 6};
-state $CODE = {reverse %$NAME};
 
 # BUILDERS
 
@@ -35,8 +41,10 @@ sub build_arg {
 sub build_self {
   my ($self, $data) = @_;
 
+  require Venus::Os;
+
   $self->level($self->level_name($self->level) || $self->level_name(1));
-  $self->handler(sub{shift; CORE::print(STDOUT @_, "\n")}) if !$self->handler;
+  $self->handler(sub{shift; Venus::Os->new->write('STDOUT', join '', @_, "\n")}) if !$self->handler;
   $self->separator(" ") if !$self->separator;
 
   return $self;

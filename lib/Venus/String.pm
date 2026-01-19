@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base';
 
+# INHERITS
+
 base 'Venus::Kind::Value';
+
+# OVERLOADS
 
 use overload (
   'eq' => sub{$_[0]->value eq "$_[1]"},
@@ -30,30 +36,6 @@ sub append_with {
   my $data = $self->get;
 
   return CORE::join($delimiter // '', $data, @args);
-}
-
-sub assertion {
-  my ($self) = @_;
-
-  my $assertion = $self->SUPER::assertion;
-
-  $assertion->match('bool')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-  $assertion->match('float')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-  $assertion->match('number')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-  $assertion->match('string')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-  return $assertion;
 }
 
 sub camelcase {
@@ -397,6 +379,51 @@ sub uppercase {
   my $data = $self->get;
 
   return CORE::uc($data);
+}
+
+sub wrap {
+  my ($self, $length, $indent) = @_;
+
+  $length ||= 80;
+
+  $indent ||= 0;
+
+  my $space = ' ' x $indent;
+
+  my $total_length = $length - CORE::length($space);
+
+  my @lines;
+
+  my @input_lines = split /\n/, $self->get;
+
+  for my $input_line (@input_lines) {
+    if ($input_line eq '') {
+      push @lines, $input_line;
+      next;
+    }
+
+    my ($saved_space) = ($input_line =~ /^(\s*)/);
+
+    $saved_space ||= '';
+
+    my @parts = split /\s+/, $input_line;
+
+    my $line = '';
+
+    for my $part (@parts) {
+      if (CORE::length($line) + CORE::length($part) + 1 > $total_length) {
+        push @lines, $space . $saved_space . $line;
+        $line = $part;
+      }
+      else {
+        $line .= $line ? " $part" : $part;
+      }
+    }
+
+    push @lines, $space . $saved_space . $line if $line;
+  }
+
+  return wantarray ? (@lines) : join "\n", @lines;
 }
 
 sub words {

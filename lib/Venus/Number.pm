@@ -5,9 +5,15 @@ use 5.018;
 use strict;
 use warnings;
 
+# IMPORTS
+
 use Venus::Class 'base';
 
+# INHERITS
+
 base 'Venus::Kind::Value';
+
+# OVERLOADS
 
 use overload (
   '!' => sub{!$_[0]->get},
@@ -61,22 +67,6 @@ sub append_with {
   my $data = $self->get;
 
   return CORE::join($delimiter // '', $data, @args);
-}
-
-sub assertion {
-  my ($self) = @_;
-
-  my $assertion = $self->SUPER::assertion;
-
-  $assertion->match('float')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-  $assertion->match('number')->format(sub{
-    (ref $self || $self)->new($_)
-  });
-
-  return $assertion;
 }
 
 sub atan2 {

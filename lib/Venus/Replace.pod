@@ -1,4 +1,4 @@
-
+﻿
 =head1 NAME
 
 Venus::Replace - Replace Class
@@ -83,9 +83,9 @@ L<Venus::Kind::Utility>
 
 This package integrates behaviors from:
 
-L<Venus::Role::Explainable>
+L<Venus::Role::Encaseable>
 
-L<Venus::Role::Stashable>
+L<Venus::Role::Explainable>
 
 =cut
 
@@ -189,6 +189,31 @@ I<Since C<0.01>>
   my $evaluate = $replace->evaluate;
 
   # Exception! (isa Venus::Replace::Error) (see error_on_evaluate)
+
+=back
+
+=over 4
+
+=item B<may raise> L<Venus::Replace::Error> C<on.evaluate>
+
+  package main;
+
+  use Venus::Replace;
+
+  my $replace = Venus::Replace->new(
+    string => 'hello world',
+    regexp => 'world',
+    substr => 'universe',
+    flags => 'i',
+  );
+
+  $replace->evaluate;
+
+  $replace->flags('q');
+
+  $replace->evaluate;
+
+  # Error! (on.evaluate)
 
 =back
 
@@ -378,6 +403,48 @@ I<Since C<0.01>>
 
 =cut
 
+=head2 new
+
+  new(any @args) (Venus::Replace)
+
+The new method constructs an instance of the package.
+
+I<Since C<4.15>>
+
+=over 4
+
+=item new example 1
+
+  package main;
+
+  use Venus::Replace;
+
+  my $new = Venus::Replace->new;
+
+  # bless(..., "Venus::Replace")
+
+=back
+
+=over 4
+
+=item new example 2
+
+  package main;
+
+  use Venus::Replace;
+
+  my $new = Venus::Replace->new(
+    string => 'hello world',
+    regexp => '(world)',
+    substr => 'universe',
+  );
+
+  # bless(..., "Venus::Replace")
+
+=back
+
+=cut
+
 =head2 postmatched
 
   postmatched() (Maybe[string])
@@ -447,39 +514,6 @@ I<Since C<0.01>>
 =back
 
 =cut
-
-=head1 ERRORS
-
-This package may raise the following errors:
-
-=cut
-
-=over 4
-
-=item error: C<error_on_evaluate>
-
-This package may raise an error_on_evaluate exception.
-
-B<example 1>
-
-  # given: synopsis;
-
-  my $input = {
-    throw => 'error_on_evaluate',
-    error => 'Exception!',
-  };
-
-  my $error = $replace->catch('error', $input);
-
-  # my $name = $error->name;
-
-  # "on_evaluate"
-
-  # my $message = $error->message;
-
-  # "Exception!"
-
-=back
 
 =head1 OPERATORS
 

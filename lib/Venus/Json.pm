@@ -5,20 +5,28 @@ use 5.018;
 use strict;
 use warnings;
 
-use overload (
-  '""' => 'explain',
-  '~~' => 'explain',
-  fallback => 1,
-);
+# IMPORTS
 
 use Venus::Class 'attr', 'base', 'with';
 
+# INHERITS
+
 base 'Venus::Kind::Utility';
+
+# INTEGRATES
 
 with 'Venus::Role::Valuable';
 with 'Venus::Role::Buildable';
 with 'Venus::Role::Accessible';
 with 'Venus::Role::Explainable';
+
+# OVERLOADS
+
+use overload (
+  '""' => 'explain',
+  '~~' => 'explain',
+  fallback => 1,
+);
 
 # ATTRIBUTES
 
@@ -66,7 +74,7 @@ sub config {
   my ($self, $package) = @_;
 
   $package ||= $self->package
-    or $self->error({throw => 'error_on_config'});
+    or $self->error_on_config->capture($package)->throw;
 
   $package = $package->new
     ->canonical
@@ -225,11 +233,14 @@ sub TO_BOOL {
 sub error_on_config {
   my ($self) = @_;
 
-  return {
-    name => 'on.config',
-    message => 'No suitable JSON package',
-    raise => true,
-  };
+  my $error = $self->error->sysinfo;
+
+  $error->name('on.config');
+  $error->message('No suitable JSON package');
+  $error->offset(1);
+  $error->reset;
+
+  return $error;
 }
 
 1;
