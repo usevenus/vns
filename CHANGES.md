@@ -1,5 +1,12 @@
 # Changelog
 
+## Version: 5.01
+
+- [feature] Implement Venus#kvargs keyword function
+- [update] Improve Venus (vns) "with" and "func" execution
+- [update] Update miscellaneous POD issues
+- [update] Release 5.01
+
 ## Version: 5.00
 
 - [feature] Implement built-in vns "func" and "with" commands
@@ -33,6 +40,17 @@
 - [feature] Add "values" to Venus::Array and Venus::Hash
 - [feature] Add "syscall" to Venus::Os
 - [feature] Add {is_error,is_fault} to Venus
+- [feature] Implement Venus::Collect
+- [feature] Support "mask" keyword function
+- [feature] Implement Venus::Data
+- [feature] Implement method modifiers
+- [feature] Support @EXPORT from class, role, mixin, or subclass of Venus::Core
+- [feature] Implement Venus::Module
+- [feature] Implement Venus::Cli Commands, Routes, and Dispatching
+- [feature] Implement Venus::Cli#spec
+- [feature] Implement Venus::Role::Boxable#boxed
+- [feature] Add schema definition shorthand for Venus::Data and Venus::Schema
+- [feature] Implement Venus::Test "auto" Feature
 - [feature] Implement Venus::Role::Fromable
 - [update] Emit errors during Venus::Run execution
 - [update] Breaking: Rename Venus::Type to Venus::What
@@ -55,6 +73,16 @@
 - [update] Support from_{type} in Venus::Role::Fromable
 - [update] Fix required vs optional in Venus::Validate
 - [update] Allow "vns" to auto-dispatch to "vns-run"
+- [update] Refactor Venus::Data
+- [update] Refactor Test Framework
+- [update] Centralize Venus Hooks
+- [update] Update auto-exported keyword functions
+- [update] Refactor Venus::Role::Encaseable
+- [update] Refactor Venus::Role::Stashable
+- [update] Improve Venus::Test spec rendering and metadata handling
+- [update] Update documentation for errors
+- [update] Support multiline values in Venus::Config#read_env
+- [update] Update Venus::Task::Venus (vns) to use new dispatching functionality
 
 ## Version: 4.11
 

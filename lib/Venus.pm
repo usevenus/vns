@@ -7,7 +7,7 @@ use warnings;
 
 # VERSION
 
-our $VERSION = '5.00';
+our $VERSION = '5.01';
 
 # AUTHORITY
 
@@ -942,6 +942,7 @@ sub import {
     is_value => 1,
     is_yesno => 1,
     json => 1,
+    kvargs => 1,
     list => 1,
     load => 1,
     log => 1,
@@ -1752,6 +1753,14 @@ sub json (;$$) {
   return fault(qq(Invalid "json" action "$code"));
 }
 
+sub kvargs {
+  my (@args) = @_;
+
+  return $args[0] if @args == 1 && ref($args[0]) eq 'HASH';
+
+  return (@args % 2) ? {@args, undef} : {@args};
+}
+
 sub list (@) {
   my (@args) = @_;
 
@@ -2397,12 +2406,13 @@ sub puts ($;@) {
   return wantarray ? (@{$result}) : $result;
 }
 
-sub raise ($;$) {
-  my ($self, $data) = @_;
+sub raise ($;@) {
+  my ($self, @args) = @_;
 
   ($self, my $parent) = (@$self) if (ref($self) eq 'ARRAY');
 
-  $data ||= {};
+  my $data = kvargs(@args);
+
   $data->{context} ||= (caller(1))[3];
 
   $parent = 'Venus::Error' if !$parent;

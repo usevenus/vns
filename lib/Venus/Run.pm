@@ -26,7 +26,7 @@ with 'Venus::Role::Optional';
 
 state $init_config = {
   data => {
-    ECHO => 1
+    VENUS_RUN_DEBUG => 1,
   },
   exec => {
     brew => 'perlbrew',
@@ -81,6 +81,16 @@ sub build_arg {
   return {
     config => $self->load_config($file),
   };
+}
+
+sub build_self {
+  my ($self, $data) = @_;
+
+  $self->debug($ENV{VENUS_DEBUG}) if defined $ENV{VENUS_DEBUG};
+
+  $self->debug($ENV{VENUS_RUN_DEBUG}) if defined $ENV{VENUS_RUN_DEBUG};
+
+  return $self;
 }
 
 sub default_cache {
@@ -395,7 +405,7 @@ sub resolve_flow {
 }
 
 sub resolve_func {
-  my ($self, $config, $item) = @_;
+  my ($self, $config, $item, @args) = @_;
 
   if (exists $self->cache->{$item}) {
     return $self->cache->{$item};
@@ -405,8 +415,21 @@ sub resolve_func {
     return;
   }
 
-  return $self->cache->{$item} = join ' ',
-    'perl', '-E', '(do("'.$config->{func}{$item}.'"))->(@ARGV)';
+  my $from = Venus::Path->new($self->file);
+
+  $ENV{VENUS_RUN_FROM_ROOT} = $from->parent->absolute->get;
+  $ENV{VENUS_RUN_FROM_FILE} = $from->absolute->get;
+
+  my $func = Venus::Path->new($config->{func}->{$item});
+
+  $ENV{VENUS_RUN_FUNC_ROOT} = $func->parent->absolute->get;
+  $ENV{VENUS_RUN_FUNC_FILE} = $func->absolute->get;
+
+  my $run = $self->from_file("$func");
+
+  my $results = $run->resolve($run->config, @args);
+
+  return wantarray ? (@{$results}) : $results;
 }
 
 sub resolve_perl {
@@ -506,9 +529,25 @@ sub resolve_with {
     return;
   }
 
-  my $run = $self->from_file($config->{with}->{$item});
+  my $here = Venus::Path->new;
+
+  my $from = Venus::Path->new($self->file);
+
+  $ENV{VENUS_RUN_FROM_ROOT} = $from->parent->absolute->get;
+  $ENV{VENUS_RUN_FROM_FILE} = $from->absolute->get;
+
+  my $with = Venus::Path->new($config->{with}->{$item});
+
+  $ENV{VENUS_RUN_WITH_ROOT} = $with->parent->absolute->get;
+  $ENV{VENUS_RUN_WITH_FILE} = $with->absolute->get;
+
+  my $run = $self->from_file("$with");
+
+  chdir $ENV{VENUS_RUN_WITH_ROOT};
 
   my $results = $run->resolve($run->config, @args);
+
+  chdir $here->get;
 
   return wantarray ? (@{$results}) : $results;
 }
@@ -525,6 +564,8 @@ sub file {
   my ($self) = @_;
 
   return $ENV{VENUS_FILE}
+      || $ENV{VENUS_RUN_FILE}
+      || $ENV{VENUS_RUN_CONFIG}
       || (grep -f, map ".vns.$_", qw(yaml yml json js perl pl))[0]
       || '.vns.pl';
 }
